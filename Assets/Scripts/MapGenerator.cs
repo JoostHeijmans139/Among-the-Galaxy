@@ -4,15 +4,12 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public int mapWidth;
+    public int mapHeight;
+    public float noiseScale;
     void Start()
     {
-        Noise.GenerateNoiseMap(10,10,0.3f);
+        Noise.GenerateNoiseMap(mapWidth,mapHeight,noiseScale);
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }
