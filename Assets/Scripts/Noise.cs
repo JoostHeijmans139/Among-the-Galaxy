@@ -8,14 +8,11 @@ public static class Noise{
     public static List<List<float>> GenerateNoiseMap(int width, int height, float scale)
     {
         List<List<float>> noiseMap = new();
-        if (scale <= 0)
+        if (scale >= 1 || scale <= 0)
         {
-            Debug.LogError("Scale must be smaller then 0 it now is :" + scale);
+            Debug.LogError("Scale must be smaller then 1 and larger then 0 it now is :" + scale);
         }
-        else if (scale >= 1)
-        {
-            Debug.LogError("Scale must be smaller then 1 it now is :" + scale);
-        }
+
 
         for (int y = 0; y < height; y++)
         {
