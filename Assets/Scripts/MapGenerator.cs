@@ -7,10 +7,6 @@ public class MapGenerator : MonoBehaviour
     public int mapWidth;
     public int mapHeight;
     public float noiseScale;
-    void Start()
-    {
-    }
-
     public void GenerateMap()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth,mapHeight,noiseScale);
