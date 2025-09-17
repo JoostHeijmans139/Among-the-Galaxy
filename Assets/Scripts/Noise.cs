@@ -27,10 +27,6 @@ public static class Noise{
                 Debug.Log(noise);
             }
         }
-        foreach (var row in noiseMap)
-        {
-            Debug.Log(row);
-        }
         return noiseMap;
     }
 }
