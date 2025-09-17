@@ -4,10 +4,11 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 public static class Noise{
-    //Scale value should only be between 0 and 1 not higher and not lower
     public static float[,] GenerateNoiseMap(int width, int height, float scale)
     {
+        //Use arrays instead of lists for performance reasons
         float[,] noiseMap = new float[width, height];
+        //Scale value should only be between 0 and 1 not higher and not lower
         if (scale >= 1 || scale <= 0)
         {
             Debug.LogError("Scale must be smaller then 1 and larger then 0 it now is :" + scale);
