@@ -7,9 +7,12 @@ public class MapGenerator : MonoBehaviour
     public int mapWidth;
     public int mapHeight;
     public float noiseScale;
+    public int octaves;
+    public float persistence;
+    public float lacunarity;
     public void GenerateMap()
     {
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth,mapHeight,noiseScale);
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth,mapHeight,noiseScale,octaves,persistence,lacunarity);
         DisplayMap display = FindObjectOfType<DisplayMap>();
         display.DrawNoiseMap(noiseMap);
     }
