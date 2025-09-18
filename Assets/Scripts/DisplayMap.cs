@@ -5,7 +5,7 @@ using UnityEngine;
 public class DisplayMap : MonoBehaviour
 {
     public Renderer textureRenderer;
-
+    
     public void DrawNoiseMap(float[,] noiseMap)
     {
         int width = noiseMap.GetLength(0);
