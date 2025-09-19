@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
 using UnityEngine.InputSystem;
 #endif
@@ -71,9 +70,6 @@ namespace StarterAssets
 		private float _rotationVelocity;
 		private float _verticalVelocity;
 		private float _terminalVelocity = 53.0f;
-		[SerializeField] private float cameraSmoothingFactor = 5.0f;
-
-		[SerializeField] private float cameraPositionOfsetY = 1.5f;
 
 		// timeout deltatime
 		private float _jumpTimeoutDelta;
@@ -165,16 +161,8 @@ namespace StarterAssets
 			// clamp our rotations so our values are limited 360 degrees
 			_cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
 			_cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, BottomClamp, TopClamp);
-			
-			//stick camera position to player body so camera doesnt move seperate
-			float targetYRotation = _cinemachineTargetYaw;
-			this.transform.rotation = Quaternion.Slerp(
-				this.transform.rotation, 
-				Quaternion.Euler(0.0f, targetYRotation, 0.0f), Time.deltaTime*cameraSmoothingFactor
-			);
 
 			// Cinemachine will follow this target
-			_mainCamera.transform.position = new Vector3(this.transform.position.x, this.transform.position.y+cameraPositionOfsetY, this.transform.position.z);
 			CinemachineCameraTarget.transform.rotation = Quaternion.Euler(_cinemachineTargetPitch + CameraAngleOverride, _cinemachineTargetYaw, 0.0f);
 		}
 
