@@ -1,9 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
+    public enum DrawMode
+    {
+        DrawNoiseMap,
+        DrawColorMap,
+    }
     public int mapWidth;
     public int mapHeight;
     public float noiseScale;
@@ -41,5 +45,12 @@ public class MapGenerator : MonoBehaviour
             octaves = 0;
         }
         
+    }
+
+    public struct TerrainType
+    {
+        public string Name;
+        public Color Color;
+        public float Height;
     }
 }
