@@ -273,12 +273,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84b26a6624821f440bc0cb6c8412970c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapWidth: 10
-  mapHeight: 10
-  noiseScale: 0.54
-  octaves: 2
-  persistence: 9.52
-  lacunarity: 0.63
+  drawMode: 1
+  mapWidth: 100
+  mapHeight: 100
+  noiseScale: 0.686
+  octaves: 4
+  persistence: 1
+  lacunarity: 1
+  autoUpdate: 1
+  TerrainTypes:
+  - Name: Water
+    Color: {r: 0, g: 0.8023877, b: 1, a: 0}
+    Height: 0.4
+  - Name: Grass
+    Color: {r: 0.25663045, g: 0.745283, b: 0.25979215, a: 0}
+    Height: 1
 --- !u!1 &2071591709
 GameObject:
   m_ObjectHideFlags: 0

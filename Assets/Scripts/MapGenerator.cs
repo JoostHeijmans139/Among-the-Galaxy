@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public class MapGenerator : MonoBehaviour
+public class MapGenerator:MonoBehaviour
 {
     public enum DrawMode
     {
@@ -11,12 +11,14 @@ public class MapGenerator : MonoBehaviour
     public DrawMode drawMode;
     public int mapWidth;
     public int mapHeight;
+    [Range(0,1)]
     public float noiseScale;
     public int octaves;
     [Range(0, 1)]
     public float persistence;
     public float lacunarity;
     public bool autoUpdate;
+    public TerrainType[] TerrainTypes;
     public void GenerateMap()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth,mapHeight,noiseScale,octaves,persistence,lacunarity);
@@ -24,7 +26,28 @@ public class MapGenerator : MonoBehaviour
         if (drawMode == DrawMode.DrawNoiseMap)
         {
             display.DisplayNoiseMap(noiseMap);
+        }else if (drawMode == DrawMode.DrawColorMap)
+        {
+            Color[] colorMap = new Color[mapWidth * mapHeight];
+            for (int y = 0; y < noiseMap.GetLength(0); y++)
+            {
+                for (int x = 0; x < noiseMap.GetLength(1); x++)
+                {
+                    float currentHeight = noiseMap[x, y];
+                    for (int i = 0; i < TerrainTypes.Length; i++)
+                    {
+                        if (currentHeight <= TerrainTypes[i].Height)
+                        {
+                            colorMap[y * mapWidth + x] = TerrainTypes[i].Color;
+                            break;
+                        }
+                    }
+                    
+                }
+            }
+            display.DisplayColorMap(colorMap,mapWidth, mapHeight);
         }
+        
         
     }
 
@@ -51,6 +74,7 @@ public class MapGenerator : MonoBehaviour
         }
         
     }
+    [System.Serializable]
 
     public struct TerrainType
     {
