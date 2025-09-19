@@ -11,7 +11,7 @@ public class MapGenerator:MonoBehaviour
     public DrawMode drawMode;
     public int mapWidth;
     public int mapHeight;
-    [Range(0,1)]
+    [Range(0,100)]
     public float noiseScale;
     public int octaves;
     [Range(0, 1)]
