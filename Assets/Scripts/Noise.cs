@@ -1,19 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public static class Noise{
     /// <summary>
-    /// This function returns a 2d float array of noise values which represent a noiseMap which is used in the terrain generation
+    /// This function generates a 2d float array of noise values which represent a noiseMap which is used in the terrain generation
     /// </summary>
     /// <param name="width">The actual map width</param>
     /// <param name="height">The actual map height</param>
     /// <param name="scale">Decides the zoom level of the noise higher means smoother terrain smaller means more details and bumpy terrain</param>
-    /// <param name="octaves">decides the amount of noise differences</param>
-    /// <param name="persistence">decides how much the amplitude changes with each octave</param>
-    /// <param name="lacunarity">decides how much the frequency changes with each</param>
-    /// <returns></returns>
+    /// <param name="octaves">Decides the amount of noise differences</param>
+    /// <param name="persistence">Decides how much the amplitude changes with each octave</param>
+    /// <param name="lacunarity">Decides how much the frequency changes with each</param>
+    /// <returns>A 2d float array</returns>
     public static float[,] GenerateNoiseMap(int width, int height, float scale, int octaves, float persistence, float lacunarity)
     {
         //Use arrays instead of lists for performance reasons
@@ -67,7 +64,16 @@ public static class Noise{
         return noiseMap;
     }
 
-    public static float[,] normalizeNoiseMap(float[,] noiseMap, float minNoiseHeight, float maxNoiseHeight,int mapWidth,int mapHeight)
+    /// <summary>
+    /// This is a function to normalize the values inside the given noisemap to make sure they are between 0 and 1
+    /// </summary>
+    /// <param name="noiseMap">A 2d float array of unnormalized values</param>
+    /// <param name="minNoiseHeight">the minimum noise height value being passed through from noise generation</param>
+    /// <param name="maxNoiseHeight">the maximum noise height value being passed through from noise generation</param>
+    /// <param name="mapWidth">The map width for the length of the inner loop</param>
+    /// <param name="mapHeight">The map height for the length of the outer loop</param>
+    /// <returns>a 2d float array of normalized values</returns>
+    private static float[,] normalizeNoiseMap(float[,] noiseMap, float minNoiseHeight, float maxNoiseHeight,int mapWidth,int mapHeight)
     {
         for (int y = 0; y < mapHeight; y++)
         {

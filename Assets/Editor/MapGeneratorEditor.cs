@@ -1,7 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine;
+
+/// <summary>
+/// This file defines a custom Unity Editor inspector for the MapGenerator component.
+/// It overrides the default inspector UI to automatically regenerate
+/// the map in the editor whenever properties are changed and the autoUpdate flag is enabled.
+/// This helps developers preview map changes in real-time without manually triggering updates.
+/// </summary>
 [CustomEditor(typeof(MapGenerator))]
 public class MapGeneratorEditor: Editor
 {
@@ -20,6 +24,4 @@ public class MapGeneratorEditor: Editor
             return;
         }
     }
-    
-    
 }
