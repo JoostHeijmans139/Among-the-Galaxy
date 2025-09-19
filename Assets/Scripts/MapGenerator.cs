@@ -8,6 +8,7 @@ public class MapGenerator : MonoBehaviour
         DrawNoiseMap,
         DrawColorMap,
     }
+    public DrawMode drawMode;
     public int mapWidth;
     public int mapHeight;
     public float noiseScale;
@@ -20,7 +21,11 @@ public class MapGenerator : MonoBehaviour
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth,mapHeight,noiseScale,octaves,persistence,lacunarity);
         DisplayMap display = FindObjectOfType<DisplayMap>();
-        display.DrawNoiseMap(noiseMap);
+        if (drawMode == DrawMode.DrawNoiseMap)
+        {
+            display.DisplayNoiseMap(noiseMap);
+        }
+        
     }
 
     void OnValidate()

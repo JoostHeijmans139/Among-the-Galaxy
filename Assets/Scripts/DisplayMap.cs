@@ -9,7 +9,7 @@ public class DisplayMap : MonoBehaviour
     /// This function generates and applies a 2d texture based on the provided noise map to visualize the noise values.
     /// </summary>
     /// <param name="noiseMap">a 2d float array of normalized noise values</param>
-    public void DrawNoiseMap(float[,] noiseMap)
+    public void DisplayNoiseMap(float[,] noiseMap)
     {
         int width = noiseMap.GetLength(0);
         int height = noiseMap.GetLength(1);
