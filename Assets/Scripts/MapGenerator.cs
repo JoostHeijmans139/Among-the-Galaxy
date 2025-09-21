@@ -7,6 +7,7 @@ public class MapGenerator:MonoBehaviour
     {
         DrawNoiseMap,
         DrawColorMap,
+        DrawMesh,
     }
     public DrawMode drawMode;
     public int mapWidth;
@@ -23,29 +24,35 @@ public class MapGenerator:MonoBehaviour
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth,mapHeight,noiseScale,octaves,persistence,lacunarity);
         DisplayMap display = FindObjectOfType<DisplayMap>();
-        if (drawMode == DrawMode.DrawNoiseMap)
+        Color[] colorMap = new Color[mapWidth * mapHeight];
+        for (int y = 0; y < noiseMap.GetLength(0); y++)
         {
-            display.DisplayNoiseMap(noiseMap);
-        }else if (drawMode == DrawMode.DrawColorMap)
-        {
-            Color[] colorMap = new Color[mapWidth * mapHeight];
-            for (int y = 0; y < noiseMap.GetLength(0); y++)
+            for (int x = 0; x < noiseMap.GetLength(1); x++)
             {
-                for (int x = 0; x < noiseMap.GetLength(1); x++)
+                float currentHeight = noiseMap[x, y];
+                for (int i = 0; i < TerrainTypes.Length; i++)
                 {
-                    float currentHeight = noiseMap[x, y];
-                    for (int i = 0; i < TerrainTypes.Length; i++)
+                    if (currentHeight <= TerrainTypes[i].Height)
                     {
-                        if (currentHeight <= TerrainTypes[i].Height)
-                        {
-                            colorMap[y * mapWidth + x] = TerrainTypes[i].Color;
-                            break;
-                        }
+                        colorMap[y * mapWidth + x] = TerrainTypes[i].Color;
+                        break;
                     }
-                    
                 }
+                    
             }
-            display.DisplayColorMap(colorMap,mapWidth, mapHeight);
+        }
+        switch (drawMode)
+        {
+            case DrawMode.DrawNoiseMap:
+                display.DisplayNoiseMap(noiseMap);
+                break;
+            case DrawMode.DrawColorMap:
+
+                display.DisplayColorMap(colorMap,mapWidth, mapHeight);
+                break;
+            case DrawMode.DrawMesh:
+                display.DrawMesh(MeshGenerator.GenerateTerainMesh(noiseMap), TextureGenerator.TextureFromColourMap(colorMap,mapWidth,mapHeight));
+                break;
         }
         
         
