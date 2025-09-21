@@ -8,7 +8,7 @@ public static class MeshGenerator
     {
         int width = heighMap.GetLength(0);
         int height = heighMap.GetLength(1);
-        float TopLeftX = (width - 1)/ -2f;
+        float topLeftX = (width - 1)/ -2f;
         float topLeftZ = (height - 1)/ 2f;
         MeshData meshData = new MeshData(width, height);
         int vertextIndex = 0;
@@ -16,7 +16,7 @@ public static class MeshGenerator
         {
             for (int x = 0; x < width; x++)
             {
-                meshData.vertices[vertextIndex] = new Vector3(TopLeftX,heighMap[x,y],topLeftZ-y);
+                meshData.vertices[vertextIndex] = new Vector3(topLeftX,heighMap[x,y],topLeftZ-y);
                 meshData.uvs[vertextIndex] = new Vector2(x / (float)width,y / (float)height);
                 if (x < width - 1 && y < height - 1)
                 {
