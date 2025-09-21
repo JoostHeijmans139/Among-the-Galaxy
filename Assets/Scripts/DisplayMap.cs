@@ -25,7 +25,7 @@ public class DisplayMap : MonoBehaviour
         textureRenderer.sharedMaterial.mainTexture = texture;
         textureRenderer.transform.localScale = new Vector3(texture.width,1,texture.height);
     }
-
+    //NOT SURE IF THIS WORKS DO PROPER CHECK
     public void DrawMesh(MeshData meshData,Texture2D texture)
     {
         meshFilter.sharedMesh = meshData.CreateMesh();
