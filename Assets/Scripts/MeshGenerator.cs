@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public static class MeshGenerator 
 {
@@ -16,7 +17,7 @@ public static class MeshGenerator
         {
             for (int x = 0; x < width; x++)
             {
-                meshData.vertices[vertextIndex] = new Vector3(topLeftX,heighMap[x,y],topLeftZ-y);
+                meshData.vertices[vertextIndex] = new Vector3(topLeftX+x,heighMap[x,y],topLeftZ-y);
                 meshData.uvs[vertextIndex] = new Vector2(x / (float)width,y / (float)height);
                 if (x < width - 1 && y < height - 1)
                 {
@@ -57,6 +58,7 @@ public class MeshData
         Mesh mesh = new Mesh();
         mesh.vertices = vertices;
         mesh.triangles = triangles;
+        mesh.RecalculateBounds();
         mesh.uv = uvs;
         mesh.RecalculateNormals();
         return mesh;
