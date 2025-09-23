@@ -14,6 +14,7 @@ public class MapGenerator:MonoBehaviour
     public int mapHeight;
     [Range(2,100)]
     public float noiseScale;
+    [Range(0,20)]
     public int octaves;
     [Range(0, 1)]
     public float persistence;
