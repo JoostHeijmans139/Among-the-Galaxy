@@ -12,7 +12,7 @@ public class MapGenerator:MonoBehaviour
     public DrawMode drawMode;
     public int mapWidth;
     public int mapHeight;
-    [Range(0,100)]
+    [Range(2,100)]
     public float noiseScale;
     public int octaves;
     [Range(0, 1)]
@@ -74,7 +74,6 @@ public class MapGenerator:MonoBehaviour
         {
             lacunarity = 1;
         }
-
         if (octaves < 0)
         {
             octaves = 0;

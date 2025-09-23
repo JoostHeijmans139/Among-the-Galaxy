@@ -29,7 +29,9 @@ public class DisplayMap : MonoBehaviour
     {
         meshFilter.sharedMesh = meshData.CreateMesh();
         meshRenderer.sharedMaterial.mainTexture = texture;
-        meshRenderer.transform.localScale = new Vector3(texture.width,1,texture.height);
+        meshRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height);
+        textureRenderer.sharedMaterial.mainTexture = texture;
+        textureRenderer.transform.localScale = new Vector3(texture.width, 0, texture.height);
     }
 
     private void SetFilterOptions(Texture2D texture)
