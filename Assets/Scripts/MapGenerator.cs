@@ -30,6 +30,7 @@ public class MapGenerator:MonoBehaviour
         {
             for (int x = 0; x < noiseMap.GetLength(1); x++)
             {
+                if(x >= mapWidth || y >= mapHeight) continue;
                 float currentHeight = noiseMap[x, y];
                 for (int i = 0; i < TerrainTypes.Length; i++)
                 {
