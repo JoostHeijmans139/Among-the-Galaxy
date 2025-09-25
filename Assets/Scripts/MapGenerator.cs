@@ -22,6 +22,7 @@ public class MapGenerator : MonoBehaviour
     public int mapHeight;            // Height of the map in units
 
     [Header("Noise Settings")]
+    public int seed = 0;
     [Range(2, 100)]
     public float noiseScale;         // Scale of the noise (affects zoom)
     [Range(0, 20)]
@@ -30,6 +31,7 @@ public class MapGenerator : MonoBehaviour
     public float persistence;        // Controls amplitude of octaves (affects roughness)
     public float lacunarity;         // Controls frequency of octaves (affects detail)
     public float heightMultiplier;
+    public Vector2 offsets;
     [Header("Other Settings")]
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
@@ -40,7 +42,7 @@ public class MapGenerator : MonoBehaviour
     public void GenerateMap()
     {
         // Generate the noise map based on the current parameters
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, noiseScale, octaves, persistence, lacunarity);
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight,seed, noiseScale, octaves, persistence, lacunarity,offsets);
 
         // Find the DisplayMap component in the scene to show the map
         DisplayMap display = FindObjectOfType<DisplayMap>();

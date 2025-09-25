@@ -11,14 +11,22 @@ public static class Noise{
     /// <param name="persistence">Decides how much the amplitude changes with each octave</param>
     /// <param name="lacunarity">Decides how much the frequency changes with each</param>
     /// <returns>A 2d float array</returns>
-    public static float[,] GenerateNoiseMap(int width, int height, float scale, int octaves, float persistence, float lacunarity)
+    public static float[,] GenerateNoiseMap(int width, int height,int seed, float scale, int octaves, float persistence, float lacunarity, Vector2 offsets)
     {
         //Use arrays instead of lists for performance reasons
         float[,] noiseMap = new float[width, height];
         //its backwards set so any value found is either less or more 
         float minNoiseHeight = float.MaxValue;
         float maxNoiseHeight = float.MinValue;
-
+        System.Random rand = new System.Random(seed);
+        Vector2[] octaveOffsets = new Vector2[octaves];
+        for (int i = 0; i < octaves; i++)
+        {
+            float offsetX = rand.Next(-100000, 100000)+offsets.x;
+            float offsetY = rand.Next(-100000, 100000)+offsets.y;
+            octaveOffsets[i] = new Vector2(offsetX, offsetY);
+        }
+    
         // Generate a 2D noise map using layered (octave) Perlin noise for procedural terrain.
         // For each (x, y) coordinate, sum multiple octaves of Perlin noise with varying frequency and amplitude.
         // Track the minimum and maximum noise heights for later normalization.
@@ -33,8 +41,8 @@ public static class Noise{
                 float noiseHeight = 0;
                 for (int i = 0; i < octaves; i++)
                 {
-                    float sampleX = x / scale * frequency;
-                    float sampleY = y / scale * frequency;
+                    float sampleX = x / scale * frequency+octaveOffsets[i].x;
+                    float sampleY = y / scale * frequency+octaveOffsets[i].y;
                     float noiseValue = Mathf.PerlinNoise(sampleX, sampleY)*2-1;
                     noiseHeight += noiseValue * amplitude;
                     amplitude *= persistence;
