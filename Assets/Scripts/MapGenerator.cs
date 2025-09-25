@@ -29,7 +29,7 @@ public class MapGenerator : MonoBehaviour
     [Range(0, 1)]
     public float persistence;        // Controls amplitude of octaves (affects roughness)
     public float lacunarity;         // Controls frequency of octaves (affects detail)
-
+    public float heightMultiplier;
     [Header("Other Settings")]
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
@@ -62,7 +62,7 @@ public class MapGenerator : MonoBehaviour
             case DrawMode.DrawMesh:
                 // Generate mesh from noise map and texture from color map
                 display.DrawMesh(
-                    MeshGenerator.GenerateTerainMesh(noiseMap),
+                    MeshGenerator.GenerateTerainMesh(noiseMap,heightMultiplier),
                     TextureGenerator.TextureFromColourMap(colorMap, mapWidth, mapHeight)
                 );
                 break;
