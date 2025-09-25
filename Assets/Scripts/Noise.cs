@@ -26,6 +26,8 @@ public static class Noise{
             float offsetY = rand.Next(-100000, 100000)+offsets.y;
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
         }
+        float halfWidth = width * 0.5f;
+        float halfHeight = height * 0.5f;
     
         // Generate a 2D noise map using layered (octave) Perlin noise for procedural terrain.
         // For each (x, y) coordinate, sum multiple octaves of Perlin noise with varying frequency and amplitude.
@@ -41,8 +43,8 @@ public static class Noise{
                 float noiseHeight = 0;
                 for (int i = 0; i < octaves; i++)
                 {
-                    float sampleX = x / scale * frequency+octaveOffsets[i].x;
-                    float sampleY = y / scale * frequency+octaveOffsets[i].y;
+                    float sampleX = (x-halfWidth) / scale * frequency+octaveOffsets[i].x;
+                    float sampleY = (y-halfHeight) / scale * frequency+octaveOffsets[i].y;
                     float noiseValue = Mathf.PerlinNoise(sampleX, sampleY)*2-1;
                     noiseHeight += noiseValue * amplitude;
                     amplitude *= persistence;
