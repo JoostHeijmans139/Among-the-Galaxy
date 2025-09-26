@@ -22,7 +22,7 @@ public class MapGenerator : MonoBehaviour
     public int mapHeight;            // Height of the map in units
 
     [Header("Noise Settings")]
-    public int seed = 0;
+    public int seed;
     [Range(2, 100)]
     public float noiseScale;         // Scale of the noise (affects zoom)
     [Range(0, 20)]
@@ -41,6 +41,8 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     public void GenerateMap()
     {
+        //get the TextureRenderer object which is used to draw the 2d texture for the color map draw option and the noise map draw option
+        DisplayMap.GetTextureRenderer();
         // Generate the noise map based on the current parameters
         float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight,seed, noiseScale, octaves, persistence, lacunarity,offsets);
 
@@ -54,14 +56,26 @@ public class MapGenerator : MonoBehaviour
         switch (drawMode)
         {
             case DrawMode.DrawNoiseMap:
+                if (!DisplayMap.CheckTextureRendererStatus())
+                {
+                    DisplayMap.EnableTextureRenderer();
+                }
                 display.DisplayNoiseMap(noiseMap);
                 break;
 
             case DrawMode.DrawColorMap:
+                if (!DisplayMap.CheckTextureRendererStatus())
+                {
+                    DisplayMap.EnableTextureRenderer();
+                }
                 display.DisplayColorMap(colorMap, mapWidth, mapHeight);
                 break;
 
             case DrawMode.DrawMesh:
+                if (DisplayMap.CheckTextureRendererStatus())
+                {
+                    DisplayMap.DisableTextureRenderer();
+                }
                 // Generate mesh from noise map and texture from color map
                 display.DrawMesh(
                     MeshGenerator.GenerateTerainMesh(noiseMap,heightMultiplier),

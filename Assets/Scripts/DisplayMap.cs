@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -6,10 +7,12 @@ using UnityEngine;
 /// </summary>
 public class DisplayMap : MonoBehaviour
 {
-    [Header("Rendering Components")]
-    public Renderer textureRenderer;    // Renderer used to display 2D textures (noise or color maps)
+    [Header("Rendering Components")] 
+    // Renderer used to display 2D textures (noise or color maps)
+    private static Renderer _textureRendererStatic;
     public MeshFilter meshFilter;       // MeshFilter component for displaying mesh geometry
     public MeshRenderer meshRenderer;   // MeshRenderer component for applying textures to meshes
+    
 
     /// <summary>
     /// Generates and applies a 2D grayscale texture based on the provided noise map.
@@ -24,10 +27,10 @@ public class DisplayMap : MonoBehaviour
         SetFilterOptions(texture);
 
         // Apply the generated texture to the renderer's material
-        textureRenderer.sharedMaterial.mainTexture = texture;
+        _textureRendererStatic.sharedMaterial.mainTexture = texture;
 
         // Scale the renderer's transform to match texture size (width x height)
-        textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height);
+        _textureRendererStatic.transform.localScale = new Vector3(texture.width, 1, texture.height);
     }
 
     /// <summary>
@@ -45,10 +48,10 @@ public class DisplayMap : MonoBehaviour
         SetFilterOptions(texture);
 
         // Assign the texture to the renderer's material
-        textureRenderer.sharedMaterial.mainTexture = texture;
+        _textureRendererStatic.sharedMaterial.mainTexture = texture;
 
         // Scale renderer to match the texture's dimensions
-        textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height);
+        _textureRendererStatic.transform.localScale = new Vector3(texture.width, 1, texture.height);
     }
 
     /// <summary>
@@ -70,8 +73,8 @@ public class DisplayMap : MonoBehaviour
 
         // Also assign the texture to the textureRenderer and scale it to zero height (effectively hiding it)
         // This may be to keep the texture renderer synchronized or for visual fallback
-        textureRenderer.sharedMaterial.mainTexture = texture;
-        textureRenderer.transform.localScale = new Vector3(texture.width, 0, texture.height);
+        // textureRenderer.sharedMaterial.mainTexture = texture;
+        // textureRenderer.transform.localScale = new Vector3(texture.width, 0, texture.height);
     }
 
     /// <summary>
@@ -82,5 +85,34 @@ public class DisplayMap : MonoBehaviour
     {
         texture.filterMode = FilterMode.Point;           // Disable texture smoothing for crisp pixels
         texture.wrapMode = TextureWrapMode.Clamp;        // Prevent texture repetition beyond edges
+    }
+
+    public static void DisableTextureRenderer()
+    {
+        _textureRendererStatic.enabled = false;
+    }
+
+    public static void EnableTextureRenderer()
+    {
+        _textureRendererStatic.enabled = true;
+    }
+
+    public static bool CheckTextureRendererStatus()
+    {
+        return _textureRendererStatic.enabled;
+    }
+
+    public static void GetTextureRenderer()
+    {
+        GameObject textureRendererStatic = GameObject.FindWithTag("Floor");
+        if (!textureRendererStatic)
+        {
+            Debug.LogError("No game object found with tag Floor");
+        }
+        _textureRendererStatic = textureRendererStatic.GetComponent<Renderer>();
+        if (_textureRendererStatic == null)
+        {
+            Debug.Log("Render not found on game object that hase the Floor tag");
+        }
     }
 }
