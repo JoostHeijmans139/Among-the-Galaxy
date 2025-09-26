@@ -1,82 +1,82 @@
 using UnityEngine;
 
-public static class Noise{
+/// <summary>
+/// Provides methods for generating 2D Perlin noise maps, used in procedural terrain generation.
+/// </summary>
+public static class Noise
+{
     /// <summary>
-    /// This function generates a 2d float array of noise values which represent a noiseMap which is used in the terrain generation
+    /// Generates a 2D array of Perlin noise values using multiple octaves, suitable for terrain heightmaps.
     /// </summary>
-    /// <param name="width">The actual map width</param>
-    /// <param name="height">The actual map height</param>
-    /// <param name="scale">Decides the zoom level of the noise higher means smoother terrain smaller means more details and bumpy terrain</param>
-    /// <param name="octaves">Decides the amount of noise differences</param>
-    /// <param name="persistence">Decides how much the amplitude changes with each octave</param>
-    /// <param name="lacunarity">Decides how much the frequency changes with each</param>
-    /// <returns>A 2d float array</returns>
-    public static float[,] GenerateNoiseMap(int width, int height, float scale, int octaves, float persistence, float lacunarity)
+    /// <param name="width">Width of the noise map.</param>
+    /// <param name="height">Height of the noise map.</param>
+    /// <param name="seed">Random seed for reproducibility (currently unused).</param>
+    /// <param name="scale">Controls the zoom level of the noise. Higher values produce smoother terrain.</param>
+    /// <param name="octaves">Number of noise layers (octaves) to combine for detail.</param>
+    /// <param name="persistence">Controls amplitude reduction per octave (affects roughness).</param>
+    /// <param name="lacunarity">Controls frequency increase per octave (affects detail scale).</param>
+    /// <param name="offsets">Global offset applied to all noise samples.</param>
+    /// <returns>A 2D float array representing the generated noise map.</returns>
+    public static float[,] GenerateNoiseMap(
+        int width,
+        int height,
+        int seed,
+        float scale,
+        int octaves,
+        float persistence,
+        float lacunarity,
+        Vector2 offsets)
     {
-        //Use arrays instead of lists for performance reasons
         float[,] noiseMap = new float[width, height];
-        //its backwards set so any value found is either less or more 
+
+        // Track the minimum and maximum noise values for normalization.
         float minNoiseHeight = float.MaxValue;
         float maxNoiseHeight = float.MinValue;
 
-        // Generate a 2D noise map using layered (octave) Perlin noise for procedural terrain.
-        // For each (x, y) coordinate, sum multiple octaves of Perlin noise with varying frequency and amplitude.
-        // Track the minimum and maximum noise heights for later normalization.
+        // Generate per-octave offsets for more varied noise.
+        Vector2[] octaveOffsets = NoiseHelper.GenerateOffsets(octaves, offsets);
+
+        float halfWidth = width * 0.5f;
+        float halfHeight = height * 0.5f;
+
+        // Iterate over each coordinate in the noise map.
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
             {
-                //amplitude hase influence on the actual height of the terrain
-                float amplitude = 1;
-                //frequency hase influence on the small details on the terrain higher means more lower means less
-                float frequency = 1;
-                float noiseHeight = 0;
+                float amplitude = 1f;
+                float frequency = 1f;
+                float noiseHeight = 0f;
+
+                // Combine multiple octaves of Perlin noise.
                 for (int i = 0; i < octaves; i++)
                 {
-                    float sampleX = x / scale * frequency;
-                    float sampleY = y / scale * frequency;
-                    float noiseValue = Mathf.PerlinNoise(sampleX, sampleY)*2-1;
+                    // Calculate sample coordinates with scaling, frequency, and offset.
+                    float sampleX = (x - halfWidth) / scale * frequency + octaveOffsets[i].x;
+                    float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[i].y;
+
+                    // Perlin noise returns [0,1], remap to [-1,1].
+                    float noiseValue = Mathf.PerlinNoise(sampleX, sampleY) * 2f - 1f;
                     noiseHeight += noiseValue * amplitude;
+
+                    // Update amplitude and frequency for next octave.
                     amplitude *= persistence;
                     frequency *= lacunarity;
                 }
 
+                // Track min and max for normalization.
                 if (noiseHeight > maxNoiseHeight)
-                {
                     maxNoiseHeight = noiseHeight;
-                }
-                else if (noiseHeight < minNoiseHeight)
-                {
+                if (noiseHeight < minNoiseHeight)
                     minNoiseHeight = noiseHeight;
-                }
 
                 noiseMap[x, y] = noiseHeight;
             }
         }
-        //normalize noise values to make sure they are in between 0 and 1
-        noiseMap = normalizeNoiseMap(noiseMap, minNoiseHeight, maxNoiseHeight,width,height);
-        return noiseMap;
-    }
 
-    /// <summary>
-    /// This is a function to normalize the values inside the given noisemap to make sure they are between 0 and 1
-    /// </summary>
-    /// <param name="noiseMap">A 2d float array of unnormalized values</param>
-    /// <param name="minNoiseHeight">the minimum noise height value being passed through from noise generation</param>
-    /// <param name="maxNoiseHeight">the maximum noise height value being passed through from noise generation</param>
-    /// <param name="mapWidth">The map width for the length of the inner loop</param>
-    /// <param name="mapHeight">The map height for the length of the outer loop</param>
-    /// <returns>a 2d float array of normalized values</returns>
-    private static float[,] normalizeNoiseMap(float[,] noiseMap, float minNoiseHeight, float maxNoiseHeight,int mapWidth,int mapHeight)
-    {
-        for (int y = 0; y < mapHeight; y++)
-        {
-            for (int x = 0; x < mapWidth; x++)
-            {
-                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
-            }
-        }
+        // Normalize the noise map to the [0,1] range.
+        noiseMap = NoiseHelper.NormalizeNoiseMap(noiseMap, minNoiseHeight, maxNoiseHeight, width, height);
+
         return noiseMap;
     }
 }
-

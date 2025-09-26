@@ -13,7 +13,7 @@ public static class MeshGenerator
     /// </summary>
     /// <param name="heighMap">2D float array containing height values for each vertex.</param>
     /// <returns>MeshData containing vertices, triangles, and UVs representing the terrain mesh.</returns>
-    public static MeshData GenerateTerainMesh(float[,] heighMap)
+    public static MeshData GenerateTerainMesh(float[,] heighMap,float heightMultiplier)
     {
         int width = heighMap.GetLength(0);  // Number of vertices along X-axis
         int height = heighMap.GetLength(1); // Number of vertices along Z-axis
@@ -36,7 +36,7 @@ public static class MeshGenerator
                 // X = topLeftX offset + x position
                 // Y = height value from height map
                 // Z = topLeftZ offset - y position (negative because Unity's Z axis is forward)
-                meshData.vertices[vertextIndex] = new Vector3(topLeftX + x, heighMap[x, y], topLeftZ - y);
+                meshData.vertices[vertextIndex] = new Vector3(topLeftX + x, heighMap[x, y]*heightMultiplier, topLeftZ - y);
 
                 // Calculate UV coordinates for texturing (range 0 to 1)
                 meshData.uvs[vertextIndex] = new Vector2(x / (float)width, y / (float)height);
