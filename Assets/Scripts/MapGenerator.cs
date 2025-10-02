@@ -30,6 +30,7 @@ public class MapGenerator : MonoBehaviour
     [Range(0, 1)]
     public float persistence;        // Controls amplitude of octaves (affects roughness)
     public float lacunarity;         // Controls frequency of octaves (affects detail)
+    public AnimationCurve heightCurve; // Curve to adjust height distribution
     public float heightMultiplier;
     public Vector2 offsets;
     [Header("Other Settings")]
@@ -78,7 +79,7 @@ public class MapGenerator : MonoBehaviour
                 }
                 // Generate mesh from noise map and texture from color map
                 display.DrawMesh(
-                    MeshGenerator.GenerateTerainMesh(noiseMap,heightMultiplier),
+                    MeshGenerator.GenerateTerainMesh(noiseMap,heightMultiplier,heightCurve),
                     TextureGenerator.TextureFromColourMap(colorMap, mapWidth, mapHeight)
                 );
                 break;
