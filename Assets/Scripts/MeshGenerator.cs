@@ -13,7 +13,7 @@ public static class MeshGenerator
     /// </summary>
     /// <param name="heighMap">2D float array containing height values for each vertex.</param>
     /// <returns>MeshData containing vertices, triangles, and UVs representing the terrain mesh.</returns>
-    public static MeshData GenerateTerainMesh(float[,] heighMap,float heightMultiplier,AnimationCurve heightCurve)
+    public static MeshData GenerateTerainMesh(float[,] heighMap,float heightMultiplier,AnimationCurve heightCurve, int levelOfDetail)
     {
         int width = heighMap.GetLength(0);  // Number of vertices along X-axis
         int height = heighMap.GetLength(1); // Number of vertices along Z-axis
@@ -21,16 +21,19 @@ public static class MeshGenerator
         // Calculate the top-left corner position to center the mesh around origin
         float topLeftX = (width - 1) / -2f;
         float topLeftZ = (height - 1) / 2f;
-
+        
+        int meshSimplificationIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
+        int verticesPerLine = (width - 1) / meshSimplificationIncrement + 1;
+        
         // Create a new MeshData object to hold mesh info
-        MeshData meshData = new MeshData(width, height);
+        MeshData meshData = new MeshData(verticesPerLine, verticesPerLine);
 
         int vertextIndex = 0; // Tracks the current vertex index while iterating
 
         // Loop through each vertex coordinate in the height map grid
-        for (int y = 0; y < height; y++)
+        for (int y = 0; y < height; y+=meshSimplificationIncrement)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < width; x+=meshSimplificationIncrement)
             {
                 // Assign the vertex position:
                 // X = topLeftX offset + x position
@@ -45,8 +48,8 @@ public static class MeshGenerator
                 if (x < width - 1 && y < height - 1)
                 {
                     // Each square consists of two triangles; add their indices in clockwise order
-                    meshData.AddTriangle(vertextIndex, vertextIndex + width + 1, vertextIndex + width);
-                    meshData.AddTriangle(vertextIndex + width + 1, vertextIndex, vertextIndex + 1);
+                    meshData.AddTriangle(vertextIndex, vertextIndex + verticesPerLine + 1, vertextIndex + verticesPerLine);
+                    meshData.AddTriangle(vertextIndex + verticesPerLine + 1, vertextIndex, vertextIndex + 1);
                 }
 
                 vertextIndex++; // Move to next vertex index
