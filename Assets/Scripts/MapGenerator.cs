@@ -25,7 +25,7 @@ public class MapGenerator : MonoBehaviour
     public int seed;
     [Range(2, 100)]
     public float noiseScale;         // Scale of the noise (affects zoom)
-    [Range(0, 20)]
+    [Range(1, 20)]
     public int octaves;              // Number of noise layers combined
     [Range(0, 1)]
     public float persistence;        // Controls amplitude of octaves (affects roughness)
@@ -138,11 +138,6 @@ public class MapGenerator : MonoBehaviour
         if (lacunarity < 1)
         {
             lacunarity = 1; // Lacunarity should be at least 1
-        }
-
-        if (octaves < 0)
-        {
-            octaves = 0; // Octaves cannot be negative
         }
     }
 
