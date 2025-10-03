@@ -18,7 +18,7 @@ public class MapGenerator : MonoBehaviour
 
     [Header("Map Settings")]
     public DrawMode drawMode;        // Current mode for displaying the map
-    const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
+    private const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
     [Range(0,6)]
     public int levelOfDetail;      // Level of detail for mesh generation (0 = highest detail)
     [Header("Noise Settings")]
@@ -108,9 +108,9 @@ public class MapGenerator : MonoBehaviour
                 // Map the current height to a terrain type color
                 for (int i = 0; i < terrainTypes.Length; i++)
                 {
-                    if (currentHeight <= terrainTypes[i].Height)
+                    if (currentHeight <= terrainTypes[i].height)
                     {
-                        colorMap[y * mapWidth + x] = terrainTypes[i].Color;
+                        colorMap[y * mapWidth + x] = terrainTypes[i].color;
                         break; // Exit loop after finding matching terrain type
                     }
                 }
@@ -138,8 +138,8 @@ public class MapGenerator : MonoBehaviour
     [System.Serializable]
     public struct TerrainType
     {
-        public string Name;   // Name of the terrain type (e.g., Water, Sand, Grass)
-        public Color Color;   // Color used to represent this terrain on the map
-        public float Height;  // Maximum height value that maps to this terrain type
+        public string name;   // Name of the terrain type (e.g., Water, Sand, Grass)
+        public Color color;   // Color used to represent this terrain on the map
+        public float height;  // Maximum height value that maps to this terrain type
     }
 }
