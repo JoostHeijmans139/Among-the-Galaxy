@@ -11,10 +11,11 @@ public static class NoiseHelper
     /// </summary>
     /// <param name="octaves">Number of octaves (layers) for which to generate offsets.</param>
     /// <param name="offsets">Global offset applied to each generated octave offset.</param>
+    /// <param name="seed">Value added to the noise to make the offsets more random</param>
     /// <returns>An array of Vector2 offsets, one for each octave.</returns>
-    public static Vector2[] GenerateOffsets(int octaves, Vector2 offsets)
+    public static Vector2[] GenerateOffsets(int octaves, Vector2 offsets,int seed)
     {
-        Random rand = new Random();
+        System.Random rand = new System.Random(seed);
         Vector2[] octaveOffsets = new Vector2[octaves];
 
         // Generate a random offset for each octave to ensure unique sampling positions.
