@@ -79,7 +79,7 @@ public class MapGenerator : MonoBehaviour
                 }
                 // Generate mesh from noise map and texture from color map
                 display.DrawMesh(
-                    MeshGenerator.GenerateTerainMesh(noiseMap,heightMultiplier,heightCurve,levelOfDetail),
+                    MeshGenerator.GenerateTerrainMesh(noiseMap,heightMultiplier,heightCurve,levelOfDetail),
                     TextureGenerator.TextureFromColourMap(colorMap, MapChunkSize, MapChunkSize)
                 );
                 break;
