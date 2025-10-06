@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 /// <summary>
@@ -87,21 +86,35 @@ public class DisplayMap : MonoBehaviour
         texture.wrapMode = TextureWrapMode.Clamp;        // Prevent texture repetition beyond edges
     }
 
+    /// <summary>
+    /// Disables the static texture renderer, making it invisible in the scene.
+    /// </summary>
     public static void DisableTextureRenderer()
     {
         _textureRendererStatic.enabled = false;
     }
 
+    /// <summary>
+    /// Enables the static texture renderer, making it visible in the scene.
+    /// </summary>
     public static void EnableTextureRenderer()
     {
         _textureRendererStatic.enabled = true;
     }
 
+    /// <summary>
+    /// Checks whether the static texture renderer is currently enabled (visible).
+    /// </summary>
+    /// <returns>True if the texture renderer is enabled; otherwise, false.</returns>
     public static bool CheckTextureRendererStatus()
     {
         return _textureRendererStatic.enabled;
     }
 
+    /// <summary>
+    /// Finds and assigns the static texture renderer by searching for a GameObject with the "Floor" tag.
+    /// Logs errors if the GameObject or its Renderer component is not found.
+    /// </summary>
     public static void GetTextureRenderer()
     {
         GameObject textureRendererStatic = GameObject.FindWithTag("Floor");
@@ -115,4 +128,5 @@ public class DisplayMap : MonoBehaviour
             Debug.Log("Render not found on game object that hase the Floor tag");
         }
     }
+
 }

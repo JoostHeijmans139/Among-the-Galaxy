@@ -18,9 +18,9 @@ public class MapGenerator : MonoBehaviour
 
     [Header("Map Settings")]
     public DrawMode drawMode;        // Current mode for displaying the map
-    public int mapWidth;             // Width of the map in units
-    public int mapHeight;            // Height of the map in units
-
+    private const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
+    [Range(0,6)]
+    public int levelOfDetail;      // Level of detail for mesh generation (0 = highest detail)
     [Header("Noise Settings")]
     public int seed;
     [Range(2, 100)]
@@ -30,6 +30,7 @@ public class MapGenerator : MonoBehaviour
     [Range(0, 1)]
     public float persistence;        // Controls amplitude of octaves (affects roughness)
     public float lacunarity;         // Controls frequency of octaves (affects detail)
+    public AnimationCurve heightCurve; // Curve to adjust height distribution
     public float heightMultiplier;
     public Vector2 offsets;
     [Header("Other Settings")]
@@ -44,7 +45,7 @@ public class MapGenerator : MonoBehaviour
         //get the TextureRenderer object which is used to draw the 2d texture for the color map draw option and the noise map draw option
         DisplayMap.GetTextureRenderer();
         // Generate the noise map based on the current parameters
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight,seed, noiseScale, octaves, persistence, lacunarity,offsets);
+        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity,offsets);
 
         // Find the DisplayMap component in the scene to show the map
         DisplayMap display = FindObjectOfType<DisplayMap>();
@@ -68,7 +69,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     DisplayMap.EnableTextureRenderer();
                 }
-                display.DisplayColorMap(colorMap, mapWidth, mapHeight);
+                display.DisplayColorMap(colorMap, MapChunkSize, MapChunkSize);
                 break;
 
             case DrawMode.DrawMesh:
@@ -78,8 +79,8 @@ public class MapGenerator : MonoBehaviour
                 }
                 // Generate mesh from noise map and texture from color map
                 display.DrawMesh(
-                    MeshGenerator.GenerateTerainMesh(noiseMap,heightMultiplier),
-                    TextureGenerator.TextureFromColourMap(colorMap, mapWidth, mapHeight)
+                    MeshGenerator.GenerateTerrainMesh(noiseMap,heightMultiplier,heightCurve,levelOfDetail),
+                    TextureGenerator.TextureFromColourMap(colorMap, MapChunkSize, MapChunkSize)
                 );
                 break;
             default:
@@ -110,9 +111,9 @@ public class MapGenerator : MonoBehaviour
                 // Map the current height to a terrain type color
                 for (int i = 0; i < terrainTypes.Length; i++)
                 {
-                    if (currentHeight <= terrainTypes[i].Height)
+                    if (currentHeight <= terrainTypes[i].height)
                     {
-                        colorMap[y * mapWidth + x] = terrainTypes[i].Color;
+                        colorMap[y * mapWidth + x] = terrainTypes[i].color;
                         break; // Exit loop after finding matching terrain type
                     }
                 }
@@ -128,16 +129,6 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     void OnValidate()
     {
-        if (mapWidth < 1)
-        {
-            mapWidth = 1; // Ensure minimum map width
-        }
-
-        if (mapHeight < 1)
-        {
-            mapHeight = mapWidth; // Keep height consistent if less than 1
-        }
-
         if (lacunarity < 1)
         {
             lacunarity = 1; // Lacunarity should be at least 1
@@ -150,8 +141,8 @@ public class MapGenerator : MonoBehaviour
     [System.Serializable]
     public struct TerrainType
     {
-        public string Name;   // Name of the terrain type (e.g., Water, Sand, Grass)
-        public Color Color;   // Color used to represent this terrain on the map
-        public float Height;  // Maximum height value that maps to this terrain type
+        public string name;   // Name of the terrain type (e.g., Water, Sand, Grass)
+        public Color color;   // Color used to represent this terrain on the map
+        public float height;  // Maximum height value that maps to this terrain type
     }
 }

@@ -34,7 +34,7 @@ public static class Noise
         float maxNoiseHeight = float.MinValue;
 
         // Generate per-octave offsets for more varied noise.
-        Vector2[] octaveOffsets = NoiseHelper.GenerateOffsets(octaves, offsets);
+        Vector2[] octaveOffsets = NoiseHelper.GenerateOffsets(octaves, offsets,seed);
 
         float halfWidth = width * 0.5f;
         float halfHeight = height * 0.5f;

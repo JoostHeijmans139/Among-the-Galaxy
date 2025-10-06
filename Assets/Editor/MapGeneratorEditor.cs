@@ -60,7 +60,7 @@ public class MapGeneratorEditor: Editor
             }
             foreach (MapGenerator.TerrainType terrainType in TerrainTypes)
             {
-                Debug.Log(terrainType.Name);
+                Debug.Log(terrainType.name);
             }
 
             string json = JsonUtility.ToJson(new TerrainTypeArray{terrainTypes = TerrainTypes},true);
