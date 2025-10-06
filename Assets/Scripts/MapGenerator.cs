@@ -82,6 +82,9 @@ public class MapGenerator : MonoBehaviour
                     TextureGenerator.TextureFromColourMap(colorMap, mapWidth, mapHeight)
                 );
                 break;
+            default:
+                drawMode = DrawMode.DrawNoiseMap;
+                break;
         }
     }
 
