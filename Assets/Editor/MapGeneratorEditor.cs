@@ -3,6 +3,7 @@ using System.Text.Json;
 using Unity.Plastic.Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// This file defines a custom Unity Editor inspector for the MapGenerator component.
@@ -13,6 +14,7 @@ using UnityEngine;
 [CustomEditor(typeof(MapGenerator))]
 public class MapGeneratorEditor: Editor
 {
+    public MapGenerator.SerializableAnimationCurve TerrainCurve;
     public MapGenerator.TerrainType[] TerrainTypes;
     public override void OnInspectorGUI()
     {
@@ -28,7 +30,7 @@ public class MapGeneratorEditor: Editor
             }
             return;
         }
-
+        
         if (GUILayout.Button("Load Preset terrain types"))
         {
             string path = EditorUtility.OpenFilePanel("Select terrain types", Application.dataPath, "json");

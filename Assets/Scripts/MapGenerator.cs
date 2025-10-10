@@ -146,4 +146,28 @@ public class MapGenerator : MonoBehaviour
         public Color Color;   // Color used to represent this terrain on the map
         public float Height;  // Maximum height value that maps to this terrain type
     }
+    [System.Serializable]
+    public class SerializableAnimationCurve
+    {
+        public Keyframe[] Keys;
+        public WrapMode preWrapMode;
+        public WrapMode postWrapMode;
+
+        public SerializableAnimationCurve() { }
+
+        public SerializableAnimationCurve(AnimationCurve curve)
+        {
+            Keys = curve.keys;
+            preWrapMode = curve.preWrapMode;
+            postWrapMode = curve.postWrapMode;
+        }
+
+        public AnimationCurve ToAnimationCurve()
+        {
+            var curve = new AnimationCurve(Keys);
+            curve.preWrapMode = preWrapMode;
+            curve.postWrapMode = postWrapMode;
+            return curve;
+        }
+    }
 }
