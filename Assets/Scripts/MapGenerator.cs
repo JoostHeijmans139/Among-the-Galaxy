@@ -1,3 +1,5 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -149,25 +151,63 @@ public class MapGenerator : MonoBehaviour
     [System.Serializable]
     public class SerializableAnimationCurve
     {
-        public Keyframe[] Keys;
+        
+        public SerializableKeyFrame[] keys;
         public WrapMode preWrapMode;
         public WrapMode postWrapMode;
-
-        public SerializableAnimationCurve() { }
-
+        
         public SerializableAnimationCurve(AnimationCurve curve)
         {
-            Keys = curve.keys;
+            for(int i = 0; i < curve.keys.Length; i++)
+            {
+                Array.Resize(ref keys, i + 1);
+                keys[i] = new SerializableKeyFrame(curve.keys[i]);
+            }
             preWrapMode = curve.preWrapMode;
             postWrapMode = curve.postWrapMode;
         }
 
         public AnimationCurve ToAnimationCurve()
         {
-            var curve = new AnimationCurve(Keys);
+            Keyframe[] keyframes = new Keyframe[keys.Length];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                keyframes[i] = keys[i].ToKeyframe();
+            }
+
+            var curve = new AnimationCurve(keyframes);
             curve.preWrapMode = preWrapMode;
             curve.postWrapMode = postWrapMode;
             return curve;
+        }
+    }
+    [System.Serializable]
+    public class SerializableKeyFrame
+    {
+        public float time;
+        public float value;
+        public float inTangent;
+        public float outTangent;
+        public float inWeight;
+        public float outWeight;
+        public WeightedMode weightedMode;
+        public SerializableKeyFrame(){}
+
+        public SerializableKeyFrame(Keyframe keyframe)
+        {
+            time = keyframe.time;
+            value = keyframe.value;
+            inTangent = keyframe.inTangent;
+            outTangent = keyframe.outTangent;
+            inWeight = keyframe.inWeight;
+            outWeight = keyframe.outWeight;
+            weightedMode = keyframe.weightedMode;
+        }
+        public Keyframe ToKeyframe()
+        {
+            var keyframe = new Keyframe(time, value, inTangent, outTangent, inWeight, outWeight);
+            keyframe.weightedMode = weightedMode;
+            return keyframe;
         }
     }
 }

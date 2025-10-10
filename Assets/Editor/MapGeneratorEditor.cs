@@ -30,7 +30,8 @@ public class MapGeneratorEditor: Editor
             }
             return;
         }
-        
+        #region Loading Terrain Types from JSON
+
         if (GUILayout.Button("Load Preset terrain types"))
         {
             string path = EditorUtility.OpenFilePanel("Select terrain types", Application.dataPath, "json");
@@ -60,7 +61,10 @@ public class MapGeneratorEditor: Editor
             }
         }
 
-        if (GUILayout.Button("Convert terrain types to json"))
+        #endregion
+
+        #region Exporting Terrain Types to JSON
+        if (GUILayout.Button("Export terrain types to json"))
         { 
             TerrainTypes = mapGenerator.TerrainTypes;
             if (TerrainTypes == null || TerrainTypes.Length == 0)
@@ -82,10 +86,71 @@ public class MapGeneratorEditor: Editor
                 AssetDatabase.Refresh();
             }
         }
+        #endregion
+        #region Loading Animation Curve from JSON
+
+        if (GUILayout.Button("Load Animation Curve from JSON"))
+        {
+            string path = EditorUtility.OpenFilePanel("Select Animation Curve", Application.dataPath, "json");
+            if (!string.IsNullOrEmpty(path))
+            {
+                string curveJson = File.ReadAllText(path);
+                TerrainCurve = JsonUtility.FromJson<MapGenerator.SerializableAnimationCurve>(curveJson);
+                if (TerrainCurve != null)
+                {
+                    mapGenerator.heightCurve = TerrainCurve.ToAnimationCurve();
+                    EditorUtility.SetDirty(mapGenerator);
+                    serializedObject.ApplyModifiedProperties();
+                }
+                else
+                {
+                    Debug.Log("No Animation Curve found in json.");
+                }
+            }
+            else
+            {
+                Debug.Log("File path is empty.");
+            }
+        }
+        #endregion
+
+        #region Exporting Animation Curve to JSON
+
+        if (GUILayout.Button("Export Animation Curve to JSON"))
+        {
+            if(mapGenerator.heightCurve == null || mapGenerator.heightCurve.keys.Length == 0)
+            {
+                Debug.LogWarning("No Animation Curve found to export.");
+                return;
+            }
+
+            TerrainCurve = new MapGenerator.SerializableAnimationCurve(mapGenerator.heightCurve);
+            Debug.Log("Exporting Animation Curve with " + TerrainCurve.keys.Length + " keyframes.");
+            string json = JsonUtility.ToJson(new AnimationCurveWrapper(){curve = TerrainCurve}, true);
+            foreach (var keyframe in TerrainCurve.keys)
+            {
+                Debug.Log("Keyframe time"+keyframe.time);
+            }
+            Debug.Log(json);
+            string path = EditorUtility.SaveFilePanelInProject("Export Animation Curve", "heightCurve", "json", "choose location to save Animation Curve");
+            if (!string.IsNullOrEmpty(path))
+            {
+                File.WriteAllText(path, json);
+                AssetDatabase.Refresh();
+            }
+        }
+
+        #endregion
     }
 }
 [System.Serializable]
 public class TerrainTypeArray
 {
     public MapGenerator.TerrainType[] terrainTypes;
+}
+
+[System.Serializable]
+public class AnimationCurveWrapper
+{
+    public MapGenerator.SerializableAnimationCurve curve;
 }
