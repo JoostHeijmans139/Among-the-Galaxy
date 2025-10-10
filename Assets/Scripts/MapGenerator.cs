@@ -40,6 +40,12 @@ public class MapGenerator : MonoBehaviour
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
 
+    private void Start()
+    {
+        drawMode = DrawMode.DrawMesh;
+        GenerateMap();
+    }
+
     /// <summary>
     /// Generates the map data (noise map) and displays it based on the selected draw mode.
     /// </summary>
