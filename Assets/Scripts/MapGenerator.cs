@@ -152,16 +152,16 @@ public class MapGenerator : MonoBehaviour
     public class SerializableAnimationCurve
     {
         
-        public SerializableKeyFrame[] keys;
+        public SerializableKeyframe[] keys;
         public WrapMode preWrapMode;
         public WrapMode postWrapMode;
         
         public SerializableAnimationCurve(AnimationCurve curve)
         {
+            keys = new SerializableKeyframe[curve.keys.Length];
             for(int i = 0; i < curve.keys.Length; i++)
             {
-                Array.Resize(ref keys, i + 1);
-                keys[i] = new SerializableKeyFrame(curve.keys[i]);
+                keys[i] = new SerializableKeyframe(curve.keys[i]);
             }
             preWrapMode = curve.preWrapMode;
             postWrapMode = curve.postWrapMode;
@@ -169,20 +169,28 @@ public class MapGenerator : MonoBehaviour
 
         public AnimationCurve ToAnimationCurve()
         {
+            if(keys == null || keys.Length == 0)
+            {
+                Debug.LogWarning("No keyframes found in SerializableAnimationCurve. Returning default AnimationCurve.");
+                return new AnimationCurve();
+            }
             Keyframe[] keyframes = new Keyframe[keys.Length];
+            Debug.Log("Converting SerializableAnimationCurve with " + keys.Length + " keyframes to AnimationCurve.");
             for (int i = 0; i < keys.Length; i++)
             {
                 keyframes[i] = keys[i].ToKeyframe();
             }
-
-            var curve = new AnimationCurve(keyframes);
-            curve.preWrapMode = preWrapMode;
-            curve.postWrapMode = postWrapMode;
+            Debug.Log("Found " + keyframes.Length + " keyframes. after deserialization.");
+            var curve = new AnimationCurve(keyframes)
+            {
+                preWrapMode = preWrapMode,
+                postWrapMode = postWrapMode,
+            };
             return curve;
         }
     }
-    [System.Serializable]
-    public class SerializableKeyFrame
+    [Serializable]
+    public class SerializableKeyframe
     {
         public float time;
         public float value;
@@ -191,9 +199,10 @@ public class MapGenerator : MonoBehaviour
         public float inWeight;
         public float outWeight;
         public WeightedMode weightedMode;
-        public SerializableKeyFrame(){}
 
-        public SerializableKeyFrame(Keyframe keyframe)
+        public SerializableKeyframe() { }
+
+        public SerializableKeyframe(Keyframe keyframe)
         {
             time = keyframe.time;
             value = keyframe.value;
@@ -203,11 +212,12 @@ public class MapGenerator : MonoBehaviour
             outWeight = keyframe.outWeight;
             weightedMode = keyframe.weightedMode;
         }
+
         public Keyframe ToKeyframe()
         {
-            var keyframe = new Keyframe(time, value, inTangent, outTangent, inWeight, outWeight);
-            keyframe.weightedMode = weightedMode;
-            return keyframe;
+            Keyframe kf = new Keyframe(time, value, inTangent, outTangent, inWeight, outWeight);
+            kf.weightedMode = weightedMode;
+            return kf;
         }
     }
 }

@@ -95,10 +95,10 @@ public class MapGeneratorEditor: Editor
             if (!string.IsNullOrEmpty(path))
             {
                 string curveJson = File.ReadAllText(path);
-                TerrainCurve = JsonUtility.FromJson<MapGenerator.SerializableAnimationCurve>(curveJson);
-                if (TerrainCurve != null)
+                AnimationCurveWrapper wrapper = JsonUtility.FromJson<AnimationCurveWrapper>(curveJson);
+                if (wrapper != null && wrapper.curve != null)
                 {
-                    mapGenerator.heightCurve = TerrainCurve.ToAnimationCurve();
+                    mapGenerator.heightCurve = wrapper.curve.ToAnimationCurve();
                     EditorUtility.SetDirty(mapGenerator);
                     serializedObject.ApplyModifiedProperties();
                 }
