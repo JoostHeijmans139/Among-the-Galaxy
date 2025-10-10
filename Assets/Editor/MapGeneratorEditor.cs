@@ -38,9 +38,17 @@ public class MapGeneratorEditor: Editor
                 var TerrainTypesArray = JsonUtility.FromJson<TerrainTypeArray>(terrainTypesJson);
                 if (TerrainTypes != null)
                 {
+                    foreach(var terrainType in TerrainTypesArray.terrainTypes)
+                    {
+                        Debug.Log(terrainType.Name + " " + terrainType.Height + " " + terrainType.Color);
+                    }
                     mapGenerator.TerrainTypes = TerrainTypesArray.terrainTypes;
                     EditorUtility.SetDirty(mapGenerator);
                     serializedObject.ApplyModifiedProperties();
+                }
+                else
+                {
+                    Debug.Log("No terrain types found in json.");
                 }
             }
             else
@@ -60,7 +68,7 @@ public class MapGeneratorEditor: Editor
             }
             foreach (MapGenerator.TerrainType terrainType in TerrainTypes)
             {
-                Debug.Log(terrainType.name);
+                Debug.Log(terrainType.Name);
             }
 
             string json = JsonUtility.ToJson(new TerrainTypeArray{terrainTypes = TerrainTypes},true);

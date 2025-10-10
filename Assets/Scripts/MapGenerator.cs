@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Generates a procedural map using Perlin noise and displays it using different modes.
@@ -111,9 +112,9 @@ public class MapGenerator : MonoBehaviour
                 // Map the current height to a terrain type color
                 for (int i = 0; i < terrainTypes.Length; i++)
                 {
-                    if (currentHeight <= terrainTypes[i].height)
+                    if (currentHeight <= terrainTypes[i].Height)
                     {
-                        colorMap[y * mapWidth + x] = terrainTypes[i].color;
+                        colorMap[y * mapWidth + x] = terrainTypes[i].Color;
                         break; // Exit loop after finding matching terrain type
                     }
                 }
@@ -141,8 +142,8 @@ public class MapGenerator : MonoBehaviour
     [System.Serializable]
     public struct TerrainType
     {
-        public string name;   // Name of the terrain type (e.g., Water, Sand, Grass)
-        public Color color;   // Color used to represent this terrain on the map
-        public float height;  // Maximum height value that maps to this terrain type
+        public string Name;   // Name of the terrain type (e.g., Water, Sand, Grass)
+        public Color Color;   // Color used to represent this terrain on the map
+        public float Height;  // Maximum height value that maps to this terrain type
     }
 }
