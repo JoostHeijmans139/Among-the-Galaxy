@@ -26,7 +26,7 @@ public class MapGeneratorEditor: Editor
             serializedObject.ApplyModifiedProperties();
             if (mapGenerator.autoUpdate)
             {
-                mapGenerator.GenerateMap();
+                mapGenerator.DrawMapInEditor();
             }
             return;
         }

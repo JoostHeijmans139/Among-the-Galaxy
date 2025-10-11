@@ -55,25 +55,15 @@ public class MapGenerator : MonoBehaviour
             Instance = this;
         }
         drawMode = DrawMode.DrawMesh;
-        GenerateMap();
+        GenerateMapData();
     }
-
-    /// <summary>
-    /// Generates the map data (noise map) and displays it based on the selected draw mode.
-    /// </summary>
-    public void GenerateMap()
+    public void DrawMapInEditor()
     {
-        //get the TextureRenderer object which is used to draw the 2d texture for the color map draw option and the noise map draw option
-        DisplayMap.GetTextureRenderer();
-        // Generate the noise map based on the current parameters
-        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity,offsets);
-
+        MapData mapData = GenerateMapData();
         // Find the DisplayMap component in the scene to show the map
         DisplayMap display = FindObjectOfType<DisplayMap>();
-
-        // Generate a color map by assigning colors to each noise value based on terrain height
-        Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
-
+        //get the TextureRenderer object which is used to draw the 2d texture for the color map draw option and the noise map draw option
+        DisplayMap.GetTextureRenderer();
         // Display the map according to the selected draw mode
         switch (drawMode)
         {
@@ -82,7 +72,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     DisplayMap.EnableTextureRenderer();
                 }
-                display.DisplayNoiseMap(noiseMap);
+                display.DisplayNoiseMap(mapData.HeightMap);
                 break;
 
             case DrawMode.DrawColorMap:
@@ -90,7 +80,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     DisplayMap.EnableTextureRenderer();
                 }
-                display.DisplayColorMap(colorMap, MapChunkSize, MapChunkSize);
+                display.DisplayColorMap(mapData.ColorMap, MapChunkSize, MapChunkSize);
                 break;
 
             case DrawMode.DrawMesh:
@@ -100,14 +90,26 @@ public class MapGenerator : MonoBehaviour
                 }
                 // Generate mesh from noise map and texture from color map
                 display.DrawMesh(
-                    MeshGenerator.GenerateTerrainMesh(noiseMap,heightMultiplier,heightCurve,levelOfDetail),
-                    TextureGenerator.TextureFromColourMap(colorMap, MapChunkSize, MapChunkSize)
+                    MeshGenerator.GenerateTerrainMesh(mapData.HeightMap,heightMultiplier,heightCurve,levelOfDetail),
+                    TextureGenerator.TextureFromColourMap(mapData.ColorMap, MapChunkSize, MapChunkSize)
                 );
                 break;
             default:
                 drawMode = DrawMode.DrawNoiseMap;
                 break;
         }
+    }
+    /// <summary>
+    /// Generates the map data (noise map) and displays it based on the selected draw mode.
+    /// </summary>
+    public MapData GenerateMapData()
+    {
+        // Generate the noise map based on the current parameters
+        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity,offsets);
+
+        // Generate a color map by assigning colors to each noise value based on terrain height
+        Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
+        return new MapData(noiseMap, colorMap);
     }
 
     /// <summary>
