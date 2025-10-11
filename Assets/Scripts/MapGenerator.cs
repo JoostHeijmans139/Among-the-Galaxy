@@ -12,6 +12,8 @@ using UnityEngine.Serialization;
 /// </summary>
 public class MapGenerator : MonoBehaviour
 {
+    #region MapGenerationVariables
+
     /// <summary>
     /// Modes for how the map will be drawn/displayed.
     /// </summary>
@@ -43,9 +45,18 @@ public class MapGenerator : MonoBehaviour
     [Header("Other Settings")]
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
-    
+
+    #endregion
+
+    #region ThreadingVariables
+
     private readonly Queue <MapThreadInfo<MapData>> _mapDataThreadInfoQueue = new ();
     private readonly Queue <MapThreadInfo<MeshData>> _meshDataThreadInfoQueue = new ();
+
+    #endregion
+
+    #region Constructor and Start methods
+
     public MapGenerator()
     {
         Instance = this;
@@ -62,6 +73,11 @@ public class MapGenerator : MonoBehaviour
         drawMode = DrawMode.DrawMesh;
         GenerateMapData();
     }
+
+    #endregion
+
+    #region DrawMapInEditor
+
     public void DrawMapInEditor()
     {
         MapData mapData = GenerateMapData();
@@ -104,6 +120,11 @@ public class MapGenerator : MonoBehaviour
                 break;
         }
     }
+
+    #endregion
+
+    #region GenerateMapData
+
     /// <summary>
     /// Generates the map data (noise map) and displays it based on the selected draw mode.
     /// </summary>
@@ -117,6 +138,10 @@ public class MapGenerator : MonoBehaviour
         return new MapData(noiseMap, colorMap);
     }
 
+    #endregion
+
+    #region GenerateColorMap
+    
     /// <summary>
     /// Converts a noise map into a color map by mapping noise values to terrain types.
     /// </summary>
@@ -150,7 +175,10 @@ public class MapGenerator : MonoBehaviour
 
         return colorMap;
     }
-    
+    #endregion
+
+    #region MapThreading
+
     public void RequestMapData(Action<MapData> callback)
     {
         ThreadStart threadStart = delegate
@@ -185,26 +213,28 @@ public class MapGenerator : MonoBehaviour
             _meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
         }
     }
-
     void Update()
     {
-        if (_mapDataThreadInfoQueue.Count > 0)
+        Dequeue<MapData>(_mapDataThreadInfoQueue);
+        Dequeue<MeshData>(_meshDataThreadInfoQueue);
+
+    }
+    private void Dequeue<T>(Queue<MapThreadInfo<T>> queue)
+    {
+        if (queue.Count !> 0)
         {
-            for(int i = 0; i< _mapDataThreadInfoQueue.Count; i++)
-            {
-                MapThreadInfo<MapData> threadInfo = _mapDataThreadInfoQueue.Dequeue();
-                threadInfo.Callback(threadInfo.Parameter);
-            }
+            return;
         }
-        if (_meshDataThreadInfoQueue.Count > 0)
+        int itemsToProcess = queue.Count;
+        for (int i = 0; i < itemsToProcess; i++)
         {
-            for (int i = 0; i < _meshDataThreadInfoQueue.Count; i++)
-            {
-                MapThreadInfo<MeshData> threadInfo = _meshDataThreadInfoQueue.Dequeue();
-                threadInfo.Callback(threadInfo.Parameter);
-            }
+            MapThreadInfo<T> threadInfo = queue.Dequeue();
+            threadInfo.Callback(threadInfo.Parameter);
         }
     }
+    #endregion
+
+    #region ValidateLacunarity
 
     /// <summary>
     /// Unity Editor callback to validate and clamp variables when they are changed in the Inspector.
@@ -218,17 +248,11 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Struct representing a terrain type with a name, color, and height threshold.
-    /// </summary>
-    [System.Serializable]
-    public struct TerrainType
-    {
-        public string Name;   // Name of the terrain type (e.g., Water, Sand, Grass)
-        public Color Color;   // Color used to represent this terrain on the map
-        public float Height;  // Maximum height value that maps to this terrain type
-    }
-    [System.Serializable]
+    #endregion
+
+    #region JsonWrapperClasses
+
+        [System.Serializable]
     public class SerializableAnimationCurve
     {
         
@@ -300,6 +324,21 @@ public class MapGenerator : MonoBehaviour
             return kf;
         }
     }
+
+    #endregion
+
+    #region Structs
+
+    /// <summary>
+    /// Struct representing a terrain type with a name, color, and height threshold.
+    /// </summary>
+    [System.Serializable]
+    public struct TerrainType
+    {
+        public string Name;   // Name of the terrain type (e.g., Water, Sand, Grass)
+        public Color Color;   // Color used to represent this terrain on the map
+        public float Height;  // Maximum height value that maps to this terrain type
+    }
     private struct MapThreadInfo<T>
     {
         public readonly Action<T> Callback;
@@ -311,16 +350,19 @@ public class MapGenerator : MonoBehaviour
             this.Parameter = parameter;
         }
     }
-}
-
-public struct MapData
-{
-    public readonly float[,] HeightMap;
-    public readonly Color[] ColorMap;
-
-    public MapData(float[,] heightMap, Color[] colorMap)
+    public struct MapData
     {
-        this.HeightMap = heightMap;
-        this.ColorMap = colorMap;
+        public readonly float[,] HeightMap;
+        public readonly Color[] ColorMap;
+
+        public MapData(float[,] heightMap, Color[] colorMap)
+        {
+            this.HeightMap = heightMap;
+            this.ColorMap = colorMap;
+        }
     }
+
+    #endregion
+    
 }
+
