@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Floor
+  - MainMenu
+  - SettingsMenu
   layers:
   - Default
   - TransparentFX
