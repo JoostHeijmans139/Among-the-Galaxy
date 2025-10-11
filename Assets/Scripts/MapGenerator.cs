@@ -239,3 +239,15 @@ public class MapGenerator : MonoBehaviour
         }
     }
 }
+
+public struct MapData
+{
+    public float[,] HeightMap;
+    public Color[] ColorMap;
+
+    public MapData(float[,] heightMap, Color[] colorMap)
+    {
+        this.HeightMap = heightMap;
+        this.ColorMap = colorMap;
+    }
+}
