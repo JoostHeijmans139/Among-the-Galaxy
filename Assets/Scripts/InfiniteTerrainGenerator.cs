@@ -7,7 +7,9 @@ public class InfiniteTerrainGenerator : MonoBehaviour
 {
     /// <summary> Maximum distance (in world units) at which chunks remain visible. </summary>
     public const float ViewDistance = 450f;
-
+    
+    /// <summary> Material applied to the terrain mesh. </summary>
+    public Material meshMaterial;
     /// <summary> Parent object to which all generated terrain chunks are attached. </summary>
     public GameObject parent;
 
@@ -93,7 +95,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
                 else
                 {
                     // Create and register a new chunk if it doesn’t exist.
-                    TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, _chunkSize, parent);
+                    TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, _chunkSize, parent,meshMaterial);
                     _terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                 }
             }
@@ -106,7 +108,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         Bounds _bounds;
         MeshRenderer _meshRenderer;
         MeshFilter _meshFilter;
-        public TerrainChunk(Vector2 coord,int chunkSize,GameObject parent)
+        public TerrainChunk(Vector2 coord,int chunkSize,GameObject parent,Material meshMaterial)
         {
             position = coord*chunkSize;
             _bounds = new Bounds(position, Vector2.one * chunkSize);
@@ -115,6 +117,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             _meshObject.transform.position = position3D;
             _meshObject.transform.localScale = Vector3.one * chunkSize / 10f;
             _meshObject.transform.parent = parent.transform;
+            _meshRenderer.material = meshMaterial;
             _meshRenderer = _meshObject.AddComponent<MeshRenderer>();
             _meshFilter = _meshObject.AddComponent<MeshFilter>();
             _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
