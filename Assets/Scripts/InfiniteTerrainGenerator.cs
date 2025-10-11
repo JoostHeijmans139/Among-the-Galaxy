@@ -29,11 +29,18 @@ public class InfiniteTerrainGenerator : MonoBehaviour
     /// <summary> List of chunks that were visible during the previous frame for efficient visibility updates. </summary>
     private readonly List<TerrainChunk> _terrainChunksLastFrame = new();
 
+    private static MapGenerator _mapGenerator;
+
     /// <summary>
     /// Initializes the chunk size and determines how many chunks are visible based on the view distance.
     /// </summary>
     private void Start()
     {
+        _mapGenerator = FindObjectOfType<MapGenerator>();
+        if (_mapGenerator == null)
+        {
+            throw new NullReferenceException("MapGenerator is null");
+        }
         _chunkSize = MapGenerator.MapChunkSize - 1;
         _chunksVisibleInViewDistance = Mathf.RoundToInt(ViewDistance / _chunkSize);
         UpdateVisibleChunks();
@@ -92,38 +99,44 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             }
         }
     }
-}
-public class TerrainChunk
-{
-    GameObject _meshObject;
-    Vector2 position;
-    Bounds _bounds;
-    public TerrainChunk(Vector2 coord,int chunkSize,GameObject parent)
+    private class TerrainChunk
     {
-        position = coord*chunkSize;
-        _bounds = new Bounds(position, Vector2.one * chunkSize);
-        Vector3 position3D = new Vector3(position.x, 0, position.y);
-        _meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        _meshObject.transform.position = position3D;
-        _meshObject.transform.localScale = Vector3.one * chunkSize / 10f;
-        _meshObject.transform.parent = parent.transform;
-        _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
-        SetVisible(false);
-    }
-    public void UpdateTerrainChunk()
-    {
-        float viewerDistanceFromNearestEdge = Mathf.Sqrt(_bounds.SqrDistance(InfiniteTerrainGenerator.ViewerPosition));
-        bool visible = viewerDistanceFromNearestEdge <= InfiniteTerrainGenerator.ViewDistance;
-        SetVisible(visible);
-    }
-    public void SetVisible(bool visible)
-    {
-        _meshObject.SetActive(visible);
+        readonly GameObject _meshObject;
+        Vector2 position;
+        Bounds _bounds;
+        public TerrainChunk(Vector2 coord,int chunkSize,GameObject parent)
+        {
+            position = coord*chunkSize;
+            _bounds = new Bounds(position, Vector2.one * chunkSize);
+            Vector3 position3D = new Vector3(position.x, 0, position.y);
+            _meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            _meshObject.transform.position = position3D;
+            _meshObject.transform.localScale = Vector3.one * chunkSize / 10f;
+            _meshObject.transform.parent = parent.transform;
+            _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
+            SetVisible(false);
+        
+            _mapGenerator.RequestMapData(OnMapDataReceived);
+        }
+        void OnMapDataReceived(MapData mapData)
+        {
+            print("Recieved map data");
+        }
+        public void UpdateTerrainChunk()
+        {
+            float viewerDistanceFromNearestEdge = Mathf.Sqrt(_bounds.SqrDistance(InfiniteTerrainGenerator.ViewerPosition));
+            bool visible = viewerDistanceFromNearestEdge <= InfiniteTerrainGenerator.ViewDistance;
+            SetVisible(visible);
+        }
+        public void SetVisible(bool visible)
+        {
+            _meshObject.SetActive(visible);
+        }
+
+        public bool IsVisable()
+        {
+            return _meshObject.activeSelf;
+        }
     }
 
-    public bool IsVisable()
-    {
-        return _meshObject.activeSelf;
-    }
 }
-
