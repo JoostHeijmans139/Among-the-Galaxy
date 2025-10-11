@@ -16,6 +16,7 @@ public static class MeshGenerator
     /// <returns>MeshData containing vertices, triangles, and UVs representing the terrain mesh.</returns>
     public static MeshData GenerateTerrainMesh(float[,] heighMap,float heightMultiplier,AnimationCurve heightCurve, int levelOfDetail)
     {
+        AnimationCurve Heightcurve = new  AnimationCurve(heightCurve.keys);
         int width = heighMap.GetLength(0);  // Number of vertices along X-axis
         int height = heighMap.GetLength(1); // Number of vertices along Z-axis
 
@@ -40,7 +41,7 @@ public static class MeshGenerator
                 // X = topLeftX offset + x position
                 // Y = height value from height map
                 // Z = topLeftZ offset - y position (negative because Unity's Z axis is forward)
-                meshData.Vertices[vertexIndex] = new Vector3(topLeftX + x, heightCurve.Evaluate(heighMap[x, y])*heightMultiplier , topLeftZ - y);
+                meshData.Vertices[vertexIndex] = new Vector3(topLeftX + x, Heightcurve.Evaluate(heighMap[x, y])*heightMultiplier , topLeftZ - y);
 
                 // Calculate UV coordinates for texturing (range 0 to 1)
                 meshData.Uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
