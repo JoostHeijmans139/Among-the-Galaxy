@@ -19,6 +19,7 @@ public class MapGenerator : MonoBehaviour
         DrawMesh,       // Display the map as a 3D mesh with textures
     }
 
+    public static MapGenerator Instance { get; private set;}
     [Header("Map Settings")]
     public DrawMode drawMode;        // Current mode for displaying the map
     private const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
@@ -40,8 +41,17 @@ public class MapGenerator : MonoBehaviour
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
 
+    public MapGenerator()
+    {
+        Instance = this;
+    }
     private void Start()
     {
+        if (Instance == null)
+        {
+            Debug.Log("Instance is null, assigning this instance.");
+            Instance = this;
+        }
         drawMode = DrawMode.DrawMesh;
         GenerateMap();
     }
