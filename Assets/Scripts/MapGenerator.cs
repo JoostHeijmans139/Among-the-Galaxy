@@ -45,7 +45,7 @@ public class MapGenerator : MonoBehaviour
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
     
     private readonly Queue <MapThreadInfo<MapData>> _mapDataThreadInfoQueue = new ();
-
+    private readonly Queue <MapThreadInfo<MeshData>> _meshDataThreadInfoQueue = new ();
     public MapGenerator()
     {
         Instance = this;
