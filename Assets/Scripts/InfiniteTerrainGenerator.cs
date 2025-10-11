@@ -117,9 +117,9 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             _meshObject.transform.position = position3D;
             _meshObject.transform.localScale = Vector3.one * chunkSize / 10f;
             _meshObject.transform.parent = parent.transform;
-            _meshRenderer.material = meshMaterial;
             _meshRenderer = _meshObject.AddComponent<MeshRenderer>();
             _meshFilter = _meshObject.AddComponent<MeshFilter>();
+            _meshRenderer.material = meshMaterial;
             _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
             SetVisible(false);
         
