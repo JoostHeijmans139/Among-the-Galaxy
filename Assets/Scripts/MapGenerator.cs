@@ -192,6 +192,14 @@ public class MapGenerator : MonoBehaviour
                 threadInfo.Callback(threadInfo.Parameter);
             }
         }
+        if (_meshDataThreadInfoQueue.Count > 0)
+        {
+            for (int i = 0; i < _meshDataThreadInfoQueue.Count; i++)
+            {
+                MapThreadInfo<MeshData> threadInfo = _meshDataThreadInfoQueue.Dequeue();
+                threadInfo.Callback(threadInfo.Parameter);
+            }
+        }
     }
 
     /// <summary>
