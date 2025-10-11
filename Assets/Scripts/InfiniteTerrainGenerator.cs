@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class InfiniteTerrainGenerator : MonoBehaviour
 {
+    #region Variables
+
     /// <summary> Maximum distance (in world units) at which chunks remain visible. </summary>
     public const float ViewDistance = 450f;
     
@@ -33,6 +35,10 @@ public class InfiniteTerrainGenerator : MonoBehaviour
 
     private static MapGenerator _mapGenerator;
 
+    #endregion
+
+    #region start and update methods
+
     /// <summary>
     /// Initializes the chunk size and determines how many chunks are visible based on the view distance.
     /// </summary>
@@ -57,7 +63,11 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         UpdateVisibleChunks();
     }
 
-    /// <summary>
+    #endregion
+
+    #region UpdateVisibleChunks
+
+        /// <summary>
     /// Determines which terrain chunks should be visible or hidden based on the viewer’s position.
     /// Dynamically creates new chunks when needed and hides those that fall outside the view distance.
     /// </summary>
@@ -101,6 +111,11 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             }
         }
     }
+
+    #endregion
+
+    #region TerrainChunkClass
+
     private class TerrainChunk
     {
         readonly GameObject _meshObject;
@@ -149,5 +164,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             return _meshObject.activeSelf;
         }
     }
+
+    #endregion
 
 }
