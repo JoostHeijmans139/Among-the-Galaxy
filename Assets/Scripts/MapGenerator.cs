@@ -169,6 +169,18 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        if (_mapDataThreadInfoQueue.Count > 0)
+        {
+            for(int i = 0; i< _mapDataThreadInfoQueue.Count; i++)
+            {
+                MapThreadInfo<MapData> threadInfo = _mapDataThreadInfoQueue.Dequeue();
+                threadInfo.Callback(threadInfo.Parameter);
+            }
+        }
+    }
+
     /// <summary>
     /// Unity Editor callback to validate and clamp variables when they are changed in the Inspector.
     /// Ensures that map dimensions and noise parameters stay within acceptable ranges.
