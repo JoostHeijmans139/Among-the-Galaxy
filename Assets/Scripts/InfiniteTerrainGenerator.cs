@@ -104,6 +104,8 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         readonly GameObject _meshObject;
         Vector2 position;
         Bounds _bounds;
+        MeshRenderer _meshRenderer;
+        MeshFilter _meshFilter;
         public TerrainChunk(Vector2 coord,int chunkSize,GameObject parent)
         {
             position = coord*chunkSize;
@@ -113,6 +115,8 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             _meshObject.transform.position = position3D;
             _meshObject.transform.localScale = Vector3.one * chunkSize / 10f;
             _meshObject.transform.parent = parent.transform;
+            _meshRenderer = _meshObject.AddComponent<MeshRenderer>();
+            _meshFilter = _meshObject.AddComponent<MeshFilter>();
             _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
             SetVisible(false);
         
@@ -121,6 +125,10 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         void OnMapDataReceived(MapData mapData)
         {
             print("Recieved map data");
+        }
+        void OnMeshDataReceived(MeshData meshData)
+        {
+            _meshFilter.mesh = meshData.CreateMesh();
         }
         public void UpdateTerrainChunk()
         {
