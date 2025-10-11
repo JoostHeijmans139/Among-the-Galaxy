@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -145,6 +146,7 @@ public class MapGenerator : MonoBehaviour
 
         return colorMap;
     }
+    
 
     /// <summary>
     /// Unity Editor callback to validate and clamp variables when they are changed in the Inspector.
@@ -238,6 +240,17 @@ public class MapGenerator : MonoBehaviour
             Keyframe kf = new Keyframe(time, value, inTangent, outTangent, inWeight, outWeight);
             kf.weightedMode = weightedMode;
             return kf;
+        }
+    }
+    private struct MapThreadInfo<T>
+    {
+        public readonly Action<T> Callback;
+        public readonly T Parameter;
+
+        public MapThreadInfo(Action<T> callback, T parameter)
+        {
+            this.Callback = callback;
+            this.Parameter = parameter;
         }
     }
 }
