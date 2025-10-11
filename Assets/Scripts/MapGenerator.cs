@@ -47,6 +47,8 @@ public class MapGenerator : MonoBehaviour
     }
     private void Start()
     {
+        levelOfDetail = Settings.SettingsManager.CurrentSettings.levelOfDetail;
+        Debug.Log("Level of Detail from SettingsManager: " + levelOfDetail);
         if (Instance == null)
         {
             Debug.Log("Instance is null, assigning this instance.");
