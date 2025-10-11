@@ -22,7 +22,7 @@ public class MapGenerator : MonoBehaviour
     public static MapGenerator Instance { get; private set;}
     [Header("Map Settings")]
     public DrawMode drawMode;        // Current mode for displaying the map
-    private const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
+    public const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
     [Range(0,6)]
     public int levelOfDetail;      // Level of detail for mesh generation (0 = highest detail)
     [Header("Noise Settings")]
