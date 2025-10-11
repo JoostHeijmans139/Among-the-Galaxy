@@ -86,11 +86,44 @@ public class InfiniteTerrainGenerator : MonoBehaviour
                 else
                 {
                     // Create and register a new chunk if it doesn’t exist.
-                    TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, chunkSize, parent);
+                    TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, _chunkSize, parent);
                     _terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                 }
             }
         }
+    }
+}
+public class TerrainChunk
+{
+    GameObject _meshObject;
+    Vector2 position;
+    Bounds _bounds;
+    public TerrainChunk(Vector2 coord,int chunkSize,GameObject parent)
+    {
+        position = coord*chunkSize;
+        _bounds = new Bounds(position, Vector2.one * chunkSize);
+        Vector3 position3D = new Vector3(position.x, 0, position.y);
+        _meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        _meshObject.transform.position = position3D;
+        _meshObject.transform.localScale = Vector3.one * chunkSize / 10f;
+        _meshObject.transform.parent = parent.transform;
+        _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
+        SetVisible(false);
+    }
+    public void UpdateTerrainChunk()
+    {
+        float viewerDistanceFromNearestEdge = Mathf.Sqrt(_bounds.SqrDistance(InfiniteTerrainGenerator.ViewerPosition));
+        bool visible = viewerDistanceFromNearestEdge <= InfiniteTerrainGenerator.ViewDistance;
+        SetVisible(visible);
+    }
+    public void SetVisible(bool visible)
+    {
+        _meshObject.SetActive(visible);
+    }
+
+    public bool IsVisable()
+    {
+        return _meshObject.activeSelf;
     }
 }
 
