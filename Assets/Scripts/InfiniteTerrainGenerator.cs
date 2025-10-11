@@ -124,7 +124,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         }
         void OnMapDataReceived(MapData mapData)
         {
-            print("Recieved map data");
+            _mapGenerator.RequestMeshData(mapData, OnMeshDataReceived);
         }
         void OnMeshDataReceived(MeshData meshData)
         {
