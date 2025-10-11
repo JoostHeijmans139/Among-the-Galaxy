@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -41,6 +43,8 @@ public class MapGenerator : MonoBehaviour
     [Header("Other Settings")]
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
+    
+    private readonly Queue <MapThreadInfo<MapData>> _mapDataThreadInfoQueue = new ();
 
     public MapGenerator()
     {
@@ -159,6 +163,10 @@ public class MapGenerator : MonoBehaviour
     private void MapDataThread(Action<MapData> callback)
     {
         MapData mapData = GenerateMapData();
+        lock (_mapDataThreadInfoQueue)
+        {
+            _mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData));
+        }
     }
 
     /// <summary>
