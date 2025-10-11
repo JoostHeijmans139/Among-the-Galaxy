@@ -169,6 +169,19 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    public void RequestMeshData(MapData mapdata,Action<MeshData> callback)
+    {
+        
+    }
+    private void MeshDataThread(MapData mapData, Action<MeshData> callback)
+    {
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.HeightMap, heightMultiplier, heightCurve, levelOfDetail);
+        lock (_meshDataThreadInfoQueue)
+        {
+            _meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
+        }
+    }
+
     void Update()
     {
         if (_mapDataThreadInfoQueue.Count > 0)
