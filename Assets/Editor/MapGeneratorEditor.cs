@@ -3,6 +3,7 @@ using System.Text.Json;
 using Unity.Plastic.Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// This file defines a custom Unity Editor inspector for the MapGenerator component.
@@ -13,6 +14,7 @@ using UnityEngine;
 [CustomEditor(typeof(MapGenerator))]
 public class MapGeneratorEditor: Editor
 {
+    public MapGenerator.SerializableAnimationCurve TerrainCurve;
     public MapGenerator.TerrainType[] TerrainTypes;
     public override void OnInspectorGUI()
     {
@@ -28,6 +30,7 @@ public class MapGeneratorEditor: Editor
             }
             return;
         }
+        #region Loading Terrain Types from JSON
 
         if (GUILayout.Button("Load Preset terrain types"))
         {
@@ -38,9 +41,17 @@ public class MapGeneratorEditor: Editor
                 var TerrainTypesArray = JsonUtility.FromJson<TerrainTypeArray>(terrainTypesJson);
                 if (TerrainTypes != null)
                 {
+                    foreach(var terrainType in TerrainTypesArray.terrainTypes)
+                    {
+                        Debug.Log(terrainType.Name + " " + terrainType.Height + " " + terrainType.Color);
+                    }
                     mapGenerator.TerrainTypes = TerrainTypesArray.terrainTypes;
                     EditorUtility.SetDirty(mapGenerator);
                     serializedObject.ApplyModifiedProperties();
+                }
+                else
+                {
+                    Debug.Log("No terrain types found in json.");
                 }
             }
             else
@@ -50,7 +61,10 @@ public class MapGeneratorEditor: Editor
             }
         }
 
-        if (GUILayout.Button("Convert terrain types to json"))
+        #endregion
+
+        #region Exporting Terrain Types to JSON
+        if (GUILayout.Button("Export terrain types to json"))
         { 
             TerrainTypes = mapGenerator.TerrainTypes;
             if (TerrainTypes == null || TerrainTypes.Length == 0)
@@ -60,7 +74,7 @@ public class MapGeneratorEditor: Editor
             }
             foreach (MapGenerator.TerrainType terrainType in TerrainTypes)
             {
-                Debug.Log(terrainType.name);
+                Debug.Log(terrainType.Name);
             }
 
             string json = JsonUtility.ToJson(new TerrainTypeArray{terrainTypes = TerrainTypes},true);
@@ -72,10 +86,71 @@ public class MapGeneratorEditor: Editor
                 AssetDatabase.Refresh();
             }
         }
+        #endregion
+        #region Loading Animation Curve from JSON
+
+        if (GUILayout.Button("Load Animation Curve from JSON"))
+        {
+            string path = EditorUtility.OpenFilePanel("Select Animation Curve", Application.dataPath, "json");
+            if (!string.IsNullOrEmpty(path))
+            {
+                string curveJson = File.ReadAllText(path);
+                AnimationCurveWrapper wrapper = JsonUtility.FromJson<AnimationCurveWrapper>(curveJson);
+                if (wrapper != null && wrapper.curve != null)
+                {
+                    mapGenerator.heightCurve = wrapper.curve.ToAnimationCurve();
+                    EditorUtility.SetDirty(mapGenerator);
+                    serializedObject.ApplyModifiedProperties();
+                }
+                else
+                {
+                    Debug.Log("No Animation Curve found in json.");
+                }
+            }
+            else
+            {
+                Debug.Log("File path is empty.");
+            }
+        }
+        #endregion
+
+        #region Exporting Animation Curve to JSON
+
+        if (GUILayout.Button("Export Animation Curve to JSON"))
+        {
+            if(mapGenerator.heightCurve == null || mapGenerator.heightCurve.keys.Length == 0)
+            {
+                Debug.LogWarning("No Animation Curve found to export.");
+                return;
+            }
+
+            TerrainCurve = new MapGenerator.SerializableAnimationCurve(mapGenerator.heightCurve);
+            Debug.Log("Exporting Animation Curve with " + TerrainCurve.keys.Length + " keyframes.");
+            string json = JsonUtility.ToJson(new AnimationCurveWrapper(){curve = TerrainCurve}, true);
+            foreach (var keyframe in TerrainCurve.keys)
+            {
+                Debug.Log("Keyframe time"+keyframe.time);
+            }
+            Debug.Log(json);
+            string path = EditorUtility.SaveFilePanelInProject("Export Animation Curve", "heightCurve", "json", "choose location to save Animation Curve");
+            if (!string.IsNullOrEmpty(path))
+            {
+                File.WriteAllText(path, json);
+                AssetDatabase.Refresh();
+            }
+        }
+
+        #endregion
     }
 }
 [System.Serializable]
 public class TerrainTypeArray
 {
     public MapGenerator.TerrainType[] terrainTypes;
+}
+
+[System.Serializable]
+public class AnimationCurveWrapper
+{
+    public MapGenerator.SerializableAnimationCurve curve;
 }

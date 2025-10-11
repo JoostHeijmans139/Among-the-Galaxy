@@ -105,4 +105,8 @@ Desktop.ini
 # Ignore fake files
 .fake
 
-# End of file
+#Text mesh pro ui temp files
+[Tt]ext[Mm]esh[Pp]ro/*.tmp
+[Tt]ext[Mm]esh[Pp]ro/*.bak
+[Tt]ext[Mm]esh[Pp]ro/*.meta.tmp
+/Assets/.vsconfig

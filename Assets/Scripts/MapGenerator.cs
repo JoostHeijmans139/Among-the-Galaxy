@@ -1,4 +1,7 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Generates a procedural map using Perlin noise and displays it using different modes.
@@ -16,6 +19,7 @@ public class MapGenerator : MonoBehaviour
         DrawMesh,       // Display the map as a 3D mesh with textures
     }
 
+    public static MapGenerator Instance { get; private set;}
     [Header("Map Settings")]
     public DrawMode drawMode;        // Current mode for displaying the map
     private const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
@@ -36,6 +40,21 @@ public class MapGenerator : MonoBehaviour
     [Header("Other Settings")]
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
+
+    public MapGenerator()
+    {
+        Instance = this;
+    }
+    private void Start()
+    {
+        if (Instance == null)
+        {
+            Debug.Log("Instance is null, assigning this instance.");
+            Instance = this;
+        }
+        drawMode = DrawMode.DrawMesh;
+        GenerateMap();
+    }
 
     /// <summary>
     /// Generates the map data (noise map) and displays it based on the selected draw mode.
@@ -83,6 +102,9 @@ public class MapGenerator : MonoBehaviour
                     TextureGenerator.TextureFromColourMap(colorMap, MapChunkSize, MapChunkSize)
                 );
                 break;
+            default:
+                drawMode = DrawMode.DrawNoiseMap;
+                break;
         }
     }
 
@@ -108,9 +130,9 @@ public class MapGenerator : MonoBehaviour
                 // Map the current height to a terrain type color
                 for (int i = 0; i < terrainTypes.Length; i++)
                 {
-                    if (currentHeight <= terrainTypes[i].height)
+                    if (currentHeight <= terrainTypes[i].Height)
                     {
-                        colorMap[y * mapWidth + x] = terrainTypes[i].color;
+                        colorMap[y * mapWidth + x] = terrainTypes[i].Color;
                         break; // Exit loop after finding matching terrain type
                     }
                 }
@@ -138,8 +160,80 @@ public class MapGenerator : MonoBehaviour
     [System.Serializable]
     public struct TerrainType
     {
-        public string name;   // Name of the terrain type (e.g., Water, Sand, Grass)
-        public Color color;   // Color used to represent this terrain on the map
-        public float height;  // Maximum height value that maps to this terrain type
+        public string Name;   // Name of the terrain type (e.g., Water, Sand, Grass)
+        public Color Color;   // Color used to represent this terrain on the map
+        public float Height;  // Maximum height value that maps to this terrain type
+    }
+    [System.Serializable]
+    public class SerializableAnimationCurve
+    {
+        
+        public SerializableKeyframe[] keys;
+        public WrapMode preWrapMode;
+        public WrapMode postWrapMode;
+        
+        public SerializableAnimationCurve(AnimationCurve curve)
+        {
+            keys = new SerializableKeyframe[curve.keys.Length];
+            for(int i = 0; i < curve.keys.Length; i++)
+            {
+                keys[i] = new SerializableKeyframe(curve.keys[i]);
+            }
+            preWrapMode = curve.preWrapMode;
+            postWrapMode = curve.postWrapMode;
+        }
+
+        public AnimationCurve ToAnimationCurve()
+        {
+            if(keys == null || keys.Length == 0)
+            {
+                Debug.LogWarning("No keyframes found in SerializableAnimationCurve. Returning default AnimationCurve.");
+                return new AnimationCurve();
+            }
+            Keyframe[] keyframes = new Keyframe[keys.Length];
+            Debug.Log("Converting SerializableAnimationCurve with " + keys.Length + " keyframes to AnimationCurve.");
+            for (int i = 0; i < keys.Length; i++)
+            {
+                keyframes[i] = keys[i].ToKeyframe();
+            }
+            Debug.Log("Found " + keyframes.Length + " keyframes. after deserialization.");
+            var curve = new AnimationCurve(keyframes)
+            {
+                preWrapMode = preWrapMode,
+                postWrapMode = postWrapMode,
+            };
+            return curve;
+        }
+    }
+    [Serializable]
+    public class SerializableKeyframe
+    {
+        public float time;
+        public float value;
+        public float inTangent;
+        public float outTangent;
+        public float inWeight;
+        public float outWeight;
+        public WeightedMode weightedMode;
+
+        public SerializableKeyframe() { }
+
+        public SerializableKeyframe(Keyframe keyframe)
+        {
+            time = keyframe.time;
+            value = keyframe.value;
+            inTangent = keyframe.inTangent;
+            outTangent = keyframe.outTangent;
+            inWeight = keyframe.inWeight;
+            outWeight = keyframe.outWeight;
+            weightedMode = keyframe.weightedMode;
+        }
+
+        public Keyframe ToKeyframe()
+        {
+            Keyframe kf = new Keyframe(time, value, inTangent, outTangent, inWeight, outWeight);
+            kf.weightedMode = weightedMode;
+            return kf;
+        }
     }
 }
