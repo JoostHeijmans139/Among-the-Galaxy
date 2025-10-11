@@ -147,6 +147,19 @@ public class MapGenerator : MonoBehaviour
         return colorMap;
     }
     
+    public void RequestMapData(Action<MapData> callback)
+    {
+        ThreadStart threadStart = delegate
+        {
+            MapDataThread(callback);
+        };
+        new Thread(threadStart).Start();
+    }
+
+    private void MapDataThread(Action<MapData> callback)
+    {
+        MapData mapData = GenerateMapData();
+    }
 
     /// <summary>
     /// Unity Editor callback to validate and clamp variables when they are changed in the Inspector.
@@ -257,8 +270,8 @@ public class MapGenerator : MonoBehaviour
 
 public struct MapData
 {
-    public float[,] HeightMap;
-    public Color[] ColorMap;
+    public readonly float[,] HeightMap;
+    public readonly Color[] ColorMap;
 
     public MapData(float[,] heightMap, Color[] colorMap)
     {
