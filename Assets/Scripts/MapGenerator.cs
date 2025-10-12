@@ -221,7 +221,7 @@ public class MapGenerator : MonoBehaviour
     }
     private void Dequeue<T>(Queue<MapThreadInfo<T>> queue)
     {
-        if (queue.Count !> 0)
+        if (queue.Count !< 0)
         {
             return;
         }
