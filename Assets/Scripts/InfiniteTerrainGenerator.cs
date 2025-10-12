@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InfiniteTerrainGenerator : MonoBehaviour
@@ -71,7 +72,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
     /// Determines which terrain chunks should be visible or hidden based on the viewer’s position.
     /// Dynamically creates new chunks when needed and hides those that fall outside the view distance.
     /// </summary>
-    void UpdateVisibleChunks()
+    private void UpdateVisibleChunks()
     {
         // Hide all chunks that were visible in the previous frame.
         foreach (TerrainChunk terrainChunk in _terrainChunksLastFrame)
@@ -111,6 +112,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             }
         }
     }
+        
 
     #endregion
 
