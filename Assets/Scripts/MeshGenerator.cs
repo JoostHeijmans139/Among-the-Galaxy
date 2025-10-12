@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 /// <summary>
@@ -71,6 +72,7 @@ public class MeshData
     private readonly int[] _triangles;      // Array of vertex indices defining mesh triangles
     private int _triangleIndex;   // Current index position for inserting triangles
     public readonly Vector2[] Uvs;        // Array of UV coordinates for texturing
+    [CanBeNull] public Texture2D Colormap;
 
     /// <summary>
     /// Constructs the MeshData object with allocated arrays based on mesh dimensions.

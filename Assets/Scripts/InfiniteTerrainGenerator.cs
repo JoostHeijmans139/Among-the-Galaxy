@@ -125,6 +125,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         Bounds _bounds;
         MeshRenderer _meshRenderer;
         MeshFilter _meshFilter;
+        MapGenerator.MapData _mapData;
         public TerrainChunk(Vector2 coord,int chunkSize,GameObject parent,Material meshMaterial)
         {
             position = coord*chunkSize;
@@ -144,6 +145,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         }
         void OnMapDataReceived(MapGenerator.MapData mapData)
         {
+            _mapData = mapData;
             _mapGenerator.RequestMeshData(mapData, OnMeshDataReceived);
         }
         void OnMeshDataReceived(MeshData meshData)
@@ -152,6 +154,11 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         }
         public void UpdateTerrainChunk()
         {
+            if (_mapData.HeightMap == null)
+            {
+                return;
+            }
+            _meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(MapGenerator.GenerateColorMap(_mapData.HeightMap,_mapGenerator.TerrainTypes), MapGenerator.MapChunkSize, MapGenerator.MapChunkSize);
             float viewerDistanceFromNearestEdge = Mathf.Sqrt(_bounds.SqrDistance(InfiniteTerrainGenerator.ViewerPosition));
             bool visible = viewerDistanceFromNearestEdge <= InfiniteTerrainGenerator.ViewDistance;
             SetVisible(visible);

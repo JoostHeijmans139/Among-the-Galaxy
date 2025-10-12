@@ -148,7 +148,7 @@ public class MapGenerator : MonoBehaviour
     /// <param name="noiseMap">2D array of noise values between 0 and 1.</param>
     /// <param name="terrainTypes">Array of terrain types with associated heights and colors.</param>
     /// <returns>1D array of colors representing the map's color data.</returns>
-    private static Color[] GenerateColorMap(float[,] noiseMap, TerrainType[] terrainTypes)
+    public static Color[] GenerateColorMap(float[,] noiseMap, TerrainType[] terrainTypes)
     {
         int mapWidth = noiseMap.GetLength(0);
         int mapHeight = noiseMap.GetLength(1);
