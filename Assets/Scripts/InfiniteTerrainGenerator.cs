@@ -45,7 +45,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
     /// </summary>
     private void Start()
     {
-        _mapGenerator = FindObjectOfType<MapGenerator>();
+        _mapGenerator = FindAnyObjectByType<MapGenerator>();
         if (_mapGenerator == null)
         {
             throw new NullReferenceException("MapGenerator is null");
