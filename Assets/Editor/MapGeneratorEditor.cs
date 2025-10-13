@@ -30,6 +30,7 @@ public class MapGeneratorEditor: Editor
             }
             return;
         }
+        
         #region Loading Terrain Types from JSON
 
         if (GUILayout.Button("Load Preset terrain types"))
