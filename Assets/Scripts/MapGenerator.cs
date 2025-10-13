@@ -82,7 +82,7 @@ public class MapGenerator : MonoBehaviour
     {
         MapData mapData = GenerateMapData();
         // Find the DisplayMap component in the scene to show the map
-        DisplayMap display = FindObjectOfType<DisplayMap>();
+        DisplayMap display = FindAnyObjectByType<DisplayMap>();
         //get the TextureRenderer object which is used to draw the 2d texture for the color map draw option and the noise map draw option
         DisplayMap.GetTextureRenderer();
         // Display the map according to the selected draw mode
