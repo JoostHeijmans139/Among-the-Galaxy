@@ -140,8 +140,18 @@ public class InfiniteTerrainGenerator : MonoBehaviour
             _meshRenderer.material = meshMaterial;
             _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
             SetVisible(false);
-        
             _mapGenerator.RequestMapData(OnMapDataReceived);
+            if (MapGenerator.CurrentHeightMap == null)
+            {
+                Debug.LogError("MapGenerator.CurrentHeightMap is null");
+                return;
+            }
+            if(MapGenerator.CurrentHeightMap != null)
+            {
+                Debug.Log("material set");
+                _meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(MapGenerator.GenerateColorMap(MapGenerator.CurrentHeightMap,_mapGenerator.TerrainTypes), MapGenerator.MapChunkSize, MapGenerator.MapChunkSize);
+            }
+            
         }
         void OnMapDataReceived(MapGenerator.MapData mapData)
         {
@@ -154,11 +164,6 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         }
         public void UpdateTerrainChunk()
         {
-            if (_mapData.HeightMap == null)
-            {
-                return;
-            }
-            _meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(MapGenerator.GenerateColorMap(_mapData.HeightMap,_mapGenerator.TerrainTypes), MapGenerator.MapChunkSize, MapGenerator.MapChunkSize);
             float viewerDistanceFromNearestEdge = Mathf.Sqrt(_bounds.SqrDistance(InfiniteTerrainGenerator.ViewerPosition));
             bool visible = viewerDistanceFromNearestEdge <= InfiniteTerrainGenerator.ViewDistance;
             SetVisible(visible);

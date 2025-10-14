@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -45,7 +46,7 @@ public class MapGenerator : MonoBehaviour
     [Header("Other Settings")]
     public bool autoUpdate;          // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
-
+    [CanBeNull] public static float[,] CurrentHeightMap;
     #endregion
 
     #region ThreadingVariables
@@ -191,6 +192,12 @@ public class MapGenerator : MonoBehaviour
     private void MapDataThread(Action<MapData> callback)
     {
         MapData mapData = GenerateMapData();
+        if (mapData.HeightMap == null)
+        {
+            Debug.LogError("MapData.HeightMap is null");
+            return;
+        }
+        CurrentHeightMap = mapData.HeightMap;
         lock (_mapDataThreadInfoQueue)
         {
             _mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData));
