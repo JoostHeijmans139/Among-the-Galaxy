@@ -156,11 +156,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         void OnMapDataReceived(MapGenerator.MapData mapData)
         {
             _mapData = mapData;
-            _mapGenerator.RequestMeshData(mapData, OnMeshDataReceived);
-        }
-        void OnMeshDataReceived(MeshData meshData)
-        {
-            _meshFilter.mesh = meshData.CreateMesh();
+            // _mapGenerator.RequestMeshData(mapData, OnMeshDataReceived);
         }
         public void UpdateTerrainChunk()
         {
