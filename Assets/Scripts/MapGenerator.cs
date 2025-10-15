@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Random = System.Random;
 
 /// <summary>
 /// Generates a procedural map using Perlin noise and displays it using different modes.
@@ -20,39 +21,33 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     public enum DrawMode
     {
-        DrawNoiseMap,   // Display the raw noise values as a grayscale image
-        DrawColorMap,   // Display the noise map colored by terrain types
-        DrawMesh,       // Display the map as a 3D mesh with textures
+        DrawNoiseMap, // Display the raw noise values as a grayscale image
+        DrawColorMap, // Display the noise map colored by terrain types
+        DrawMesh, // Display the map as a 3D mesh with textures
     }
 
-    public static MapGenerator Instance { get; private set;}
-    [Header("Map Settings")]
-    public DrawMode drawMode;        // Current mode for displaying the map
+    public static MapGenerator Instance { get; private set; }
+    [Header("Map Settings")] public DrawMode drawMode; // Current mode for displaying the map
     public const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
-    [Range(0,6)]
-    public int levelOfDetail;      // Level of detail for mesh generation (0 = highest detail)
-    [Header("Noise Settings")]
-    public int seed;
-    [Range(2, 100)]
-    public float noiseScale;         // Scale of the noise (affects zoom)
-    [Range(1, 20)]
-    public int octaves;              // Number of noise layers combined
-    [Range(0, 1)]
-    public float persistence;        // Controls amplitude of octaves (affects roughness)
-    public float lacunarity;         // Controls frequency of octaves (affects detail)
+    [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation (0 = highest detail)
+    [Header("Noise Settings")] public int seed;
+    [Range(2, 100)] public float noiseScale; // Scale of the noise (affects zoom)
+    [Range(1, 20)] public int octaves; // Number of noise layers combined
+    [Range(0, 1)] public float persistence; // Controls amplitude of octaves (affects roughness)
+    public float lacunarity; // Controls frequency of octaves (affects detail)
     public AnimationCurve heightCurve; // Curve to adjust height distribution
     public float heightMultiplier;
     public Vector2 offsets;
-    [Header("Other Settings")]
-    public bool autoUpdate;          // If true, map auto regenerates when settings change
+    [Header("Other Settings")] public bool autoUpdate; // If true, map auto regenerates when settings change
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
     [CanBeNull] public static float[,] CurrentHeightMap;
+
     #endregion
 
     #region ThreadingVariables
 
-    private readonly Queue <MapThreadInfo<MapData>> _mapDataThreadInfoQueue = new ();
-    private readonly Queue <MapThreadInfo<MeshData>> _meshDataThreadInfoQueue = new ();
+    private readonly Queue<MapThreadInfo<MapData>> _mapDataThreadInfoQueue = new();
+    private readonly Queue<MapThreadInfo<MeshData>> _meshDataThreadInfoQueue = new();
 
     #endregion
 
@@ -62,17 +57,19 @@ public class MapGenerator : MonoBehaviour
     {
         Instance = this;
     }
+
     private void Start()
     {
-        levelOfDetail = Settings.SettingsManager.CurrentSettings.levelOfDetail;
-        Debug.Log("Level of Detail from SettingsManager: " + levelOfDetail);
+        levelOfDetailEditorPreview = Settings.SettingsManager.CurrentSettings.levelOfDetail;
+        Debug.Log("Level of Detail from SettingsManager: " + levelOfDetailEditorPreview);
         if (Instance == null)
         {
             Debug.Log("Instance is null, assigning this instance.");
             Instance = this;
         }
+
         drawMode = DrawMode.DrawMesh;
-        GenerateMapData();
+        // GenerateMapData(Vector2.zero);
     }
 
     #endregion
@@ -81,7 +78,7 @@ public class MapGenerator : MonoBehaviour
 
     public void DrawMapInEditor()
     {
-        MapData mapData = GenerateMapData();
+        MapData mapData = GenerateMapData(Vector2.zero);
         // Find the DisplayMap component in the scene to show the map
         DisplayMap display = FindAnyObjectByType<DisplayMap>();
         //get the TextureRenderer object which is used to draw the 2d texture for the color map draw option and the noise map draw option
@@ -94,6 +91,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     DisplayMap.EnableTextureRenderer();
                 }
+
                 display.DisplayNoiseMap(mapData.HeightMap);
                 break;
 
@@ -102,6 +100,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     DisplayMap.EnableTextureRenderer();
                 }
+
                 display.DisplayColorMap(mapData.ColorMap, MapChunkSize, MapChunkSize);
                 break;
 
@@ -110,9 +109,11 @@ public class MapGenerator : MonoBehaviour
                 {
                     DisplayMap.DisableTextureRenderer();
                 }
+
                 // Generate mesh from noise map and texture from color map
                 display.DrawMesh(
-                    MeshGenerator.GenerateTerrainMesh(mapData.HeightMap,heightMultiplier,heightCurve,levelOfDetail),
+                    MeshGenerator.GenerateTerrainMesh(mapData.HeightMap, heightMultiplier, heightCurve,
+                        levelOfDetailEditorPreview),
                     TextureGenerator.TextureFromColourMap(mapData.ColorMap, MapChunkSize, MapChunkSize)
                 );
                 break;
@@ -129,10 +130,13 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Generates the map data (noise map) and displays it based on the selected draw mode.
     /// </summary>
-    public MapData GenerateMapData()
+    public MapData GenerateMapData(Vector2 center)
     {
         // Generate the noise map based on the current parameters
-        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity,offsets);
+        Debug.Log("Generating noisemap with the center: " + center);
+        center.x *= 10000;
+        center.y *= 10000;
+        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity, center+offsets);
 
         // Generate a color map by assigning colors to each noise value based on terrain height
         Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
@@ -180,18 +184,18 @@ public class MapGenerator : MonoBehaviour
 
     #region MapThreading
 
-    public void RequestMapData(Action<MapData> callback)
+    public void RequestMapData(Vector2 center,Action<MapData> callback)
     {
         ThreadStart threadStart = delegate
         {
-            MapDataThread(callback);
+            MapDataThread(center,callback);
         };
         new Thread(threadStart).Start();
     }
 
-    private void MapDataThread(Action<MapData> callback)
+    private void MapDataThread(Vector2 center,Action<MapData> callback)
     {
-        MapData mapData = GenerateMapData();
+        MapData mapData = GenerateMapData(center);
         if (mapData.HeightMap == null)
         {
             Debug.LogError("MapData.HeightMap is null");
@@ -204,17 +208,17 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public void RequestMeshData(MapData mapdata,Action<MeshData> callback)
+    public void RequestMeshData(MapData mapdata,int lod,Action<MeshData> callback)
     {
         ThreadStart threadStart = delegate
         {
-            MeshDataThread(mapdata, callback);
+            MeshDataThread(mapdata,lod, callback);
         };
         new Thread(threadStart).Start();
     }
-    private void MeshDataThread(MapData mapData, Action<MeshData> callback)
+    private void MeshDataThread(MapData mapData, int lod, Action<MeshData> callback)
     {
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.HeightMap, heightMultiplier, heightCurve, levelOfDetail);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.HeightMap, heightMultiplier, heightCurve, lod);
         lock (_meshDataThreadInfoQueue)
         {
             _meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
@@ -368,7 +372,7 @@ public class MapGenerator : MonoBehaviour
             this.ColorMap = colorMap;
         }
     }
-
+    
     #endregion
     
 }
