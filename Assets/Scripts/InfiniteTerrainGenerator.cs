@@ -181,4 +181,44 @@ public class InfiniteTerrainGenerator : MonoBehaviour
 
     #endregion
 
+    #region LODMesh Class
+    class LODMesh
+    {
+        public Mesh Mesh;
+        public bool HaseReqestedMesh;
+        public bool HaseMesh;
+        private int _levelOfDetail;
+        public LODMesh(Mesh mesh, int levelOfDetail)
+        {
+            Mesh = mesh;
+            _levelOfDetail = levelOfDetail;
+        }
+        private void OnMeshDataReceived(MeshData meshData)
+        {
+            Mesh = meshData.CreateMesh();
+            HaseMesh = true;
+        }
+        public void RequestMesh(MapGenerator.MapData mapData)
+        {
+            HaseReqestedMesh = true;
+            _mapGenerator.RequestMeshData(mapData,_levelOfDetail, OnMeshDataReceived);
+        }
+    }
+
+    #endregion
+    #region LODInfo struct
+    [System.Serializable]
+    public struct LODInfo
+    {
+        public int LevelOfDetail;
+        public float VisibleDistanceThreshold;
+
+        public LODInfo(int levelOfDetail, float visibleDistanceThreshold)
+        {
+            LevelOfDetail = levelOfDetail;
+            VisibleDistanceThreshold = visibleDistanceThreshold;
+        }
+    }
+
+    #endregion
 }
