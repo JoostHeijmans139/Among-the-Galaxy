@@ -7,6 +7,7 @@ using UnityEngine;
 public class InfiniteTerrainGenerator : MonoBehaviour
 {
     #region Variables
+    public LODInfo[] LevelOfDetailLevels;
 
     /// <summary> Maximum distance (in world units) at which chunks remain visible. </summary>
     public const float ViewDistance = 450f;
