@@ -52,8 +52,8 @@ public static class Noise
                 for (int i = 0; i < octaves; i++)
                 {
                     // Calculate sample coordinates with scaling, frequency, and offset.
-                    float sampleX = (x - halfWidth) / scale * frequency + octaveOffsets[i].x;
-                    float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[i].y;
+                    float sampleX = (x - halfWidth + octaveOffsets[i].x) / scale * frequency;
+                    float sampleY = (y - halfHeight - octaveOffsets[i].y) / scale * frequency;
 
                     // Perlin noise returns [0,1], remap to [-1,1].
                     float noiseValue = Mathf.PerlinNoise(sampleX, sampleY) * 2f - 1f;
