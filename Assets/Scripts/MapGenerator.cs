@@ -25,7 +25,7 @@ public class MapGenerator : MonoBehaviour
         DrawColorMap, // Display the noise map colored by terrain types
         DrawMesh, // Display the map as a 3D mesh with textures
     }
-
+    public Noise.NormalizedMode normalizedMode;
     public static MapGenerator Instance { get; private set; }
     [Header("Map Settings")] public DrawMode drawMode; // Current mode for displaying the map
     public const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
@@ -136,7 +136,7 @@ public class MapGenerator : MonoBehaviour
         Debug.Log("Generating noisemap with the center: " + center);
         center.x *= 10000;
         center.y *= 10000;
-        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity, center+offsets);
+        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity, center+offsets,normalizedMode);
 
         // Generate a color map by assigning colors to each noise value based on terrain height
         Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
