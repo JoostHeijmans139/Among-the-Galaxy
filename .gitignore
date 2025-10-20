@@ -40,6 +40,9 @@ Recordings/
 mono_crash.*
 sysinfo.txt
 
+# Unity Packages
+Packages/com.merry-yellow.code-assist/
+
 # Crashlytics
 crashlytics-build.properties
 
@@ -105,8 +108,6 @@ Desktop.ini
 # Ignore fake files
 .fake
 
-#Text mesh pro ui temp files
-[Tt]ext[Mm]esh[Pp]ro/*.tmp
-[Tt]ext[Mm]esh[Pp]ro/*.bak
-[Tt]ext[Mm]esh[Pp]ro/*.meta.tmp
-/Assets/.vsconfig
+# End of file
+.github/copilot-instructions.md
+Packages/packages-lock.json
