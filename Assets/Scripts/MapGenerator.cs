@@ -26,7 +26,6 @@ public class MapGenerator : MonoBehaviour
         DrawMesh, // Display the map as a 3D mesh with textures
     }
     public Noise.NormalizedMode normalizedMode;
-    public static MapGenerator Instance { get; private set; }
     [Header("Map Settings")] public DrawMode drawMode; // Current mode for displaying the map
     public const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
     [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation (0 = highest detail)
@@ -39,6 +38,7 @@ public class MapGenerator : MonoBehaviour
     public float heightMultiplier;
     public Vector2 offsets;
     [Header("Other Settings")] public bool autoUpdate; // If true, map auto regenerates when settings change
+    public bool generateInfiniteTerrain = false;
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
     [CanBeNull] public static float[,] CurrentHeightMap;
 
@@ -52,21 +52,10 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region Constructor and Start methods
-
-    public MapGenerator()
-    {
-        Instance = this;
-    }
-
     private void Start()
     {
         levelOfDetailEditorPreview = Settings.SettingsManager.CurrentSettings.levelOfDetail;
         Debug.Log("Level of Detail from SettingsManager: " + levelOfDetailEditorPreview);
-        if (Instance == null)
-        {
-            Debug.Log("Instance is null, assigning this instance.");
-            Instance = this;
-        }
 
         drawMode = DrawMode.DrawMesh;
         // GenerateMapData(Vector2.zero);

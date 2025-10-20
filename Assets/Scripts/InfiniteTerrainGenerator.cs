@@ -54,10 +54,13 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         {
             throw new NullReferenceException("MapGenerator is null");
         }
-        ViewDistance = LevelOfDetailLevels[LevelOfDetailLevels.Length - 1].VisibleDistanceThreshold;
-        _chunkSize = MapGenerator.MapChunkSize - 1;
-        _chunksVisibleInViewDistance = Mathf.RoundToInt(ViewDistance / _chunkSize);
-        UpdateVisibleChunks();
+        if (_mapGenerator.generateInfiniteTerrain)
+        {
+            ViewDistance = LevelOfDetailLevels[LevelOfDetailLevels.Length - 1].VisibleDistanceThreshold;
+            _chunkSize = MapGenerator.MapChunkSize - 1;
+            _chunksVisibleInViewDistance = Mathf.RoundToInt(ViewDistance / _chunkSize);
+            UpdateVisibleChunks();   
+        }
     }
 
     /// <summary>
