@@ -1,11 +1,13 @@
 using JetBrains.Annotations;
 using UnityEngine;
 
-/// <summary>
-/// Static class responsible for generating terrain meshes from height maps.
-/// </summary>
-public static class MeshGenerator
+namespace TerrainGeneration
 {
+ public static class MeshGenerator
+{
+    /// <summary>
+    /// Static class responsible for generating terrain meshes from height maps.
+    /// </summary>
     /// <summary>
     /// Generates a MeshData object representing a terrain mesh based on a 2D height map.
     /// </summary>
@@ -124,4 +126,5 @@ public class MeshData
 
         return mesh;
     }
+}   
 }

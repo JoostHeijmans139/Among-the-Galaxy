@@ -3,8 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Assets.Scripts.TerrainGeneration;
+using TerrainGeneration;
 
-public class InfiniteTerrainGenerator : MonoBehaviour
+namespace Assets.Scripts.TerrainGeneration
+{
+ public class InfiniteTerrainGenerator : MonoBehaviour
 {
     const float viewerMoveThresholdForChunkUpdate = 25f;
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
@@ -36,7 +40,7 @@ public class InfiniteTerrainGenerator : MonoBehaviour
     private readonly Dictionary<Vector2, TerrainChunk> _terrainChunkDictionary = new();
 
     /// <summary> List of chunks that were visible during the previous frame for efficient visibility updates. </summary>
-    private readonly List<TerrainChunk> _terrainChunksLastFrame = new();
+    private static readonly List<TerrainChunk> _terrainChunksLastFrame = new();
 
     private static MapGenerator _mapGenerator;
 
@@ -54,10 +58,13 @@ public class InfiniteTerrainGenerator : MonoBehaviour
         {
             throw new NullReferenceException("MapGenerator is null");
         }
-        ViewDistance = LevelOfDetailLevels[LevelOfDetailLevels.Length - 1].VisibleDistanceThreshold;
-        _chunkSize = MapGenerator.MapChunkSize - 1;
-        _chunksVisibleInViewDistance = Mathf.RoundToInt(ViewDistance / _chunkSize);
-        UpdateVisibleChunks();
+        if (_mapGenerator.generateInfiniteTerrain)
+        {
+            ViewDistance = LevelOfDetailLevels[LevelOfDetailLevels.Length - 1].VisibleDistanceThreshold;
+            _chunkSize = MapGenerator.MapChunkSize - 1;
+            _chunksVisibleInViewDistance = Mathf.RoundToInt(ViewDistance / _chunkSize);
+            UpdateVisibleChunks();   
+        }
     }
 
     /// <summary>
@@ -105,12 +112,6 @@ public class InfiniteTerrainGenerator : MonoBehaviour
                 {
                     // Update existing chunk visibility.
                     _terrainChunkDictionary[viewedChunkCoord].UpdateTerrainChunk();
-
-                    // If chunk is visible, add it to the list for this frame.
-                    if (_terrainChunkDictionary[viewedChunkCoord].IsVisable())
-                    {
-                        _terrainChunksLastFrame.Add(_terrainChunkDictionary[viewedChunkCoord]);
-                    }
                 }
                 else
                 {
@@ -208,6 +209,9 @@ public class InfiniteTerrainGenerator : MonoBehaviour
                         lodMesh.RequestMesh(_mapData);
                     }
                 }
+                // If chunk is visible, add it to the list for this frame.
+                _terrainChunksLastFrame.Add(this);
+                
             }
             SetVisible(visible);
         }
@@ -266,4 +270,5 @@ public class InfiniteTerrainGenerator : MonoBehaviour
     }
 
     #endregion
+}   
 }

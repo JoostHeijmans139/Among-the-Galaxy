@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -5,6 +6,15 @@ using UnityEngine;
 /// </summary>
 public static class Noise
 {
+    public enum NormalizedMode
+    {
+        Local,
+        Global,
+    }
+    public static NormalizedMode normalizedMode;
+    public static float maxPossibleHeight = 0f;
+    public static float amplitude = 1f;
+    public static float persistence;
     /// <summary>
     /// Generates a 2D array of Perlin noise values using multiple octaves, suitable for terrain heightmaps.
     /// </summary>
@@ -25,14 +35,16 @@ public static class Noise
         int octaves,
         float persistence,
         float lacunarity,
-        Vector2 offsets)
+        Vector2 offsets,NormalizedMode normalizedMode)
     {
+        Noise.persistence = persistence;
+        Noise.normalizedMode = normalizedMode;
         float[,] noiseMap = new float[width, height];
 
         // Track the minimum and maximum noise values for normalization.
         float minNoiseHeight = float.MaxValue;
         float maxNoiseHeight = float.MinValue;
-
+        float frequency = 1f;
         // Generate per-octave offsets for more varied noise.
         Vector2[] octaveOffsets = NoiseHelper.GenerateOffsets(octaves, offsets,seed);
 
@@ -44,16 +56,16 @@ public static class Noise
         {
             for (int x = 0; x < width; x++)
             {
-                float amplitude = 1f;
-                float frequency = 1f;
+                amplitude = 1f;
+                frequency = 1f;
                 float noiseHeight = 0f;
 
                 // Combine multiple octaves of Perlin noise.
                 for (int i = 0; i < octaves; i++)
                 {
                     // Calculate sample coordinates with scaling, frequency, and offset.
-                    float sampleX = (x - halfWidth) / scale * frequency + octaveOffsets[i].x;
-                    float sampleY = (y - halfHeight) / scale * frequency + octaveOffsets[i].y;
+                    float sampleX = (x - halfWidth + octaveOffsets[i].x) / scale * frequency;
+                    float sampleY = (y - halfHeight - octaveOffsets[i].y) / scale * frequency;
 
                     // Perlin noise returns [0,1], remap to [-1,1].
                     float noiseValue = Mathf.PerlinNoise(sampleX, sampleY) * 2f - 1f;
