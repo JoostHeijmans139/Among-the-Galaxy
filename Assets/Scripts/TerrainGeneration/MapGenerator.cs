@@ -41,7 +41,7 @@ public class MapGenerator : MonoBehaviour
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
     [CanBeNull] public static float[,] CurrentHeightMap;
     public MeshRenderer meshRenderer;
-
+    public MeshCollider meshCollider;
     #endregion
 
     #region ThreadingVariables
@@ -59,9 +59,10 @@ public class MapGenerator : MonoBehaviour
         Debug.Log("Level of Detail from SettingsManager: " + levelOfDetailEditorPreview);
         drawMode = DrawMode.DrawMesh;
         MapData data = GenerateMapData(Vector2.zero);
-        MeshGenerator.GenerateTerrainMesh(data.HeightMap, heightMultiplier, heightCurve, levelOfDetailEditorPreview);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(data.HeightMap, heightMultiplier, heightCurve, levelOfDetailEditorPreview);
         meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap,MapChunkSize,MapChunkSize);
-            
+        Mesh mesh = meshData.CreateMesh();
+        meshCollider.sharedMesh = mesh;
     }
 
     #endregion
