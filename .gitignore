@@ -21,9 +21,7 @@ Recordings/
 *.userprefs
 *.booproj
 *.svd
-*.csproj
 *.unityproj
-*.sln
 *.ncb
 *.sdf
 *.sln.docstates
