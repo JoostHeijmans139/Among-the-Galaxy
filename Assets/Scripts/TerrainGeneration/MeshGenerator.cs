@@ -1,11 +1,13 @@
 using JetBrains.Annotations;
 using UnityEngine;
 
-/// <summary>
-/// Static class responsible for generating terrain meshes from height maps.
-/// </summary>
-public static class MeshGenerator
+namespace TerrainGeneration
 {
+ public static class MeshGenerator
+{
+    /// <summary>
+    /// Static class responsible for generating terrain meshes from height maps.
+    /// </summary>
     /// <summary>
     /// Generates a MeshData object representing a terrain mesh based on a 2D height map.
     /// </summary>
@@ -69,7 +71,7 @@ public static class MeshGenerator
 public class MeshData
 {
     public readonly Vector3[] Vertices;   // Array of vertex positions
-    private readonly int[] _triangles;      // Array of vertex indices defining mesh triangles
+    public readonly int[] Triangles;      // Array of vertex indices defining mesh triangles
     private int _triangleIndex;   // Current index position for inserting triangles
     public readonly Vector2[] Uvs;        // Array of UV coordinates for texturing
     [CanBeNull] public Texture2D Colormap;
@@ -86,7 +88,7 @@ public class MeshData
 
         // Each square (quad) consists of 2 triangles, each triangle has 3 vertices
         // Number of quads = (meshWidth-1)*(meshHeight-1)
-        _triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
+        Triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
     }
 
     /// <summary>
@@ -97,9 +99,9 @@ public class MeshData
     /// <param name="c">Index of the third vertex.</param>
     public void AddTriangle(int a, int b, int c)
     {
-        _triangles[_triangleIndex] = a;
-        _triangles[_triangleIndex + 1] = b;
-        _triangles[_triangleIndex + 2] = c;
+        Triangles[_triangleIndex] = a;
+        Triangles[_triangleIndex + 1] = b;
+        Triangles[_triangleIndex + 2] = c;
         _triangleIndex += 3; // Move to next available slot for triangles
     }
 
@@ -112,11 +114,11 @@ public class MeshData
         Mesh mesh = new Mesh()
         {
             vertices = Vertices,
-            triangles = _triangles,
+            triangles = Triangles,
             uv = Uvs
         };
         mesh.vertices = Vertices;
-        mesh.triangles = _triangles;
+        mesh.triangles = Triangles;
         mesh.uv = Uvs;
 
         mesh.RecalculateBounds();  // Recalculate bounding box of the mesh
@@ -124,4 +126,5 @@ public class MeshData
 
         return mesh;
     }
+}   
 }

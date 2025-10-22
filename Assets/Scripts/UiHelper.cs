@@ -2,14 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Settings;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 
 public class UiHelper: MonoBehaviour
-{ 
+{
     public List<GameObject> MenuParents;
     public void GenerateMap()
     {

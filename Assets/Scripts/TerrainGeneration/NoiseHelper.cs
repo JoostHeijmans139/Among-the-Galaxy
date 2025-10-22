@@ -24,12 +24,6 @@ public static class NoiseHelper
             float offsetX = rand.Next(-100000, 100000) + offsets.x;
             float offsetY = rand.Next(-100000, 100000) + offsets.y;
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
-            Noise.maxPossibleHeight += Noise.amplitude;
-            if (Noise.persistence == 0)
-            {
-                return octaveOffsets;
-            }
-            Noise.amplitude *= Noise.persistence;
         }
         return octaveOffsets;
     }
@@ -50,15 +44,7 @@ public static class NoiseHelper
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                if(Noise.normalizedMode == Noise.NormalizedMode.Local)
-                {
-                    noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
-                }
-                else
-                {
-                    float normalizedHeight = (noiseMap[x, y] + 1) / (2f * Noise.maxPossibleHeight / 1.75f);
-                    noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
-                }
+                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
         }
         return noiseMap;

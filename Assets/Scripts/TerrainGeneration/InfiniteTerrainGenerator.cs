@@ -3,8 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Assets.Scripts.TerrainGeneration;
+using TerrainGeneration;
 
-public class InfiniteTerrainGenerator : MonoBehaviour
+namespace Assets.Scripts.TerrainGeneration
+{
+ public class InfiniteTerrainGenerator : MonoBehaviour
 {
     const float viewerMoveThresholdForChunkUpdate = 25f;
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
@@ -266,4 +270,5 @@ public class InfiniteTerrainGenerator : MonoBehaviour
     }
 
     #endregion
+}   
 }

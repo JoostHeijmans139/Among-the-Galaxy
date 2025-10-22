@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using JetBrains.Annotations;
-using Unity.VisualScripting;
+using TerrainGeneration;
 using UnityEngine;
-using UnityEngine.Serialization;
-using Random = System.Random;
+using TerrainGeneration;
 
 /// <summary>
 /// Generates a procedural map using Perlin noise and displays it using different modes.
@@ -25,6 +23,7 @@ public class MapGenerator : MonoBehaviour
         DrawColorMap, // Display the noise map colored by terrain types
         DrawMesh, // Display the map as a 3D mesh with textures
     }
+
     public Noise.NormalizedMode normalizedMode;
     [Header("Map Settings")] public DrawMode drawMode; // Current mode for displaying the map
     public const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
@@ -41,7 +40,8 @@ public class MapGenerator : MonoBehaviour
     public bool generateInfiniteTerrain = false;
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
     [CanBeNull] public static float[,] CurrentHeightMap;
-
+    public MeshRenderer meshRenderer;
+    public MeshCollider meshCollider;
     #endregion
 
     #region ThreadingVariables
@@ -52,13 +52,18 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region Constructor and Start methods
+
     private void Start()
     {
         levelOfDetailEditorPreview = Settings.SettingsManager.CurrentSettings.levelOfDetail;
         Debug.Log("Level of Detail from SettingsManager: " + levelOfDetailEditorPreview);
 
         drawMode = DrawMode.DrawMesh;
-        // GenerateMapData(Vector2.zero);
+        MapData data = GenerateMapData(Vector2.zero);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(data.HeightMap, heightMultiplier, heightCurve, levelOfDetailEditorPreview);
+        meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap,MapChunkSize,MapChunkSize);
+        Mesh mesh = meshData.CreateMesh();
+        meshCollider.sharedMesh = mesh;
     }
 
     #endregion
@@ -125,7 +130,8 @@ public class MapGenerator : MonoBehaviour
         Debug.Log("Generating noisemap with the center: " + center);
         center.x *= 10000;
         center.y *= 10000;
-        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize,seed, noiseScale, octaves, persistence, lacunarity, center+offsets,normalizedMode);
+        float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize, seed, noiseScale, octaves, persistence,
+            lacunarity, center + offsets, normalizedMode);
 
         // Generate a color map by assigning colors to each noise value based on terrain height
         Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
@@ -135,7 +141,7 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region GenerateColorMap
-    
+
     /// <summary>
     /// Converts a noise map into a color map by mapping noise values to terrain types.
     /// </summary>
@@ -169,11 +175,12 @@ public class MapGenerator : MonoBehaviour
 
         return colorMap;
     }
+
     #endregion
 
     #region MapThreading
 
-    public void RequestMapData(Vector2 center,Action<MapData> callback)
+    public void RequestMapData(Vector2 center, Action<MapData> callback)
     {
         ThreadStart threadStart = delegate
         {
@@ -182,7 +189,7 @@ public class MapGenerator : MonoBehaviour
         new Thread(threadStart).Start();
     }
 
-    private void MapDataThread(Vector2 center,Action<MapData> callback)
+    private void MapDataThread(Vector2 center, Action<MapData> callback)
     {
         MapData mapData = GenerateMapData(center);
         if (mapData.HeightMap == null)
@@ -190,6 +197,7 @@ public class MapGenerator : MonoBehaviour
             Debug.LogError("MapData.HeightMap is null");
             return;
         }
+
         CurrentHeightMap = mapData.HeightMap;
         lock (_mapDataThreadInfoQueue)
         {
@@ -197,7 +205,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    public void RequestMeshData(MapData mapdata,int lod,Action<MeshData> callback)
+    public void RequestMeshData(MapData mapdata, int lod, Action<MeshData> callback)
     {
         ThreadStart threadStart = delegate
         {
@@ -205,6 +213,7 @@ public class MapGenerator : MonoBehaviour
         };
         new Thread(threadStart).Start();
     }
+
     private void MeshDataThread(MapData mapData, int lod, Action<MeshData> callback)
     {
         MeshData meshData = MeshGenerator.GenerateTerrainMesh(mapData.HeightMap, heightMultiplier, heightCurve, lod);
@@ -213,18 +222,21 @@ public class MapGenerator : MonoBehaviour
             _meshDataThreadInfoQueue.Enqueue(new MapThreadInfo<MeshData>(callback, meshData));
         }
     }
+
     void Update()
     {
         Dequeue<MapData>(_mapDataThreadInfoQueue);
         Dequeue<MeshData>(_meshDataThreadInfoQueue);
 
     }
+
     private void Dequeue<T>(Queue<MapThreadInfo<T>> queue)
     {
-        if (queue.Count !< 0)
+        if (queue.Count ! < 0)
         {
             return;
         }
+
         int itemsToProcess = queue.Count;
         for (int i = 0; i < itemsToProcess; i++)
         {
@@ -232,6 +244,7 @@ public class MapGenerator : MonoBehaviour
             threadInfo.Callback(threadInfo.Parameter);
         }
     }
+
     #endregion
 
     #region ValidateLacunarity
@@ -252,38 +265,41 @@ public class MapGenerator : MonoBehaviour
 
     #region JsonWrapperClasses
 
-        [System.Serializable]
+    [System.Serializable]
     public class SerializableAnimationCurve
     {
-        
+
         public SerializableKeyframe[] keys;
         public WrapMode preWrapMode;
         public WrapMode postWrapMode;
-        
+
         public SerializableAnimationCurve(AnimationCurve curve)
         {
             keys = new SerializableKeyframe[curve.keys.Length];
-            for(int i = 0; i < curve.keys.Length; i++)
+            for (int i = 0; i < curve.keys.Length; i++)
             {
                 keys[i] = new SerializableKeyframe(curve.keys[i]);
             }
+
             preWrapMode = curve.preWrapMode;
             postWrapMode = curve.postWrapMode;
         }
 
         public AnimationCurve ToAnimationCurve()
         {
-            if(keys == null || keys.Length == 0)
+            if (keys == null || keys.Length == 0)
             {
                 Debug.LogWarning("No keyframes found in SerializableAnimationCurve. Returning default AnimationCurve.");
                 return new AnimationCurve();
             }
+
             Keyframe[] keyframes = new Keyframe[keys.Length];
             Debug.Log("Converting SerializableAnimationCurve with " + keys.Length + " keyframes to AnimationCurve.");
             for (int i = 0; i < keys.Length; i++)
             {
                 keyframes[i] = keys[i].ToKeyframe();
             }
+
             Debug.Log("Found " + keyframes.Length + " keyframes. after deserialization.");
             var curve = new AnimationCurve(keyframes)
             {
@@ -293,6 +309,7 @@ public class MapGenerator : MonoBehaviour
             return curve;
         }
     }
+
     [Serializable]
     public class SerializableKeyframe
     {
@@ -303,7 +320,7 @@ public class MapGenerator : MonoBehaviour
         public float inWeight;
         public float outWeight;
         public WeightedMode weightedMode;
-
+        
         public SerializableKeyframe() { }
 
         public SerializableKeyframe(Keyframe keyframe)
@@ -335,10 +352,11 @@ public class MapGenerator : MonoBehaviour
     [System.Serializable]
     public struct TerrainType
     {
-        public string Name;   // Name of the terrain type (e.g., Water, Sand, Grass)
-        public Color Color;   // Color used to represent this terrain on the map
-        public float Height;  // Maximum height value that maps to this terrain type
+        public string Name; // Name of the terrain type (e.g., Water, Sand, Grass)
+        public Color Color; // Color used to represent this terrain on the map
+        public float Height; // Maximum height value that maps to this terrain type
     }
+
     private struct MapThreadInfo<T>
     {
         public readonly Action<T> Callback;
@@ -350,6 +368,7 @@ public class MapGenerator : MonoBehaviour
             this.Parameter = parameter;
         }
     }
+
     public struct MapData
     {
         public readonly float[,] HeightMap;
@@ -361,7 +380,7 @@ public class MapGenerator : MonoBehaviour
             this.ColorMap = colorMap;
         }
     }
-    
+
     #endregion
     
 }
