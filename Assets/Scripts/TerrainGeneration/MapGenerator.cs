@@ -54,9 +54,25 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
+        if (generateInfiniteTerrain)
+        {
+            GameObject meshObject = GameObject.FindGameObjectWithTag("MeshObject");
+            if (meshObject != null)
+            {
+                meshObject.SetActive(false);
+            }
+        }
+        if(!generateInfiniteTerrain)
+        {
+            GameObject meshObject = GameObject.FindGameObjectWithTag("MeshObject");
+            if (meshObject != null && !meshObject.activeSelf)
+            {
+                meshObject.SetActive(true);
+            }
+        }
         levelOfDetailEditorPreview = Settings.SettingsManager.CurrentSettings.levelOfDetail;
         Debug.Log("Level of Detail from SettingsManager: " + levelOfDetailEditorPreview);
-
+        
         drawMode = DrawMode.DrawMesh;
         MapData data = GenerateMapData(Vector2.zero);
         MeshData meshData = MeshGenerator.GenerateTerrainMesh(data.HeightMap, heightMultiplier, heightCurve, levelOfDetailEditorPreview);
