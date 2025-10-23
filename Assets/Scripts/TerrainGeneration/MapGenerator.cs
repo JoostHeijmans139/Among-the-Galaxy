@@ -4,7 +4,6 @@ using System.Threading;
 using JetBrains.Annotations;
 using TerrainGeneration;
 using UnityEngine;
-using TerrainGeneration;
 
 /// <summary>
 /// Generates a procedural map using Perlin noise and displays it using different modes.
