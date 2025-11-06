@@ -38,9 +38,10 @@ public class MapGenerator : MonoBehaviour
     [Header("Other Settings")] public bool autoUpdate; // If true, map auto regenerates when settings change
     public bool generateInfiniteTerrain = false;
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
-    [CanBeNull] public static float[,] CurrentHeightMap;
     public MeshRenderer meshRenderer;
     public MeshCollider meshCollider;
+    private float[,] _globalNoiseMap;
+    private const int _globalNoiseMapSize = 2048;
     #endregion
 
     #region ThreadingVariables
@@ -61,6 +62,8 @@ public class MapGenerator : MonoBehaviour
             {
                 meshObject.SetActive(false);
             }
+            GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
+            
         }
         if(!generateInfiniteTerrain)
         {
@@ -141,20 +144,35 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     public MapData GenerateMapData(Vector2 center)
     {
-        // Generate the noise map based on the current parameters
-        Debug.Log("Generating noisemap with the center: " + center);
-        center.x *= 10000;
-        center.y *= 10000;
         float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize, seed, noiseScale, octaves, persistence,
             lacunarity, center + offsets, normalizedMode);
-
         // Generate a color map by assigning colors to each noise value based on terrain height
         Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
         return new MapData(noiseMap, colorMap);
     }
 
     #endregion
+    #region GenerateGlobalNoiseMap
+    public void GenerateGlobalNoiseMap(int seed, float scale, int octaves, float persistence, float lacunarity, Vector2 offsets)
+    {
+        _globalNoiseMap = Noise.GenerateNoiseMap(_globalNoiseMapSize, _globalNoiseMapSize, seed, noiseScale, octaves, persistence,
+            lacunarity, offsets, Noise.NormalizedMode.Global);
+    }
+    #endregion
 
+    #region GetNoiseValueAtWorldPosition
+    public float GetNoiseValueAtWorldPosition(Vector2 worldPosition){
+        int noiseX = Mathf.RoundToInt(worldPosition.x / _globalNoiseMapSize) % _globalNoiseMapSize;
+        int noiseY = Mathf.RoundToInt(worldPosition.y / _globalNoiseMapSize) % _globalNoiseMapSize;
+        if(noiseX < 0){
+            noiseX += _globalNoiseMapSize;
+        }
+        if(noiseY < 0){
+            noiseY += _globalNoiseMapSize;
+        }
+        return _globalNoiseMap[noiseX, noiseY];
+    }
+    #endregion
     #region GenerateColorMap
 
     /// <summary>
@@ -194,26 +212,48 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region MapThreading
-
-    public void RequestMapData(Vector2 center, Action<MapData> callback)
+    public float[,] GetGlobalNoiseMap()
+    {
+        return _globalNoiseMap;
+    }
+    public void RequestMapData(Vector2 position, Action<MapData> callback)
     {
         ThreadStart threadStart = delegate
         {
-            MapDataThread(center,callback);
+            MapDataThread(position,callback);
         };
         new Thread(threadStart).Start();
     }
 
-    private void MapDataThread(Vector2 center, Action<MapData> callback)
+    private void MapDataThread(Vector2 position, Action<MapData> callback)
     {
-        MapData mapData = GenerateMapData(center);
+        MapData mapData;
+        float [,] noiseMap = null;
+        if(normalizedMode == Noise.NormalizedMode.Global)
+        {
+            if (_globalNoiseMap == null)
+            {
+                Debug.LogError("Global nosie map is null. Generate it first.");
+                return;
+            }
+
+            mapData = new MapData();
+            noiseMap = NoiseHelper.SampleNoiseMap(
+            _globalNoiseMap,
+            position);
+            Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes); 
+            mapData.HeightMap = noiseMap;
+            mapData.ColorMap = colorMap;
+        }
+        else
+        {
+            mapData = GenerateMapData(position);
+        }
         if (mapData.HeightMap == null)
         {
             Debug.LogError("MapData.HeightMap is null");
             return;
         }
-
-        CurrentHeightMap = mapData.HeightMap;
         lock (_mapDataThreadInfoQueue)
         {
             _mapDataThreadInfoQueue.Enqueue(new MapThreadInfo<MapData>(callback, mapData));
@@ -247,7 +287,7 @@ public class MapGenerator : MonoBehaviour
 
     private void Dequeue<T>(Queue<MapThreadInfo<T>> queue)
     {
-        if (queue.Count ! < 0)
+        if (queue.Count <= 0)
         {
             return;
         }
@@ -386,8 +426,18 @@ public class MapGenerator : MonoBehaviour
 
     public struct MapData
     {
-        public readonly float[,] HeightMap;
-        public readonly Color[] ColorMap;
+        //Dont change the order of these properties as it will break the threading system
+        public float[,] HeightMap
+        {
+            get;
+            set;
+        }
+        //Dont change the order of these properties as it will break the threading system
+        public Color[] ColorMap
+        {
+            get;
+            set;
+        }
 
         public MapData(float[,] heightMap, Color[] colorMap)
         {

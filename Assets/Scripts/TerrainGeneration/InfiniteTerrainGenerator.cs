@@ -130,6 +130,7 @@ namespace Assets.Scripts.TerrainGeneration
 
     private class TerrainChunk
     {
+        private const float CHUNK_OVERLAP = 1f;
         readonly GameObject _meshObject;
         Vector2 position;
         Bounds _bounds;
@@ -143,8 +144,8 @@ namespace Assets.Scripts.TerrainGeneration
         public TerrainChunk(Vector2 coord,int chunkSize,LODInfo[] detailLevels,GameObject parent,Material meshMaterial)
         {
             _levelsOfDetail = detailLevels;
-            position = coord*chunkSize;
-            _bounds = new Bounds(position, Vector2.one * chunkSize);
+            position = coord*(chunkSize-CHUNK_OVERLAP);
+            _bounds = new Bounds(position, Vector2.one * (chunkSize-CHUNK_OVERLAP));
             Vector3 position3D = new Vector3(position.x, 0, position.y);
             
             _meshObject = new GameObject();
@@ -164,13 +165,12 @@ namespace Assets.Scripts.TerrainGeneration
             
         }
         void OnMapDataReceived(MapGenerator.MapData mapData)
-        {
+        { 
             _mapData = mapData;
-            if (MapGenerator.CurrentHeightMap == null)
-            {
-                MapGenerator.CurrentHeightMap = mapData.HeightMap;
-            }
-            _meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(MapGenerator.GenerateColorMap(MapGenerator.CurrentHeightMap,_mapGenerator.TerrainTypes), MapGenerator.MapChunkSize, MapGenerator.MapChunkSize);
+            _meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(
+                _mapData.ColorMap, 
+                MapGenerator.MapChunkSize, 
+                MapGenerator.MapChunkSize);
             mapDataReceived = true;
             UpdateTerrainChunk();
         }
