@@ -31,7 +31,7 @@ public class MapGenerator : MonoBehaviour
     [Range(2, 100)] public float noiseScale; // Scale of the noise (affects zoom)
     [Range(1, 20)] public int octaves; // Number of noise layers combined
     [Range(0, 1)] public float persistence; // Controls amplitude of octaves (affects roughness)
-    public float lacunarity; // Controls frequency of octaves (affects detail)
+    [Range(1,int.MaxValue)] public float lacunarity; // Controls frequency of octaves (affects detail)
     public AnimationCurve heightCurve; // Curve to adjust height distribution
     public float heightMultiplier;
     public Vector2 offsets;
@@ -297,22 +297,6 @@ public class MapGenerator : MonoBehaviour
         {
             MapThreadInfo<T> threadInfo = queue.Dequeue();
             threadInfo.Callback(threadInfo.Parameter);
-        }
-    }
-
-    #endregion
-
-    #region ValidateLacunarity
-
-    /// <summary>
-    /// Unity Editor callback to validate and clamp variables when they are changed in the Inspector.
-    /// Ensures that map dimensions and noise parameters stay within acceptable ranges.
-    /// </summary>
-    void OnValidate()
-    {
-        if (lacunarity < 1)
-        {
-            lacunarity = 1; // Lacunarity should be at least 1
         }
     }
 
