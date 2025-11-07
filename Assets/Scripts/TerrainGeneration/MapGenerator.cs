@@ -24,18 +24,22 @@ public class MapGenerator : MonoBehaviour
     }
 
     public Noise.NormalizedMode normalizedMode;
-    [Header("Map Settings")] public DrawMode drawMode; // Current mode for displaying the map
+    [Header("Map Settings")] 
+    public DrawMode drawMode; // Current mode for displaying the map
     public const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
     [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation (0 = highest detail)
-    [Header("Noise Settings")] public int seed;
+    [Header("Noise Settings")] 
+    public int seed;
     [Range(2, 100)] public float noiseScale; // Scale of the noise (affects zoom)
     [Range(1, 20)] public int octaves; // Number of noise layers combined
     [Range(0, 1)] public float persistence; // Controls amplitude of octaves (affects roughness)
     [Range(1,int.MaxValue)] public float lacunarity; // Controls frequency of octaves (affects detail)
+    public float heightBias;
     public AnimationCurve heightCurve; // Curve to adjust height distribution
     public float heightMultiplier;
     public Vector2 offsets;
-    [Header("Other Settings")] public bool autoUpdate; // If true, map auto regenerates when settings change
+    [Header("Other Settings")] 
+    public bool autoUpdate; // If true, map auto regenerates when settings change
     public bool generateInfiniteTerrain = false;
     public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
     public MeshRenderer meshRenderer;
@@ -241,6 +245,7 @@ public class MapGenerator : MonoBehaviour
             noiseMap = NoiseHelper.SampleNoiseMap(
             _globalNoiseMap,
             position);
+            noiseMap = ApplyHeightBias(noiseMap);
             Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes); 
             mapData.HeightMap = noiseMap;
             mapData.ColorMap = colorMap;
@@ -298,6 +303,24 @@ public class MapGenerator : MonoBehaviour
             MapThreadInfo<T> threadInfo = queue.Dequeue();
             threadInfo.Callback(threadInfo.Parameter);
         }
+    }
+
+    #endregion
+
+    #region ApplyHeightBias
+
+    private float[,] ApplyHeightBias(float[,] noiseMap)
+    {
+        int width = noiseMap.GetLength(0);
+        int height = noiseMap.GetLength(1);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                noiseMap[x, y] = Mathf.Clamp01(noiseMap[x, y] + heightBias);
+            }
+        }
+        return noiseMap;
     }
 
     #endregion
