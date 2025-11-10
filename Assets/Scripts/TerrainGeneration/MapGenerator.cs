@@ -35,6 +35,7 @@ public class MapGenerator : MonoBehaviour
     [Range(0, 1)] public float persistence; // Controls amplitude of octaves (affects roughness)
     [Range(1,int.MaxValue)] public float lacunarity; // Controls frequency of octaves (affects detail)
     public float heightBias;
+    public float worldToNoiseScaleBias;
     public AnimationCurve heightCurve; // Curve to adjust height distribution
     public float heightMultiplier;
     public Vector2 offsets;
@@ -244,7 +245,7 @@ public class MapGenerator : MonoBehaviour
             mapData = new MapData();
             noiseMap = NoiseHelper.SampleNoiseMap(
             _globalNoiseMap,
-            position);
+            position,MapChunkSize,worldToNoiseScaleBias);
             noiseMap = ApplyHeightBias(noiseMap);
             Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes); 
             mapData.HeightMap = noiseMap;

@@ -1,0 +1,62 @@
+﻿{
+  "curve": {
+    "keys": [
+      {
+        "time": 0.0,
+        "value": 0.0,
+        "inTangent": 0.0,
+        "outTangent": 0.3,
+        "inWeight": 0.0,
+        "outWeight": 0.0,
+        "weightedMode": 0
+      },
+      {
+        "time": 0.15,
+        "value": 0.08,
+        "inTangent": 0.55,
+        "outTangent": 0.55,
+        "inWeight": 0.0,
+        "outWeight": 0.0,
+        "weightedMode": 0
+      },
+      {
+        "time": 0.35,
+        "value": 0.25,
+        "inTangent": 0.6,
+        "outTangent": 0.6,
+        "inWeight": 0.0,
+        "outWeight": 0.0,
+        "weightedMode": 0
+      },
+      {
+        "time": 0.55,
+        "value": 0.55,
+        "inTangent": 1.1,
+        "outTangent": 1.1,
+        "inWeight": 0.0,
+        "outWeight": 0.0,
+        "weightedMode": 0
+      },
+      {
+        "time": 0.8,
+        "value": 0.85,
+        "inTangent": 1.7,
+        "outTangent": 1.7,
+        "inWeight": 0.0,
+        "outWeight": 0.0,
+        "weightedMode": 0
+      },
+      {
+        "time": 1.0,
+        "value": 1.0,
+        "inTangent": 0.0,
+        "outTangent": 0.0,
+        "inWeight": 0.0,
+        "outWeight": 0.0,
+        "weightedMode": 0
+      }
+    ],
+    "preWrapMode": 8,
+    "postWrapMode": 8
+  }
+}

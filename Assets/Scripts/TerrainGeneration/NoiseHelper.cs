@@ -57,12 +57,12 @@ public static class NoiseHelper
         }
         return noiseMap;
     }
-    public static float[,] SampleNoiseMap(float[,] noiseMap,Vector2 worldPosition,int mapSize = 241)
+    public static float[,] SampleNoiseMap(float[,] noiseMap,Vector2 worldPosition,int mapSize = 241,float worldToNoiseScaleBias = 1f)
     {
         float[,] globalNoiseMap = new float[mapSize, mapSize];
         int mapWidth = noiseMap.GetLength(0);
         int mapHeight = noiseMap.GetLength(1);
-        float worldToNoiseScale = mapWidth/250f;
+        float worldToNoiseScale = mapWidth/worldToNoiseScaleBias;
         for (int y = 0; y < mapSize; y++)
         {
             for (int x = 0; x < mapSize; x++)
