@@ -151,9 +151,10 @@ public class MapGenerator : MonoBehaviour
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(MapChunkSize, MapChunkSize, seed, noiseScale, octaves, persistence,
             lacunarity, center + offsets, normalizedMode);
+        float[,] biasedNoiseMap = ApplyHeightBias(noiseMap);
         // Generate a color map by assigning colors to each noise value based on terrain height
         Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
-        return new MapData(noiseMap, colorMap);
+        return new MapData(biasedNoiseMap, colorMap);
     }
 
     #endregion
