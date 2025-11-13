@@ -10,16 +10,18 @@ public class playerControler : MonoBehaviour
     private Transform cameraTransform;
     private Transform playerBody;
     private Rigidbody _rb;
-    [Header("Settings")]
+    [Header("Camera Settings")]
     [SerializeField] private float mouseSensitivity;
     [SerializeField] private float verticalClampAngle = 80f;
     [SerializeField] private float cameraSmoothTime = 0.1f;
-    private float Pitch = 0f;       // Vertical rotation (pitch)
+    private float Pitch = 0f;   
+    [Header("Camera smoothing")] // Vertical rotation (pitch)
     private Vector2 currentMouseDelta; // Current smoothed mouse movement
     private Vector2 currentMouseDeltaVelocity; // Velocity reference for SmoothDamp
     [Header("Movement Settings")]
     private float horizontalInput;
     private float verticalInput;
+    private Vector2 _rawInput;
     [SerializeField] private float moveSpeed = 5f;
     [Header("Ground Check Settings")]
     [SerializeField] private float playerHeight = 2f;
@@ -52,6 +54,7 @@ public class playerControler : MonoBehaviour
     void Update()
     {
         isGrounded = IsGroundedCheck();
+        RawInputsToVector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         MovePlayer();
         UpdateCameraPosition();
         UpdateCameraRotation();
@@ -65,6 +68,12 @@ public class playerControler : MonoBehaviour
     private void UpdateCameraPosition()
     {
         cameraTransform.position = transform.position + new Vector3(0, 10, -10)*Time.deltaTime;
+    }
+
+    private Vector2 RawInputsToVector2(float horizontalInput, float verticalInput)
+    {
+        Vector2 rawInput = new Vector2(horizontalInput, verticalInput);
+        return rawInput;
     }
 
     private void UpdateCameraRotation()
