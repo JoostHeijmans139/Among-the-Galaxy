@@ -23,6 +23,7 @@ public class playerControler : MonoBehaviour
     private float verticalInput;
     private Vector2 _rawInput;
     private Vector3 _moveDirection;
+    [SerializeField] private float groundDrag = 6f;
     [SerializeField] private float moveSpeed = 5f;
     [Header("Ground Check Settings")]
     [SerializeField] private float playerHeight = 2f;
@@ -58,14 +59,15 @@ public class playerControler : MonoBehaviour
         _rawInput = RawInputsToVector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         // Calculate movement direction relative to orientation (camera/player facing)
         _moveDirection = playerBody.forward * _rawInput.y + playerBody.right * _rawInput.x;
-        MovePlayer();
+        //apply drag
+        _rb.linearDamping = isGrounded ? groundDrag : 0f;
         UpdateCameraPosition();
         UpdateCameraRotation();
     }
 
     private void FixedUpdate()
     {
-        
+        MovePlayer();
     }
 
     private void UpdateCameraPosition()
