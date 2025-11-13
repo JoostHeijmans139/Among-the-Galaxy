@@ -23,6 +23,7 @@ public class playerControler : MonoBehaviour
     private float verticalInput;
     private Vector2 _rawInput;
     private Vector3 _moveDirection;
+    [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float groundDrag = 6f;
     [SerializeField] private float moveSpeed = 5f;
     [Header("Ground Check Settings")]
@@ -61,6 +62,10 @@ public class playerControler : MonoBehaviour
         _moveDirection = playerBody.forward * _rawInput.y + playerBody.right * _rawInput.x;
         //apply drag
         _rb.linearDamping = isGrounded ? groundDrag : 0f;
+        if(isGrounded && Input.GetButtonDown("Jump"))
+        {
+            Jump();
+        }
         UpdateCameraPosition();
         UpdateCameraRotation();
     }
@@ -108,5 +113,11 @@ public class playerControler : MonoBehaviour
         verticalInput = Input.GetAxis("Vertical")*moveSpeed*Time.deltaTime;
         Vector3 movement = new Vector3(horizontalInput, 0, verticalInput);
         _rb.AddForce(movement, ForceMode.Force);
+    }
+    private void Jump()
+    {
+        // Reset Y velocity
+        _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+        _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 }
