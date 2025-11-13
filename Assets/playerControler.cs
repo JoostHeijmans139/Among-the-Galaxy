@@ -17,6 +17,14 @@ public class playerControler : MonoBehaviour
     private float Pitch = 0f;       // Vertical rotation (pitch)
     private Vector2 currentMouseDelta; // Current smoothed mouse movement
     private Vector2 currentMouseDeltaVelocity; // Velocity reference for SmoothDamp
+    [Header("Movement Settings")]
+    private float horizontalInput;
+    private float verticalInput;
+    [SerializeField] private float moveSpeed = 5f;
+    [Header("Ground Check Settings")]
+    [SerializeField] private float playerHeight = 2f;
+    [SerializeField] private LayerMask groundMask;
+    private bool isGrounded;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -26,6 +34,7 @@ public class playerControler : MonoBehaviour
             Debug.LogError("Rigidbody component not found on the player object.");
             return;
         }
+        _rb.freezeRotation = true;
 
         Cursor.lockState = CursorLockMode.Locked;
         playerBody = this.TryGetComponent(out Transform playerTransform)? 
@@ -42,9 +51,17 @@ public class playerControler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        isGrounded = IsGroundedCheck();
+        MovePlayer();
         UpdateCameraPosition();
         UpdateCameraRotation();
     }
+
+    private void FixedUpdate()
+    {
+        
+    }
+
     private void UpdateCameraPosition()
     {
         cameraTransform.position = transform.position + new Vector3(0, 10, -10)*Time.deltaTime;
@@ -52,10 +69,30 @@ public class playerControler : MonoBehaviour
 
     private void UpdateCameraRotation()
     {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
-        cameraTransform.Rotate(Vector3.up, -mouseX, Space.World);
-        cameraTransform.Rotate(Vector3.right, mouseY);
+        //get raw mouse input
+        Vector2 mouseDelta = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
+        //smooth the raw mouse input
+        currentMouseDelta = Vector2.SmoothDamp(currentMouseDelta, mouseDelta, ref currentMouseDeltaVelocity, cameraSmoothTime);
+        float mouseX = currentMouseDelta.x * mouseSensitivity * Time.deltaTime;
+        float mouseY = currentMouseDelta.y * mouseSensitivity * Time.deltaTime;
+        playerBody.Rotate(Vector3.up * mouseX);
+        Pitch -= mouseY;
+        Pitch = Mathf.Clamp(Pitch, -verticalClampAngle, verticalClampAngle);
+        cameraTransform.localRotation = Quaternion.Euler(Pitch, 0, 0);
 
+    }
+
+    private bool IsGroundedCheck()
+    {
+        bool result = Physics.Raycast(transform.position, Vector3.down, playerHeight / 2 + 0.2f, groundMask);
+        return result;
+    }
+
+    private void MovePlayer()
+    {
+        horizontalInput = Input.GetAxis("Horizontal")*moveSpeed*Time.deltaTime;
+        verticalInput = Input.GetAxis("Vertical")*moveSpeed*Time.deltaTime;
+        Vector3 movement = new Vector3(horizontalInput, 0, verticalInput);
+        _rb.AddForce(movement, ForceMode.Force);
     }
 }
