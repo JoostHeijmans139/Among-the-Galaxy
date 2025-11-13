@@ -4,13 +4,19 @@ using UnityEngine.PlayerLoop;
 
 public class playerControler : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private GameObject playerCameraObject;
     private Camera playerCamera;
     private Transform cameraTransform;
-    [SerializeField] private float mouseSensitivity;
     private Transform playerBody;
-    private float xRotation = 0f;       // Vertical rotation (pitch)
     private Rigidbody _rb;
+    [Header("Settings")]
+    [SerializeField] private float mouseSensitivity;
+    [SerializeField] private float verticalClampAngle = 80f;
+    [SerializeField] private float cameraSmoothTime = 0.1f;
+    private float Pitch = 0f;       // Vertical rotation (pitch)
+    private Vector2 currentMouseDelta; // Current smoothed mouse movement
+    private Vector2 currentMouseDeltaVelocity; // Velocity reference for SmoothDamp
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
