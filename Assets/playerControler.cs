@@ -109,10 +109,8 @@ public class playerControler : MonoBehaviour
 
     private void MovePlayer()
     {
-        horizontalInput = Input.GetAxis("Horizontal")*moveSpeed*Time.deltaTime;
-        verticalInput = Input.GetAxis("Vertical")*moveSpeed*Time.deltaTime;
-        Vector3 movement = new Vector3(horizontalInput, 0, verticalInput);
-        _rb.AddForce(movement, ForceMode.Force);
+        _rb.AddForce(_moveDirection.normalized * moveSpeed, ForceMode.Force);
+        
     }
     private void Jump()
     {
