@@ -103,7 +103,7 @@ public class playerControler : MonoBehaviour
 
     private bool IsGroundedCheck()
     {
-        bool result = Physics.Raycast(transform.position, Vector3.down, playerHeight / 2 + 0.2f, groundMask);
+        bool result = Physics.Raycast(transform.position, Vector3.down, playerHeight / 2f + 1f, groundMask);
         return result;
     }
 
