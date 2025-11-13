@@ -29,7 +29,7 @@ public class playerControler : MonoBehaviour
     [Header("Ground Check Settings")]
     [SerializeField] private float playerHeight = 2f;
     [SerializeField] private LayerMask groundMask;
-    private bool isGrounded;
+    [SerializeField] private bool isGrounded;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
