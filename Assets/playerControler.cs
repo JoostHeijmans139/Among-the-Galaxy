@@ -1,52 +1,55 @@
 using System;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 public class playerControler : MonoBehaviour
 {
-    [SerializeField] private Camera playerCamera;
+    [SerializeField] private GameObject playerCameraObject;
+    private Camera playerCamera;
+    private Transform cameraTransform;
     [SerializeField] private float mouseSensitivity;
+    private Transform playerBody;
+    private float xRotation = 0f;       // Vertical rotation (pitch)
     private Rigidbody _rb;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
         if (_rb == null)
-        { 
+        {
             Debug.LogError("Rigidbody component not found on the player object.");
             return;
         }
 
-        if (playerCamera == null)
-        {
-            Debug.LogError("Camera component not found on the player object.");
-            return;
-        }
-
         Cursor.lockState = CursorLockMode.Locked;
+        playerBody = this.TryGetComponent(out Transform playerTransform)? 
+            playerTransform
+            : throw new NullReferenceException("Player body transform is null.");
+        playerCamera = playerCameraObject.TryGetComponent(out Camera cam) 
+            ? cam 
+            : throw new NullReferenceException("Player camera is null.");
+        cameraTransform = playerCameraObject.TryGetComponent(out Transform camTransform)
+            ? camTransform 
+            : throw new NullReferenceException("Camera transform is null.");
     }
 
     // Update is called once per frame
     void Update()
-    {
-        
-    }
-
-    private void FixedUpdate()
     {
         UpdateCameraPosition();
         UpdateCameraRotation();
     }
     private void UpdateCameraPosition()
     {
-        playerCamera.transform.position = transform.position + new Vector3(0, 10, -10)*Time.deltaTime;
+        cameraTransform.position = transform.position + new Vector3(0, 10, -10)*Time.deltaTime;
     }
 
     private void UpdateCameraRotation()
     {
-        var mouseX = Input.GetAxis("Mouse X")*mouseSensitivity*Time.deltaTime;
-        var mouseY = Input.GetAxis("Mouse Y")*mouseSensitivity*Time.deltaTime;
-        playerCamera.transform.Rotate(Vector3.up, mouseX);
-        playerCamera.transform.Rotate(Vector3.left, mouseY);
-        
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        cameraTransform.Rotate(Vector3.up, -mouseX, Space.World);
+        cameraTransform.Rotate(Vector3.right, mouseY);
+
     }
 }
