@@ -18,7 +18,7 @@ public class Patrol : State
     public override void Enter()
     {
         currentIndex = 0;
-        anim.SetTrigger("isWalking");
+        anim.SetBool("isWalking", true);
         base.Enter();
     }
 
