@@ -25,7 +25,10 @@ public class playerControler : MonoBehaviour
     private Vector3 _moveDirection;
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float groundDrag = 6f;
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float walkSpeed = 5f;
+    [SerializeField] private float sprintSpeed = 3f;
+    [SerializeField] private float Acceleration;
     [Header("Ground Check Settings")]
     [SerializeField] private float playerHeight = 2f;
     [SerializeField] private LayerMask groundMask;
@@ -51,6 +54,7 @@ public class playerControler : MonoBehaviour
         cameraTransform = playerCameraObject.TryGetComponent(out Transform camTransform)
             ? camTransform 
             : throw new NullReferenceException("Camera transform is null.");
+        moveSpeed = walkSpeed;
     }
 
     // Update is called once per frame
@@ -66,6 +70,7 @@ public class playerControler : MonoBehaviour
         {
             Jump();
         }
+        ApplySprint();
         UpdateCameraPosition();
         UpdateCameraRotation();
     }
@@ -112,10 +117,21 @@ public class playerControler : MonoBehaviour
         _rb.AddForce(_moveDirection.normalized * moveSpeed, ForceMode.Force);
         
     }
+
+    private void ApplySprint()
+    {
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed,Acceleration*Time.deltaTime);
+        }
+        if(!Input.GetKey(KeyCode.LeftShift)&& moveSpeed > walkSpeed){
+            moveSpeed = Mathf.Lerp(moveSpeed ,walkSpeed ,Acceleration*Time.deltaTime);
+        }
+    }
     private void Jump()
     {
         // Reset Y velocity
-        _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+        _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z*Time.deltaTime);
         _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 }
