@@ -24,12 +24,13 @@ public class SelectionManager : MonoBehaviour
 
     void Update()
     {
-        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+        // Offset the ray origin slightly in front of the camera to avoid hitting the player
+        Vector3 rayOrigin = playerCamera.transform.position + playerCamera.transform.forward * 0.5f;
+        Ray ray = new Ray(rayOrigin, playerCamera.transform.forward);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, maxDistance))
         {
-            // Debug line to visualize the raycast in the scene view
             Debug.DrawLine(ray.origin, hit.point, Color.red);
 
             var selectionTransform = hit.transform;
@@ -48,6 +49,7 @@ public class SelectionManager : MonoBehaviour
         else
         {
             Debug.DrawLine(ray.origin, ray.origin + ray.direction * maxDistance, Color.green);
+            InteractionInfo.SetActive(false);
         }
     }
 
