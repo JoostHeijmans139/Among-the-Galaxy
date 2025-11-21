@@ -22,8 +22,16 @@ namespace StarterAssets
 		public bool cursorInputForLook = true;
 #endif
 
+        public bool attack;
+        public void OnAttack(InputValue value)
+        {
+            attack = value.isPressed;
+			Debug.Log("Look im attacking!");
+
+        }
+
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
-		public void OnMove(InputValue value)
+        public void OnMove(InputValue value)
 		{
 			MoveInput(value.Get<Vector2>());
 		}
@@ -45,6 +53,8 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
+
+		
 #else
 	// old input sys if we do decide to have it (most likely wont)...
 #endif
