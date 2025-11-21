@@ -10,17 +10,20 @@ public class Idle : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.IDLE;
+        agent.speed = 0;
+        agent.isStopped = true;
     }
 
     public override void Enter()
     {
-        anim.SetTrigger("isIdle");
+        anim.SetFloat("blend", 0f);
         base.Enter();
+        agent.SetDestination(npc.transform.position);
     }
 
     public override void Update()
     {
-        if (Random.Range(0, 100) < 10)
+        if (Random.Range(0, 10000) < 10)
         {
             nextState = new Patrol(npc, agent, anim, player);
             stage = EVENT.EXIT;
@@ -29,7 +32,6 @@ public class Idle : State
 
     public override void Exit()
     {
-        anim.ResetTrigger("isIdle");
         base.Exit();
     }
 }

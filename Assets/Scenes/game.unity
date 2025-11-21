@@ -269,7 +269,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 780c39ac84231f94a93115e351a5a99c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
+  player: {fileID: 1321974771}
+  sightRange: 20
+  attackRange: 4
 --- !u!195 &977539834
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -912,7 +914,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7982966797167880433, guid: 12cc27a1c1cb74f45a97f59a64324747, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.92
+      value: 28.7
       objectReference: {fileID: 0}
     - target: {fileID: 7982966797167880433, guid: 12cc27a1c1cb74f45a97f59a64324747, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1326,6 +1328,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 977539833}
   m_SourcePrefab: {fileID: 100100000, guid: d66c23583a584ef4195dbea312c0b2a7, type: 3}
+--- !u!4 &1321974771 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7982966797167880433, guid: 12cc27a1c1cb74f45a97f59a64324747, type: 3}
+  m_PrefabInstance: {fileID: 1044789294}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1897463421
 GameObject:
   m_ObjectHideFlags: 0

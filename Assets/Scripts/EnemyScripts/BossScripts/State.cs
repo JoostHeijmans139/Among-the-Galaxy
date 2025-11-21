@@ -23,7 +23,7 @@ public class State
     protected State nextState;
     protected NavMeshAgent agent;
 
-    float visDist = 10.0f;
+    public float visDist = 20.0f;
     float visAngle = 30.0f;
     float attackDist = 4.0f;
 
