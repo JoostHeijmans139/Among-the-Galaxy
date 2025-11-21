@@ -4,134 +4,172 @@ using UnityEngine.PlayerLoop;
 
 public class playerControler : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private GameObject playerCameraObject;
-    private Camera playerCamera;
-    private Transform cameraTransform;
-    private Transform playerBody;
-    private Rigidbody _rb;
-    [Header("Camera Settings")]
-    [SerializeField] private float mouseSensitivity;
-    [SerializeField] private float verticalClampAngle = 80f;
-    [SerializeField] private float cameraSmoothTime = 0.1f;
-    private float Pitch = 0f;   
-    [Header("Camera smoothing")] // Vertical rotation (pitch)
-    private Vector2 currentMouseDelta; // Current smoothed mouse movement
-    private Vector2 currentMouseDeltaVelocity; // Velocity reference for SmoothDamp
     [Header("Movement Settings")]
-    private float horizontalInput;
-    private float verticalInput;
-    private Vector2 _rawInput;
-    private Vector3 _moveDirection;
-    [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float groundDrag = 6f;
-    [SerializeField] private float moveSpeed;
     [SerializeField] private float walkSpeed = 5f;
-    [SerializeField] private float sprintSpeed = 3f;
-    [SerializeField] private float Acceleration;
-    [Header("Ground Check Settings")]
-    [SerializeField] private float playerHeight = 2f;
+    [SerializeField] private float sprintSpeed = 8f;
+    [SerializeField] private float jumpHeight = 2f;
+    [SerializeField] private float gravity = -9.81f;
+    
+    [Header("Camera Settings")]
+    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private float mouseSensitivity = 2f;
+    [SerializeField] private float maxLookAngle = 80f;
+    
+    [Header("Ground Check")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundDistance = 0.4f;
     [SerializeField] private LayerMask groundMask;
-    [SerializeField] private bool isGrounded;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    
+    // Component references
+    private CharacterController controller;
+    
+    // Movement variables
+    private Vector3 velocity;
+    private bool isGrounded;
+    private float currentSpeed;
+    
+    // Camera rotation variables
+    private float rotationX = 0f;
+    private float rotationY = 0f;
+    
+    /// <summary>
+    /// Initialize component references and setup
+    /// </summary>
     void Start()
     {
-        _rb = GetComponent<Rigidbody>();
-        if (_rb == null)
-        {
-            Debug.LogError("Rigidbody component not found on the player object.");
-            return;
-        }
-        _rb.freezeRotation = true;
-
+        controller = GetComponent<CharacterController>();
+            
+        // Lock and hide cursor for FPS control
         Cursor.lockState = CursorLockMode.Locked;
-        playerBody = this.TryGetComponent(out Transform playerTransform)? 
-            playerTransform
-            : throw new NullReferenceException("Player body transform is null.");
-        playerCamera = playerCameraObject.TryGetComponent(out Camera cam) 
-            ? cam 
-            : throw new NullReferenceException("Player camera is null.");
-        cameraTransform = playerCameraObject.TryGetComponent(out Transform camTransform)
-            ? camTransform 
-            : throw new NullReferenceException("Camera transform is null.");
-        moveSpeed = walkSpeed;
+        Cursor.visible = false;
+        
+        // If no camera assigned, try to find main camera
+        if (cameraTransform == null)
+        {
+            cameraTransform = Camera.main?.transform;
+        }
     }
-
-    // Update is called once per frame
+    
+    /// <summary>
+    /// Main update loop - handles input and movement
+    /// </summary>
     void Update()
     {
-        isGrounded = IsGroundedCheck();
-        _rawInput = RawInputsToVector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        // Calculate movement direction relative to orientation (camera/player facing)
-        _moveDirection = playerBody.forward * _rawInput.y + playerBody.right * _rawInput.x;
-        //apply drag
-        _rb.linearDamping = isGrounded ? groundDrag : 0f;
-        if(isGrounded && Input.GetButtonDown("Jump"))
+        cameraTransform.position = this.transform.position;
+        HandleGroundCheck();
+        HandleMovement();
+        HandleJump();
+        HandleMouseLook();
+        ApplyGravity();
+    }
+    
+    /// <summary>
+    /// Check if player is standing on ground using a sphere overlap
+    /// </summary>
+    private void HandleGroundCheck()
+    {
+        if (groundCheck != null)
         {
-            Jump();
+            isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         }
-        ApplySprint();
-        UpdateCameraPosition();
-        UpdateCameraRotation();
+        else
+        {
+            // Fallback ground check using CharacterController
+            isGrounded = controller.isGrounded;
+        }
+
+        if (isGrounded)
+        {
+            Debug.Log("GROUNDED");
+        }
+
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f; // Small negative value to keep player grounded
+        }
     }
-
-    private void FixedUpdate()
+    
+    /// <summary>
+    /// Handle player movement with WASD/arrow keys and sprint with Shift
+    /// </summary>
+    private void HandleMovement()
     {
-        MovePlayer();
-    }
-
-    private void UpdateCameraPosition()
-    {
-        cameraTransform.position = transform.position + new Vector3(0, 10, -10)*Time.deltaTime;
-    }
-
-    private Vector2 RawInputsToVector2(float horizontalInput, float verticalInput)
-    {
-        Vector2 rawInput = new Vector2(horizontalInput, verticalInput);
-        return rawInput;
-    }
-
-    private void UpdateCameraRotation()
-    {
-        //get raw mouse input
-        Vector2 mouseDelta = new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        //smooth the raw mouse input
-        currentMouseDelta = Vector2.SmoothDamp(currentMouseDelta, mouseDelta, ref currentMouseDeltaVelocity, cameraSmoothTime);
-        float mouseX = currentMouseDelta.x * mouseSensitivity * Time.deltaTime;
-        float mouseY = currentMouseDelta.y * mouseSensitivity * Time.deltaTime;
-        playerBody.Rotate(Vector3.up * mouseX);
-        Pitch -= mouseY;
-        Pitch = Mathf.Clamp(Pitch, -verticalClampAngle, verticalClampAngle);
-        cameraTransform.localRotation = Quaternion.Euler(Pitch, 0, 0);
-
-    }
-
-    private bool IsGroundedCheck()
-    {
-        bool result = Physics.Raycast(transform.position, Vector3.down, playerHeight / 2f + 1f, groundMask);
-        return result;
-    }
-
-    private void MovePlayer()
-    {
-        _rb.AddForce(_moveDirection.normalized * moveSpeed, ForceMode.Force);
+        // Get input
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
         
+        // Determine current speed (sprint or walk)
+        bool isSprinting = Input.GetKey(KeyCode.LeftShift);
+        currentSpeed = isSprinting ? sprintSpeed : walkSpeed;
+        
+        // Calculate movement direction relative to player rotation
+        Vector3 move = transform.right * horizontal + transform.forward * vertical;
+        
+        // Apply movement
+        controller.Move(move * currentSpeed * Time.deltaTime);
     }
-
-    private void ApplySprint()
+    
+    /// <summary>
+    /// Handle jump input and apply jump force
+    /// </summary>
+    private void HandleJump()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
-            moveSpeed = Mathf.Lerp(moveSpeed, sprintSpeed,Acceleration*Time.deltaTime);
-        }
-        if(!Input.GetKey(KeyCode.LeftShift)&& moveSpeed > walkSpeed){
-            moveSpeed = Mathf.Lerp(moveSpeed ,walkSpeed ,Acceleration*Time.deltaTime);
+
+            // Calculate jump velocity using physics formula: v = sqrt(h * -2 * g)
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
     }
-    private void Jump()
+    
+    /// <summary>
+    /// Handle mouse look for first-person camera control
+    /// </summary>
+    /// <summary>
+    /// Handle mouse look for first-person camera control
+    /// </summary>
+    private void HandleMouseLook()
     {
-        // Reset Y velocity
-        _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z*Time.deltaTime);
-        _rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        if (cameraTransform == null) return;
+        
+        // Get mouse input
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        
+        // Accumulate horizontal rotation
+        rotationY += mouseX;
+        
+        // Accumulate vertical rotation with clamping
+        rotationX -= mouseY;
+        rotationX = Mathf.Clamp(rotationX, -maxLookAngle, maxLookAngle);
+        
+        // Apply rotations using eulerAngles to force the rotation
+        Vector3 playerRot = transform.eulerAngles;
+        playerRot.y = rotationY;
+        transform.eulerAngles = playerRot;
+        
+        // Apply camera rotation
+        cameraTransform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
+    }
+    
+    /// <summary>
+    /// Apply gravity to player every frame
+    /// </summary>
+    private void ApplyGravity()
+    {
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+    }
+    
+    /// <summary>
+    /// Unlock cursor when ESC is pressed (for debugging/menus)
+    /// </summary>
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (hasFocus)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 }
