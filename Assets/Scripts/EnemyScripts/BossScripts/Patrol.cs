@@ -24,9 +24,9 @@ public class Patrol : State
 
     public override void Update()
     {
-        if(agent.remainingDistance < 1)
+        if (Vector3.Distance(npc.transform.position, player.position) > 20f)
         {
-            if (Vector3.Distance(npc.transform.position, player.position) > 20f)
+            if (agent.remainingDistance < 1)
             {
                 if (currentIndex >= GameEnvironment.Singleton.Checkpoints.Count - 1)
                     currentIndex = 0;
@@ -34,14 +34,15 @@ public class Patrol : State
                     currentIndex++;
 
                 agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
-            }
-            else
-            {
-                nextState = new Pursue(npc, agent, anim, player);
-                stage = EVENT.EXIT;
-            }
+            }   
+        }
+        else
+        {
+            nextState = new Pursue(npc, agent, anim, player);
+            stage = EVENT.EXIT;
         }
     }
+    
 
     public override void Exit()
     {
