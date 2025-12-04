@@ -22,7 +22,15 @@ public class Attack : State
 
     public override void Update()
     {
-        //
+        if (Vector3.Distance(npc.transform.position, player.position) > attackDist)
+        {
+            nextState = new Pursue(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
+        else
+        {
+            // attack method here
+        }
     }
 
     public override void Exit()
