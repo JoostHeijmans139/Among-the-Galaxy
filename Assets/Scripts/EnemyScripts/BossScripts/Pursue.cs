@@ -10,7 +10,7 @@ public class Pursue : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PURSUE;
-        agent.speed = 8;
+        agent.speed = 6;
         agent.isStopped = false;
     }
 

@@ -30,6 +30,7 @@ public class Attack : State
         }
         else
         {
+            npc.transform.LookAt(new Vector3(player.position.x, npc.transform.position.y, player.position.z));
             // attack method here
         }
     }
