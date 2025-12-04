@@ -22,7 +22,7 @@ public class Pursue : State
 
     public override void Update()
     {
-        if (Vector3.Distance(npc.transform.position, player.position) > 20f)
+        if (Vector3.Distance(npc.transform.position, player.position) > visDist)
         {
             nextState = new Idle(npc, agent, anim, player);
             stage = EVENT.EXIT;

@@ -23,10 +23,18 @@ public class Idle : State
 
     public override void Update()
     {
-        if (Random.Range(0, 10000) < 10)
+        if (Vector3.Distance(npc.transform.position, player.position) < visDist)
         {
-            nextState = new Patrol(npc, agent, anim, player);
+            nextState = new Pursue(npc, agent, anim, player);
             stage = EVENT.EXIT;
+        }
+        else
+        {
+            if (Random.Range(0, 10000) < 10)
+            {
+                nextState = new Patrol(npc, agent, anim, player);
+                stage = EVENT.EXIT;
+            }
         }
     }
 

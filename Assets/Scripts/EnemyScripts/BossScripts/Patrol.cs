@@ -24,7 +24,7 @@ public class Patrol : State
 
     public override void Update()
     {
-        if (Vector3.Distance(npc.transform.position, player.position) > 20f)
+        if (Vector3.Distance(npc.transform.position, player.position) > visDist)
         {
             if (agent.remainingDistance < 1)
             {

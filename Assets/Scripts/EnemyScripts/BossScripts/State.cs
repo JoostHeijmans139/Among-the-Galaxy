@@ -24,8 +24,8 @@ public class State
     protected NavMeshAgent agent;
 
     public float visDist = 20.0f;
-    float visAngle = 30.0f;
-    float attackDist = 4.0f;
+    public float visAngle = 30.0f;
+    public float attackDist = 4.0f;
 
     public State(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
     {
