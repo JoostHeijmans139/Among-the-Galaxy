@@ -28,6 +28,11 @@ public class Idle : State
             nextState = new Pursue(npc, agent, anim, player);
             stage = EVENT.EXIT;
         }
+        else if (Vector3.Distance(npc.transform.position, player.position) < attackDist)
+        {
+            nextState = new Attack(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
         else
         {
             if (Random.Range(0, 10000) < 10)

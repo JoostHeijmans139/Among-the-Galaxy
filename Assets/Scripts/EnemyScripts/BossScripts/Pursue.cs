@@ -27,6 +27,11 @@ public class Pursue : State
             nextState = new Idle(npc, agent, anim, player);
             stage = EVENT.EXIT;
         }
+        else if (Vector3.Distance(npc.transform.position, player.position) < attackDist)
+        {
+            nextState = new Attack(npc, agent, anim, player);
+            stage = EVENT.EXIT;
+        }
         else
         {
             agent.SetDestination(player.position);

@@ -16,7 +16,7 @@ public class Attack : State
 
     public override void Enter()
     {
-        anim.SetFloat("blend", 0f);
+        anim.SetBool("attacking", true);
         base.Enter();
     }
 
@@ -24,6 +24,7 @@ public class Attack : State
     {
         if (Vector3.Distance(npc.transform.position, player.position) > attackDist)
         {
+            anim.SetBool("attacking", false);
             nextState = new Pursue(npc, agent, anim, player);
             stage = EVENT.EXIT;
         }
