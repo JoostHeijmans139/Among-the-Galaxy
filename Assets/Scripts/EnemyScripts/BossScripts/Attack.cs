@@ -18,6 +18,7 @@ public class Attack : State
     {
         anim.SetBool("attacking", true);
         base.Enter();
+        agent.SetDestination(npc.transform.position);
     }
 
     public override void Update()
@@ -31,6 +32,7 @@ public class Attack : State
         else
         {
             npc.transform.LookAt(new Vector3(player.position.x, npc.transform.position.y, player.position.z));
+            agent.SetDestination(npc.transform.position);
             // attack method here
         }
     }

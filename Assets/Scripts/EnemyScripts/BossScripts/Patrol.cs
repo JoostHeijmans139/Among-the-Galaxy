@@ -20,6 +20,7 @@ public class Patrol : State
         currentIndex = 0;
         anim.SetFloat("blend", 0.5f);
         base.Enter();
+        agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
     }
 
     public override void Update()
