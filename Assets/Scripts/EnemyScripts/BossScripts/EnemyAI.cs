@@ -34,4 +34,9 @@ public class EnemyAI : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, sightRange);
     }
+
+    //public void Damage()
+    //{
+    //    Debug.Log("Damage dealt to player");
+    //}
 }

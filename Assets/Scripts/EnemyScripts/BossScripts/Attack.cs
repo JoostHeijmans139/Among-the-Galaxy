@@ -6,6 +6,8 @@ using UnityEditor;
 
 public class Attack : State
 {
+    [SerializeField] private PlayerStats _playerStats;
+
     public Attack(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
         : base(_npc, _agent, _anim, _player)
     {
@@ -25,9 +27,13 @@ public class Attack : State
     {
         if (Vector3.Distance(npc.transform.position, player.position) > attackDist)
         {
+            //animation event
             anim.SetBool("attacking", false);
             nextState = new Pursue(npc, agent, anim, player);
             stage = EVENT.EXIT;
+
+            PlayerStats.instance.TakeDamage(10f);
+            _playerStats.TakeDamage(10f);
         }
         else
         {
@@ -41,4 +47,9 @@ public class Attack : State
     {
         base.Exit();
     }
+    public void Damage()
+    {
+        Debug.Log("Damage dealt to player");
+    }
+
 }
