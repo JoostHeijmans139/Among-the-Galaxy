@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEditor;
+using JetBrains.Annotations;
 
 public class Pursue : State
 {
@@ -10,7 +11,7 @@ public class Pursue : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PURSUE;
-        agent.speed = 6;
+        agent.speed = 5;
         agent.isStopped = false;
     }
 
@@ -18,6 +19,7 @@ public class Pursue : State
     {
         anim.SetFloat("blend", 1f);
         base.Enter();
+        agent.SetDestination(npc.transform.position);
     }
 
     public override void Update()
@@ -34,7 +36,14 @@ public class Pursue : State
         }
         else
         {
-            agent.SetDestination(player.position);
+            if (this.anim.GetCurrentAnimatorStateInfo(0).IsName("Attacking01"))
+            {
+                agent.SetDestination(npc.transform.position);
+            }
+            else
+            {
+                agent.SetDestination(player.position);
+            }
         }
     }
 

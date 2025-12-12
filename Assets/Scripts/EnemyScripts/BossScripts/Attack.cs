@@ -6,7 +6,6 @@ using UnityEditor;
 
 public class Attack : State
 {
-
     public Attack(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
         : base(_npc, _agent, _anim, _player)
     {
@@ -26,7 +25,6 @@ public class Attack : State
     {
         if (Vector3.Distance(npc.transform.position, player.position) > attackDist)
         {
-            //animation event
             anim.SetBool("attacking", false);
             nextState = new Pursue(npc, agent, anim, player);
             stage = EVENT.EXIT;
