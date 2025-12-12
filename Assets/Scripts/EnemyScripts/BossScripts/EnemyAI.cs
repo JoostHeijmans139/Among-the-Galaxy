@@ -14,6 +14,7 @@ public class EnemyAI : MonoBehaviour
     public int sightRange = 20;
     public int attackRange = 4;
 
+    public bool isInAttackRange = false;
 
     void Start()
     {
@@ -35,8 +36,23 @@ public class EnemyAI : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, sightRange);
     }
 
-    //public void Damage()
-    //{
-    //    Debug.Log("Damage dealt to player");
-    //}
+    public void OnTriggerStay(Collider other)
+    {
+        if (other.attachedRigidbody)
+        {
+            isInAttackRange = true;
+        }
+        else
+        {
+            isInAttackRange = false;
+        }
+    }
+    public void Damage()
+    {
+        if (isInAttackRange == true)
+        {
+            PlayerStats.instance.Health -= 10f;
+            Debug.Log("Damage dealt to player");
+        }
+    }
 }

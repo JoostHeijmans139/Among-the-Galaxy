@@ -8,7 +8,7 @@ public class PlayerStats : MonoBehaviour
     public static PlayerStats instance { get; private set; }
 
     // Starting health of player
-    public float Health { get; set; } = 100f;
+    public float Health = 100f;
 
     // Crafting resources
     public int Wood { get; set; } = 0;
