@@ -82,12 +82,14 @@ namespace StarterAssets
 
 #if !UNITY_IOS || !UNITY_ANDROID
 
-		private void OnApplicationFocus(bool hasFocus)
+        public void OnCrafting(InputValue value)
 		{
-			SetCursorState(cursorLocked);
+			if (!value.isPressed) return;
+
+			CraftingMenuController.Instance.ToggleCrafting();
 		}
 
-		private void SetCursorState(bool newState)
+        private void SetCursorState(bool newState)
 		{
 			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
 		}
