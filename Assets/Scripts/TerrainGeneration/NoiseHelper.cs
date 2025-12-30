@@ -1,3 +1,4 @@
+using TerrainGeneration;
 using UnityEngine;
 using Random = System.Random;
 
@@ -37,16 +38,46 @@ public static class NoiseHelper
     /// <param name="mapWidth">Width of the noise map.</param>
     /// <param name="mapHeight">Height of the noise map.</param>
     /// <returns>A 2D float array with all values normalized to the \[0,1\] range.</returns>
-    public static float[,] NormalizeNoiseMap(float[,] noiseMap, float minNoiseHeight, float maxNoiseHeight, int mapWidth, int mapHeight)
+    public static float[,] NormalizeNoiseMap(float[,] noiseMap, float minNoiseHeight, float maxNoiseHeight, int mapWidth, int mapHeight, Noise.NormalizedMode normalizedMode)
     {
-        // Iterate through each value and normalize using Mathf.InverseLerp.
-        for (int y = 0; y < mapHeight; y++)
-        {
-            for (int x = 0; x < mapWidth; x++)
-            {
-                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+        for (int y = 0; y < mapHeight; y++) {
+            for (int x = 0; x < mapWidth; x++) {
+                if (normalizedMode == Noise.NormalizedMode.Local) {
+                    float range = maxNoiseHeight - minNoiseHeight;
+                    if (range == 0) {
+                        noiseMap[x, y] = 0;
+                    } else {
+                        noiseMap[x, y] = (noiseMap[x, y] - minNoiseHeight) / range;
+                    }
+                } else {
+                    float normalizedHeight = (noiseMap[x, y] + 1) / (2f * Noise.maxPossibleHeight /2.75f);
+                    noiseMap[x, y] = Mathf.Clamp01(normalizedHeight);
+                }
             }
         }
         return noiseMap;
+    }
+    public static float[,] SampleNoiseMap(float[,] noiseMap,Vector2 worldPosition,int mapSize = 241,float worldToNoiseScaleBias = 1f)
+    {
+        float[,] globalNoiseMap = new float[mapSize, mapSize];
+        int mapWidth = noiseMap.GetLength(0);
+        int mapHeight = noiseMap.GetLength(1);
+        float worldToNoiseScale = mapWidth/worldToNoiseScaleBias;
+        for (int y = 0; y < mapSize; y++)
+        {
+            for (int x = 0; x < mapSize; x++)
+            {
+                float worldX = worldPosition.x + x;
+                float worldY = worldPosition.y + y;
+                int globalX = (Mathf.RoundToInt(worldX*worldToNoiseScale)) % mapWidth;
+                int globalY = (Mathf.RoundToInt(worldY*worldToNoiseScale)) % mapHeight;
+                
+                if (globalX < 0) globalX += mapWidth;
+                if (globalY < 0) globalY += mapHeight;
+                
+                globalNoiseMap[x, y] = noiseMap[globalX, globalY];
+            }
+        }
+        return globalNoiseMap;
     }
 }

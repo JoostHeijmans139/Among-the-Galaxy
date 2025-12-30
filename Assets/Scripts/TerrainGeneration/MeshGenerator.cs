@@ -44,7 +44,8 @@ namespace TerrainGeneration
                 // X = topLeftX offset + x position
                 // Y = height value from height map
                 // Z = topLeftZ offset - y position (negative because Unity's Z axis is forward)
-                meshData.Vertices[vertexIndex] = new Vector3(topLeftX + x, Heightcurve.Evaluate(heighMap[x, y])*heightMultiplier , topLeftZ - y);
+                float heightValue = Mathf.Clamp01(Heightcurve.Evaluate(heighMap[x, y]));
+                meshData.Vertices[vertexIndex] = new Vector3(topLeftX + x,heightValue*heightMultiplier , topLeftZ - y);
 
                 // Calculate UV coordinates for texturing (range 0 to 1)
                 meshData.Uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
@@ -60,8 +61,30 @@ namespace TerrainGeneration
                 vertexIndex++; // Move to next vertex index
             }
         }
-
+        SmoothMeshEdges(meshData, verticesPerLine); // Smooth the edges of the mesh
         return meshData; // Return the constructed mesh data
+    }
+    // Add to GenerateTerrainMesh before returning meshData:
+    private static void SmoothMeshEdges(MeshData meshData, int verticesPerLine, float smoothingFactor = 0.5f)
+    {
+        for (int i = 0; i < verticesPerLine; i++) {
+            // Smooth left edge
+            if (i > 0 && i < verticesPerLine - 1) {
+                Vector3 edge = meshData.Vertices[i];
+                Vector3 prev = meshData.Vertices[i - 1];
+                Vector3 next = meshData.Vertices[i + 1];
+                meshData.Vertices[i] = Vector3.Lerp(edge, (prev + next) * 0.5f, smoothingFactor);
+            }
+            
+            // Smooth right edge
+            int rightEdge = meshData.Vertices.Length - 1 - i;
+            if (i > 0 && i < verticesPerLine - 1) {
+                Vector3 edge = meshData.Vertices[rightEdge];
+                Vector3 prev = meshData.Vertices[rightEdge - 1];
+                Vector3 next = meshData.Vertices[rightEdge + 1];
+                meshData.Vertices[rightEdge] = Vector3.Lerp(edge, (prev + next) * 0.5f, smoothingFactor);
+            }
+        }
     }
 }
 
@@ -117,9 +140,6 @@ public class MeshData
             triangles = Triangles,
             uv = Uvs
         };
-        mesh.vertices = Vertices;
-        mesh.triangles = Triangles;
-        mesh.uv = Uvs;
 
         mesh.RecalculateBounds();  // Recalculate bounding box of the mesh
         mesh.RecalculateNormals(); // Recalculate normals for lighting

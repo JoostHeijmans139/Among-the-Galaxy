@@ -1,0 +1,35 @@
+{
+    "curve": {
+        "keys": [
+            {
+                "time": 0.0,
+                "value": 0.0,
+                "inTangent": 2.0,
+                "outTangent": 2.0,
+                "inWeight": 0.0,
+                "outWeight": 0.0,
+                "weightedMode": 0
+            },
+            {
+                "time": 1.6203330755233765,
+                "value": 0.9378150105476379,
+                "inTangent": -0.098152756690979,
+                "outTangent": -0.098152756690979,
+                "inWeight": 0.3333333432674408,
+                "outWeight": 0.3333333432674408,
+                "weightedMode": 0
+            },
+            {
+                "time": 4.235198974609375,
+                "value": -0.0271148681640625,
+                "inTangent": 0.0,
+                "outTangent": 0.0,
+                "inWeight": 0.0,
+                "outWeight": 0.0,
+                "weightedMode": 0
+            }
+        ],
+        "preWrapMode": 8,
+        "postWrapMode": 8
+    }
+}
