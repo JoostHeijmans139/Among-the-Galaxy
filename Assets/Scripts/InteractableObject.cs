@@ -14,6 +14,12 @@ public class InteractableObject : MonoBehaviour
     public float shakeDuration = 0.2f;
     public float shakeMagnitude = 0.1f;
 
+    // Amount of materials given on hit
+    public int hitGiveAmount = 2;
+
+    // Amount of materials given on destruction
+    public int destroyGiveAmount = 5;
+
     public string GetItemName()
     {
         return ObjectName;
@@ -21,14 +27,29 @@ public class InteractableObject : MonoBehaviour
 
     public void OnPunchOrShoot()
     {
+        // Stop previous shake
         if (shakeCoroutine != null)
             StopCoroutine(shakeCoroutine);
         shakeCoroutine = StartCoroutine(Shake());
 
+        // Give player resource
+        if (PlayerStats.Instance != null)
+        {
+            PlayerStats.Instance.GainResource(ItemName, hitGiveAmount);
+        }
+
+        // Reduce object health
         ObjectHealth--;
+
+        // Check if object should die
         if (ObjectHealth < 0)
         {
-            Debug.Log($"Item {ItemName} added to inventory");
+            if (PlayerStats.Instance != null)
+            {
+                PlayerStats.Instance.GainResource(ItemName, destroyGiveAmount);
+                Debug.Log($"Item {ItemName} added to inventory");
+            }
+
             Destroy(gameObject);
         }
     }

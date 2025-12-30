@@ -20,6 +20,10 @@ public class CraftingMenuUI : MonoBehaviour
     {
         Instance = this;
         ClearDetails();
+
+        // Add Confirm button functionality
+        confirmButton.onClick.RemoveAllListeners();
+        confirmButton.onClick.AddListener(ConfirmCraft);
     }
 
     public void SelectRecipe(CraftingRecipe recipe)
@@ -48,17 +52,37 @@ public class CraftingMenuUI : MonoBehaviour
 
     private void UpdateConfirmButton()
     {
+        if (currentRecipe == null)
+        {
+            confirmButton.interactable = false;
+            return;
+        }
+
         confirmButton.interactable = PlayerStats.Instance.HasResources(currentRecipe);
     }
 
     public void ConfirmCraft()
     {
-        if (!PlayerStats.Instance.HasResources(currentRecipe))
+        if (currentRecipe == null)
+        {
             return;
+        }
 
+        if (!PlayerStats.Instance.HasResources(currentRecipe))
+        {
+            return;
+        }
+
+        // Consume resources
         PlayerStats.Instance.ConsumeResources(currentRecipe);
+
+        // Add item to inventory
         PlayerStats.Instance.GiveItem(currentRecipe);
 
+        // Refresh resource list UI
+        PopulateResourceList(currentRecipe);
+
+        // UI refresh
         UpdateConfirmButton();
     }
 
