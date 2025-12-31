@@ -47,6 +47,15 @@ public class MapGenerator : MonoBehaviour
     public MeshCollider meshCollider;
     private float[,] _globalNoiseMap;
     private const int _globalNoiseMapSize = 2048;
+    [Header("Enemie spawners")] 
+    public MeshRenderer mapMesh;
+    public GameObject enemySpawnerParent;
+    public GameObject enemySpawnerPrefab;
+    public int enemySpawnerMinDistance = 20;
+    public float enemySpawnerMinDistanceFromPlayer = 20f;
+    public int enemySpawnerSeed = 42;
+    public int playerRadius;
+    public int enemySpawnerCount = 10;
     #endregion
 
     #region ThreadingVariables
@@ -68,7 +77,6 @@ public class MapGenerator : MonoBehaviour
                 meshObject.SetActive(false);
             }
             GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
-            
         }
         if(!generateInfiniteTerrain)
         {
@@ -87,6 +95,7 @@ public class MapGenerator : MonoBehaviour
         meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap,MapChunkSize,MapChunkSize);
         Mesh mesh = meshData.CreateMesh();
         meshCollider.sharedMesh = mesh;
+        SpawnEnemieCheckPointsNearPlayer();
     }
 
     #endregion
@@ -157,6 +166,93 @@ public class MapGenerator : MonoBehaviour
         return new MapData(biasedNoiseMap, colorMap);
     }
 
+    public void SpawnEnemieCheckPointsNearPlayer()
+    {
+        if (_globalNoiseMap == null)
+        {
+            GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
+        }
+
+        GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO == null)
+        {
+            Debug.LogWarning("Player not found. Cannot spawn enemy checkpoints.");
+            return;
+        }
+
+        Vector3 playerPosition = playerGO.transform.position;
+
+        // Safety check
+        if (enemySpawnerMinDistanceFromPlayer >= playerRadius)
+        {
+            Debug.LogWarning(
+                "enemySpawnerMinDistanceFromPlayer is >= playerRadius. No valid spawn area.");
+            return;
+        }
+
+        System.Random rng = new System.Random(enemySpawnerSeed);
+        List<Vector3> spawnedPositions = new List<Vector3>(enemySpawnerCount);
+
+        int maxTries = enemySpawnerCount * 12;
+
+        for (int attempt = 0; attempt < maxTries; attempt++)
+        {
+            if (spawnedPositions.Count >= enemySpawnerCount)
+                break;
+
+            // Random point in a ring (not a full circle)
+            float angle = (float)(rng.NextDouble() * Mathf.PI * 2f);
+            float radius = Mathf.Lerp(
+                enemySpawnerMinDistanceFromPlayer,
+                playerRadius,
+                Mathf.Sqrt((float)rng.NextDouble())
+            );
+
+            float worldX = playerPosition.x + Mathf.Cos(angle) * radius;
+            float worldZ = playerPosition.z + Mathf.Sin(angle) * radius;
+
+            Vector2 samplePos = new Vector2(worldX, worldZ);
+            float noiseValue = GetNoiseValueAtWorldPosition(samplePos);
+
+            float biased = Mathf.Clamp01(noiseValue + heightBias);
+            float height = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier;
+
+            Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
+
+            // Map bounds check
+            if (mapMesh != null &&
+                !mapMesh.bounds.Contains(new Vector3(worldX, playerPosition.y, worldZ)))
+            {
+                continue;
+            }
+
+            // Minimum distance between spawners
+            bool valid = true;
+            float minDistSq = enemySpawnerMinDistance * enemySpawnerMinDistance;
+
+            for (int i = 0; i < spawnedPositions.Count; i++)
+            {
+                if ((spawnedPositions[i] - spawnPosition).sqrMagnitude < minDistSq)
+                {
+                    valid = false;
+                    break;
+                }
+            }
+
+            if (!valid)
+                continue;
+
+            spawnedPositions.Add(spawnPosition);
+
+            Transform parent = enemySpawnerParent != null ? enemySpawnerParent.transform : null;
+            Instantiate(enemySpawnerPrefab, spawnPosition, Quaternion.identity, parent);
+        }
+
+        Debug.Log(
+            $"Spawned {spawnedPositions.Count}/{enemySpawnerCount} enemy checkpoints " +
+            $"(min player distance: {enemySpawnerMinDistanceFromPlayer}).");
+    }
+
     #endregion
     #region GenerateGlobalNoiseMap
     public void GenerateGlobalNoiseMap(int seed, float scale, int octaves, float persistence, float lacunarity, Vector2 offsets)
@@ -167,16 +263,24 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region GetNoiseValueAtWorldPosition
-    public float GetNoiseValueAtWorldPosition(Vector2 worldPosition){
-        int noiseX = Mathf.RoundToInt(worldPosition.x / _globalNoiseMapSize) % _globalNoiseMapSize;
-        int noiseY = Mathf.RoundToInt(worldPosition.y / _globalNoiseMapSize) % _globalNoiseMapSize;
-        if(noiseX < 0){
-            noiseX += _globalNoiseMapSize;
+    public float GetNoiseValueAtWorldPosition(Vector2 worldPosition)
+    {
+        if (_globalNoiseMap == null)
+        {
+            Debug.LogWarning("Global noise map is null. Call GenerateGlobalNoiseMap first.");
+            return 0f;
         }
-        if(noiseY < 0){
-            noiseY += _globalNoiseMapSize;
-        }
-        return _globalNoiseMap[noiseX, noiseY];
+
+        // Convert world position into noise-map space using worldToNoiseScaleBias
+        float sampleX = worldPosition.x * worldToNoiseScaleBias;
+        float sampleY = worldPosition.y * worldToNoiseScaleBias;
+
+        int noiseX = Mathf.FloorToInt(sampleX) % _globalNoiseMapSize;
+        int noiseY = Mathf.FloorToInt(sampleY) % _globalNoiseMapSize;
+        if (noiseX < 0) noiseX += _globalNoiseMapSize;
+        if (noiseY < 0) noiseY += _globalNoiseMapSize;
+
+        return _globalNoiseMap[noiseX, noiseY]; // value expected in [0,1]
     }
     #endregion
     #region GenerateColorMap
