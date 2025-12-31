@@ -69,6 +69,7 @@
     <Compile Include="Assets\Scripts\TerrainGeneration\MapGenerator.cs" />
     <Compile Include="Assets\Scripts\GameUIScript.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\PlayerStats.cs" />
+    <Compile Include="Assets\playerControler.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BasicRigidBodyPush.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\NoiseHelper.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\ThirdPersonController.cs" />

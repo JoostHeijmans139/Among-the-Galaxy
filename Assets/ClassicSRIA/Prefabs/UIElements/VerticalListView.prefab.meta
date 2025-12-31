@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 700fa4739f929e24698fb8d976a1dfd9
+NativeFormatImporter:
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 106425
+  packageName: ScrollView Adapter (ListView, GridView)
+  packageVersion: 1.0
+  assetPath: Assets/ClassicSRIA/Prefabs/UIElements/VerticalListView.prefab
+  uploadId: 216159

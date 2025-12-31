@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 64f6025e8c14a4044aba0dcc9f207e1e
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 106425
+  packageName: ScrollView Adapter (ListView, GridView)
+  packageVersion: 1.0
+  assetPath: Assets/ClassicSRIA/Scripts/CAbstractViewsHolder.cs
+  uploadId: 216159

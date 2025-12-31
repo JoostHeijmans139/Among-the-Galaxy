@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: af3dff6578b9ec54ba3981aa1724950b
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 106425
+  packageName: ScrollView Adapter (ListView, GridView)
+  packageVersion: 1.0
+  assetPath: Assets/ClassicSRIA/Scripts/Examples/ClassicGridViewExample.cs
+  uploadId: 216159

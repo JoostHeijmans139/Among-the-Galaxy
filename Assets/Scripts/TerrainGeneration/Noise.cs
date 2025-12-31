@@ -1,9 +1,11 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-/// <summary>
-/// Provides methods for generating 2D Perlin noise maps, used in procedural terrain generation.
-/// </summary>
+namespace TerrainGeneration
+{
+    /// <summary>
+    /// Provides methods for generating 2D Perlin noise maps, used in procedural terrain generation.
+    /// </summary>
 public static class Noise
 {
     public enum NormalizedMode
@@ -85,10 +87,20 @@ public static class Noise
                 noiseMap[x, y] = noiseHeight;
             }
         }
-
-        // Normalize the noise map to the [0,1] range.
-        noiseMap = NoiseHelper.NormalizeNoiseMap(noiseMap, minNoiseHeight, maxNoiseHeight, width, height);
-
+        if (normalizedMode == NormalizedMode.Global) {
+            maxPossibleHeight = 0;
+            float amplitude = 1;
+            for (int i = 0; i < octaves; i++) {
+                maxPossibleHeight += amplitude;
+                amplitude *= persistence;
+            }
+        }else
+        {
+            // Normalize the noise map to the [0,1] range.
+            noiseMap = NoiseHelper.NormalizeNoiseMap(noiseMap, minNoiseHeight, maxNoiseHeight, width, height,normalizedMode);
+        }
         return noiseMap;
     }
+}
+
 }
