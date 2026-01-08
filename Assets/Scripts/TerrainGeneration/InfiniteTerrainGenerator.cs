@@ -10,13 +10,15 @@ namespace Assets.Scripts.TerrainGeneration
 {
  public class InfiniteTerrainGenerator : MonoBehaviour
 {
+    #region Variables
     const float viewerMoveThresholdForChunkUpdate = 25f;
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
-    #region Variables
     public LODInfo[] LevelOfDetailLevels;
 
     /// <summary> Maximum distance (in world units) at which chunks remain visible. </summary>
     public static float ViewDistance;
+    
+    public static PhysicsMaterial terrainPhysicsMaterial;
     
     /// <summary> Material applied to the terrain mesh. </summary>
     public Material meshMaterial;
@@ -137,10 +139,12 @@ namespace Assets.Scripts.TerrainGeneration
         MeshRenderer _meshRenderer;
         MeshFilter _meshFilter;
         MapGenerator.MapData _mapData;
+        MeshCollider _meshCollider;
         LODInfo[] _levelsOfDetail;
         LODMesh[] _lodMeshes;
         bool mapDataReceived;
         int previousLODIndex = -1;
+        private readonly int _colliderLODIndex = 0;  // Which LOD to use for collider (0 = highest detail);
         public TerrainChunk(Vector2 coord,int chunkSize,LODInfo[] detailLevels,GameObject parent,Material meshMaterial)
         {
             _levelsOfDetail = detailLevels;
@@ -155,6 +159,8 @@ namespace Assets.Scripts.TerrainGeneration
             _meshRenderer = _meshObject.AddComponent<MeshRenderer>();
             _meshRenderer.material = meshMaterial;
             _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
+            _meshCollider = _meshObject.AddComponent<MeshCollider>();
+            _meshCollider.sharedMaterial = terrainPhysicsMaterial;
             SetVisible(false);
             _lodMeshes = new LODMesh[_levelsOfDetail.Length];
             for (int i = 0; i < _levelsOfDetail.Length; i++)
@@ -203,6 +209,7 @@ namespace Assets.Scripts.TerrainGeneration
                     {
                         previousLODIndex = lodIndex;
                         _meshFilter.mesh = lodMesh.Mesh;
+                        UpdateCollider(lodIndex);
                     }
                     else if (!lodMesh.HaseReqestedMesh && mapDataReceived)
                     {
@@ -214,6 +221,21 @@ namespace Assets.Scripts.TerrainGeneration
                 
             }
             SetVisible(visible);
+        }
+        private void UpdateCollider(int currentLODIndex)
+        {
+            int colliderLOD = Mathf.Min(currentLODIndex, _colliderLODIndex);
+            LODMesh colliderMesh = _lodMeshes[colliderLOD];
+        
+            if (colliderMesh.HaseMesh)
+            {
+                _meshCollider.sharedMesh = null; // Clear first to force update
+                _meshCollider.sharedMesh = colliderMesh.Mesh;
+            }
+            else if (!colliderMesh.HaseReqestedMesh)
+            {
+                colliderMesh.RequestMesh(_mapData);
+            }
         }
         public void SetVisible(bool visible)
         {
@@ -234,6 +256,7 @@ namespace Assets.Scripts.TerrainGeneration
         public Mesh Mesh;
         public bool HaseReqestedMesh;
         public bool HaseMesh;
+        public MeshCollider MeshCollider;
         private int _levelOfDetail;
         private System.Action updateCallback;
         public LODMesh(int levelOfDetail, System.Action updateCallback)
