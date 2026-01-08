@@ -13,15 +13,15 @@ public class MapGenerator : MonoBehaviour
 {
     #region MapGenerationVariables
 
-    /// <summary>
-    /// Modes for how the map will be drawn/displayed.
-    /// </summary>
-    public enum DrawMode
-    {
-        DrawNoiseMap, // Display the raw noise values as a grayscale image
-        DrawColorMap, // Display the noise map colored by terrain types
-        DrawMesh, // Display the map as a 3D mesh with textures
-    }
+        /// <summary>
+        /// Modes for how the map will be drawn/displayed.
+        /// </summary>
+        public enum DrawMode
+        {
+            DrawNoiseMap, // Display the raw noise values as a grayscale image
+            DrawColorMap, // Display the noise map colored by terrain types
+            DrawMesh, // Display the map as a 3D mesh with textures
+        }
 
         /// <summary>
         /// Determines whether noise normalization is done per chunk (Local) or globally across the entire terrain (Global).
