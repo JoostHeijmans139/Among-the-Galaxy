@@ -109,7 +109,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c57d41691c38925488c77bd3b8430f92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemName: Tree
+  ObjectName: Tree
+  ItemName: Wood
+  ObjectHealth: 3
+  shakeDuration: 0.2
+  shakeMagnitude: 0.1
+  hitGiveAmount: 2
+  destroyGiveAmount: 5
 --- !u!43 &-2382538047088866719
 Mesh:
   m_ObjectHideFlags: 0
