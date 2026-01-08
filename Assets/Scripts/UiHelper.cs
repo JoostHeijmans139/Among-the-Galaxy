@@ -14,12 +14,6 @@ public class UiHelper: MonoBehaviour
     {
         SceneManager.LoadScene("WorldCreation");
     }
-    public void SetLevelOfDetail(float value)
-    {
-        SettingsManager.CurrentSettings.levelOfDetail = (int)value;
-        Debug.Log("Level of Detail set to: " + value);
-        SettingsManager.SaveSettings();
-    }
 
     public void LoadSettingsMenu()
     {

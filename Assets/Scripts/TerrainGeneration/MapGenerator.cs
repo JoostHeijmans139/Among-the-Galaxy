@@ -161,6 +161,8 @@ public class MapGenerator : MonoBehaviour
 
     private void Start()
     {
+        // Load the generateInfiniteTerrain setting from SettingsManager
+        generateInfiniteTerrain = Settings.SettingsManager.CurrentSettings.generateInfiteTerrain;
         if (generateInfiniteTerrain)
         {
             GameObject meshObject = GameObject.FindGameObjectWithTag("MeshObject");
@@ -178,7 +180,6 @@ public class MapGenerator : MonoBehaviour
                 meshObject.SetActive(true);
             }
         }
-        levelOfDetailEditorPreview = Settings.SettingsManager.CurrentSettings.levelOfDetail;
         Debug.Log("Level of Detail from SettingsManager: " + levelOfDetailEditorPreview);
         
         drawMode = DrawMode.DrawMesh;

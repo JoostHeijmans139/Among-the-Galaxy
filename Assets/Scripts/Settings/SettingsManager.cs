@@ -39,7 +39,7 @@ namespace Settings
         {
             CurrentSettings = new SettingsData
             {
-                levelOfDetail = 0
+                generateInfiteTerrain = false
             };
             SaveSettings();
             LoadSettings();
@@ -48,6 +48,6 @@ namespace Settings
     [Serializable]
     public class SettingsData
     {
-        public int levelOfDetail;
+        public Boolean generateInfiteTerrain = true;
     }
 }
