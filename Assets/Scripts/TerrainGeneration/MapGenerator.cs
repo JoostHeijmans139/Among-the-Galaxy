@@ -492,8 +492,6 @@ public class MapGenerator : MonoBehaviour
         {
             Dequeue<MeshData>(_meshDataThreadInfoQueue);
         }
-        
-
     }
 
     private void Dequeue<T>(Queue<MapThreadInfo<T>> queue)
