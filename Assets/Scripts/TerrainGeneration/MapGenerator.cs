@@ -484,8 +484,15 @@ public class MapGenerator : MonoBehaviour
 
     void Update()
     {
-        Dequeue<MapData>(_mapDataThreadInfoQueue);
-        Dequeue<MeshData>(_meshDataThreadInfoQueue);
+        lock(_mapDataThreadInfoQueue)
+        {
+            Dequeue<MapData>(_mapDataThreadInfoQueue);
+        }
+        lock(_meshDataThreadInfoQueue)
+        {
+            Dequeue<MeshData>(_meshDataThreadInfoQueue);
+        }
+        
 
     }
 
@@ -495,13 +502,13 @@ public class MapGenerator : MonoBehaviour
         {
             return;
         }
-
         int itemsToProcess = queue.Count;
         for (int i = 0; i < itemsToProcess; i++)
         {
             MapThreadInfo<T> threadInfo = queue.Dequeue();
             threadInfo.Callback(threadInfo.Parameter);
         }
+        
     }
 
     #endregion
