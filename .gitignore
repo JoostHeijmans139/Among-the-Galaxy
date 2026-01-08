@@ -8,7 +8,6 @@
 UserSettings/
 MemoryCaptures/
 Recordings/
-
 # Unity generated files
 *.pidb
 *.pdb
@@ -101,7 +100,6 @@ Desktop.ini
 *.swp
 *.bak
 *.orig
-*.tmp
 
 # Ignore fake files
 .fake

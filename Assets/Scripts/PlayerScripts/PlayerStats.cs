@@ -1,26 +1,15 @@
+
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
-    // Singleton instance
-    public static PlayerStats Instance { get; private set; }
+    public static PlayerStats instance { get; private set; }
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    // Player stats
-    public float Health { get; set; } = 100f;
+    // Starting health of player
+    public float Health = 100f;
 
     // Crafting resources
     public int Wood { get; set; } = 0;
@@ -29,15 +18,21 @@ public class PlayerStats : MonoBehaviour
     public int Gold { get; set; } = 0;
     public int Slime { get; set; } = 0;
 
-    // Player inventory
-    public List<string> Inventory = new List<string>();
-
-    // --- Basic functions ---
-    public void TakeDamage(float damage)
+    private void Awake()
     {
-        Health -= damage;
+        if (instance == null)
+        {
+            instance = this;
+        }
     }
 
+    // Player receives damage function
+    public void TakeDamage(float damage)
+    {
+        Health = Health - damage;
+    }
+
+    // Player gaining resources function
     public void GainResource(string type, int amount)
     {
         switch (type.FirstCharacterToUpper())
