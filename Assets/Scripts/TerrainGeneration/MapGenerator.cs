@@ -188,7 +188,8 @@ public class MapGenerator : MonoBehaviour
         meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap,MapChunkSize,MapChunkSize);
         Mesh mesh = meshData.CreateMesh();
         meshCollider.sharedMesh = mesh;
-        SpawnEnemieCheckPointsNearPlayer();
+        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 60.0f, 60.0f);
+        InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
     }
 
     #endregion
@@ -258,7 +259,23 @@ public class MapGenerator : MonoBehaviour
         Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
         return new MapData(biasedNoiseMap, colorMap);
     }
+    public void RemoveEnemieCheckPoints()
+    {
+        if (enemySpawnerParent == null)
+        {
+            Debug.LogWarning("Enemy spawner parent is not assigned.");
+            return;
+        }
 
+        int childCount = enemySpawnerParent.transform.childCount;
+        for (int i = childCount - 1; i >= 0; i--)
+        {
+            Transform child = enemySpawnerParent.transform.GetChild(i);
+            Destroy(child.gameObject);
+        }
+
+        Debug.Log("All enemy checkpoints have been removed.");
+    }
     public void SpawnEnemieCheckPointsNearPlayer()
     {
         if (_globalNoiseMap == null)
