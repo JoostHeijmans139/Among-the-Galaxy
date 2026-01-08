@@ -23,39 +23,131 @@ public class MapGenerator : MonoBehaviour
         DrawMesh, // Display the map as a 3D mesh with textures
     }
 
-    public Noise.NormalizedMode normalizedMode;
-    [Header("Map Settings")] 
-    public DrawMode drawMode; // Current mode for displaying the map
-    public const int MapChunkSize = 241; // Size of each map chunk (for mesh generation)
-    [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation (0 = highest detail)
-    [Header("Noise Settings")] 
-    public int seed;
-    [Range(2, 100)] public float noiseScale; // Scale of the noise (affects zoom)
-    [Range(1, 20)] public int octaves; // Number of noise layers combined
-    [Range(0, 1)] public float persistence; // Controls amplitude of octaves (affects roughness)
-    [Range(1,int.MaxValue)] public float lacunarity; // Controls frequency of octaves (affects detail)
-    public float heightBias;
-    public float worldToNoiseScaleBias;
-    public AnimationCurve heightCurve; // Curve to adjust height distribution
-    public float heightMultiplier;
-    public Vector2 offsets;
-    [Header("Other Settings")] 
-    public bool autoUpdate; // If true, map auto regenerates when settings change
-    public bool generateInfiniteTerrain = false;
-    public TerrainType[] TerrainTypes; // Array defining different terrain types by height and color
-    public MeshRenderer meshRenderer;
-    public MeshCollider meshCollider;
-    private float[,] _globalNoiseMap;
-    private const int _globalNoiseMapSize = 2048;
-    [Header("Enemie spawners")] 
-    public MeshRenderer mapMesh;
-    public GameObject enemySpawnerParent;
-    public GameObject enemySpawnerPrefab;
-    public int enemySpawnerMinDistance = 20;
-    public float enemySpawnerMinDistanceFromPlayer = 20f;
-    public int enemySpawnerSeed = 42;
-    public int playerRadius;
-    public int enemySpawnerCount = 10;
+        /// <summary>
+        /// Determines whether noise normalization is done per chunk (Local) or globally across the entire terrain (Global).
+        /// </summary>
+        public Noise.NormalizedMode normalizedMode;
+
+        [Header("Map Settings")]
+        public DrawMode drawMode; // Current mode for displaying the map (NoiseMap, ColorMap, or Mesh)
+
+        public const int MapChunkSize = 241; // Size of each map chunk in vertices (241x241)
+
+        [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation in editor preview
+
+        [Header("Noise Settings")]
+        public int seed; // Seed value for procedural noise generation
+
+        [Range(2, 100)] public float noiseScale; // Controls the zoom level of the noise pattern
+
+        [Range(1, 20)] public int octaves; // Number of noise layers combined together
+
+        /// <summary>
+        /// Controls how much each octave contributes to the overall shape. Higher values = rougher terrain.
+        /// </summary>
+        [Range(0, 1)] public float persistence;
+
+        /// <summary>
+        /// Controls how quickly the frequency increases for each octave. Higher values = more detailed features.
+        /// </summary>
+        [Range(1, int.MaxValue)] public float lacunarity;
+
+        /// <summary>
+        /// Vertical offset added to all terrain heights. Positive values raise terrain, negative values lower it.
+        /// </summary>
+        public float heightBias;
+
+        /// <summary>
+        /// Scale factor for converting world coordinates to noise map coordinates. Affects how terrain samples from the global noise map.
+        /// </summary>
+        public float worldToNoiseScaleBias;
+
+        /// <summary>
+        /// Animation curve to remap height values non-linearly. Allows custom height distribution (e.g., flatter valleys, steeper mountains).
+        /// </summary>
+        public AnimationCurve heightCurve;
+
+        /// <summary>
+        /// Multiplier applied to final height values. Controls the overall vertical scale of the terrain.
+        /// </summary>
+        public float heightMultiplier;
+
+        /// <summary>
+        /// Offset applied to noise sampling position. Used to shift the entire terrain pattern in world space.
+        /// </summary>
+        public Vector2 offsets;
+
+        [Header("Other Settings")] 
+        
+        public bool autoUpdate;/// If true, the map automatically regenerates when inspector values change (editor only).
+
+        /// <summary>
+        /// If true, enables infinite terrain generation mode. If false, generates a single static terrain chunk.
+        /// </summary>
+        public bool generateInfiniteTerrain = false;
+
+        /// <summary>
+        /// Array defining terrain type layers (water, sand, grass, etc.) by height threshold and color.
+        /// </summary>
+        public TerrainType[] TerrainTypes;
+
+        /// <summary>
+        /// Renderer component for the main terrain mesh. Used to apply textures and materials.
+        /// </summary>
+        public MeshRenderer meshRenderer;
+
+        /// <summary>
+        /// Collider component for the terrain mesh. Enables physics interactions with the terrain.
+        /// </summary>
+        public MeshCollider meshCollider;
+
+        /// <summary>
+        /// Pre-generated global noise map used for infinite terrain generation. Size defined by _globalNoiseMapSize.
+        /// </summary>
+        private float[,] _globalNoiseMap;
+
+        /// <summary>
+        /// Size of the global noise map (2048x2048). Larger values provide more unique terrain before patterns repeat.
+        /// </summary>
+        private const int _globalNoiseMapSize = 2048;
+
+        [Header("Enemie spawners")] 
+        public MeshRenderer mapMesh;/// Reference to the terrain mesh renderer. Used for bounds checking when spawning enemy checkpoints.
+
+        /// <summary>
+        /// Parent GameObject to organize spawned enemy checkpoint objects in the hierarchy.
+        /// </summary>
+        public GameObject enemySpawnerParent;
+
+        /// <summary>
+        /// Prefab instantiated for each enemy checkpoint spawn location.
+        /// </summary>
+        public GameObject enemySpawnerPrefab;
+
+        /// <summary>
+        /// Minimum distance (in world units) that must separate each enemy spawner from others.
+        /// </summary>
+        public int enemySpawnerMinDistance = 20;
+
+        /// <summary>
+        /// Minimum distance (in world units) from the player where enemy spawners can spawn. Defines the inner radius of the spawn ring.
+        /// </summary>
+        public float enemySpawnerMinDistanceFromPlayer = 20f;
+
+        /// <summary>
+        /// Seed for enemy spawner random number generation. Ensures consistent spawner placement with the same seed.
+        /// </summary>
+        public int enemySpawnerSeed = 42;
+
+        /// <summary>
+        /// Maximum distance (in world units) from the player where enemy spawners can spawn. Defines the outer radius of the spawn ring.
+        /// </summary>
+        public int playerRadius;
+
+        /// <summary>
+        /// Target number of enemy checkpoint spawners to generate around the player.
+        /// </summary>
+        public int enemySpawnerCount = 10;
     #endregion
 
     #region ThreadingVariables

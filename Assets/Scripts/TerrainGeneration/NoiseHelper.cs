@@ -75,9 +75,28 @@ public static class NoiseHelper
                 if (globalX < 0) globalX += mapWidth;
                 if (globalY < 0) globalY += mapHeight;
                 
-                globalNoiseMap[x, y] = noiseMap[globalX, globalY];
+                globalNoiseMap[x, y] = BilinearSample(noiseMap, worldX,worldY,mapSize,mapHeight); 
             }
         }
         return globalNoiseMap;
+    }
+    private static float BilinearSample(float[,] map, float x, float y, int width, int height)
+    {
+        int x0 = Mathf.FloorToInt(x) % width;
+        int y0 = Mathf.FloorToInt(y) % height;
+        int x1 = (x0 + 1) % width;
+        int y1 = (y0 + 1) % height;
+    
+        if (x0 < 0) x0 += width;
+        if (y0 < 0) y0 += height;
+        if (x1 < 0) x1 += width;
+        if (y1 < 0) y1 += height;
+    
+        float tx = x - Mathf.Floor(x);
+        float ty = y - Mathf.Floor(y);
+    
+        float top = Mathf.Lerp(map[x0, y0], map[x1, y0], tx);
+        float bottom = Mathf.Lerp(map[x0, y1], map[x1, y1], tx);
+        return Mathf.Lerp(top, bottom, ty);
     }
 }
