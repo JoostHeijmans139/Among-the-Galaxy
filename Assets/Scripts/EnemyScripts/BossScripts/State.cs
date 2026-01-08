@@ -5,6 +5,7 @@ using UnityEngine.AI;
 
 public class State
 {
+    //Create states
     public enum STATE
     {
         IDLE, PATROL, PURSUE, ATTACK, IDLE2
@@ -49,6 +50,7 @@ public class State
         stage = EVENT.EXIT;
     }
 
+    //State handler
     public State Process()
     {
         if (stage == EVENT.ENTER) Enter();

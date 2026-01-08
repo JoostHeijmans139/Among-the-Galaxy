@@ -6,7 +6,21 @@ using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
 {
-    public static PlayerStats instance { get; private set; }
+    //Singleton instance
+    public static PlayerStats Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     // Starting health of player
     public float Health = 100f;
@@ -18,19 +32,8 @@ public class PlayerStats : MonoBehaviour
     public int Gold { get; set; } = 0;
     public int Slime { get; set; } = 0;
 
-    private void Awake()
-    {
-        if (instance == null)
-        {
-            instance = this;
-        }
-    }
-
-    // Player receives damage function
-    public void TakeDamage(float damage)
-    {
-        Health = Health - damage;
-    }
+    // Player inventory
+    public List<string> Inventory = new List<string>();
 
     // Player gaining resources function
     public void GainResource(string type, int amount)
@@ -140,14 +143,7 @@ public class PlayerStats : MonoBehaviour
         Inventory.Add(recipe.itemName);
     }
 
-    // Debug
-    [ContextMenu("Debug Damage (10)")]
-    private void DebugTakeDamage()
-    {
-        TakeDamage(10f);
-        Debug.Log("-10 damage, Health = " + Health);
-    }
-
+    //Debug
     [ContextMenu("Debug Give Wood (1)")]
     private void DebugGiveWood()
     {
