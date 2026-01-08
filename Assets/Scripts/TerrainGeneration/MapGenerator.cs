@@ -308,7 +308,7 @@ public class MapGenerator : MonoBehaviour
             float noiseValue = GetNoiseValueAtWorldPosition(samplePos);
 
             float biased = Mathf.Clamp01(noiseValue + heightBias);
-            float height = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier;
+            float height = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier+3.0f;
 
             Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
 
