@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -36,30 +37,110 @@ public class PlayerStats : MonoBehaviour
     {
         switch (type.FirstCharacterToUpper())
         {
-            case "Wood":
-                Wood = Wood + amount;
+            case "Wood": 
+                Wood += amount; 
                 break;
 
-            case "Stone":
-                Stone = Stone + amount;
+            case "Stone": 
+                Stone += amount; 
                 break;
 
-            case "Metal":
-                Metal = Metal + amount;
+            case "Metal": 
+                Metal += amount; 
                 break;
 
-            case "Gold":
-                Gold = Gold + amount;
+            case "Gold": 
+                Gold += amount; 
                 break;
 
-            case "Slime":
-                Slime = Slime + amount;
+            case "Slime": 
+                Slime += amount; 
                 break;
         }
     }
 
+    public void LoseResource(string type, int amount)
+    {
+        switch (type.FirstCharacterToUpper())
+        {
+            case "Wood": 
+                Wood = Mathf.Max(0, Wood - amount); 
+                break;
 
-    // Quick test for damage to UI
+            case "Stone": 
+                Stone = Mathf.Max(0, Stone - amount); 
+                break;
+
+            case "Metal": 
+                Metal = Mathf.Max(0, Metal - amount); 
+                break;
+
+            case "Gold": 
+                Gold = Mathf.Max(0, Gold - amount); 
+                break;
+
+            case "Slime": 
+                Slime = Mathf.Max(0, Slime - amount); 
+                break;
+        }
+    }
+
+    public int GetAmount(string type)
+    {
+        switch (type.FirstCharacterToUpper())
+        {
+            case "Wood": 
+                return Wood;
+
+            case "Stone": 
+                return Stone;
+
+            case "Metal": 
+                return Metal;
+
+            case "Gold": 
+                return Gold;
+
+            case "Slime": 
+                return Slime;
+
+            default:
+                Debug.LogWarning("Resource type not found: " + type);
+                return 0;
+        }
+    }
+    
+    // Check if player has enough resources for recipe
+    public bool HasResources(CraftingRecipe recipe)
+    {
+        foreach (var cost in recipe.costs)
+        {
+            if (GetAmount(cost.resourceName) < cost.amount)
+            {
+                // Player does NOT have enough
+                return false;
+            }
+        }
+        // Player has enough
+        return true;
+    }
+
+    // Remove resources based on a recipe
+    public void ConsumeResources(CraftingRecipe recipe)
+    {
+        foreach (var cost in recipe.costs)
+        {
+            LoseResource(cost.resourceName, cost.amount);
+        }
+    }
+
+    // Add crafted item to player's inventory
+    public void GiveItem(CraftingRecipe recipe)
+    {
+        Inventory.Add(recipe.itemName);
+    }
+
+    // Debug
     [ContextMenu("Debug Damage (10)")]
     private void DebugTakeDamage()
     {
@@ -72,5 +153,16 @@ public class PlayerStats : MonoBehaviour
     {
         GainResource("Wood", 1);
         Debug.Log("+1 wood gained, Wood = " + Wood);
+    }
+}
+
+// Extension method to capitalize first letter
+public static class StringExtensions
+{
+    public static string FirstCharacterToUpper(this string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return string.Empty;
+        return input[0].ToString().ToUpper() + input.Substring(1).ToLower();
     }
 }

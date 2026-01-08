@@ -1,0 +1,44 @@
+{
+  "terrainTypes": [
+    {
+      "Name": "water",
+      "Color": { "r": 0.0, "g": 0.35, "b": 0.9, "a": 0.0 },
+      "Height": 0.15
+    },
+    {
+      "Name": "shallowWater",
+      "Color": { "r": 0.0, "g": 0.65, "b": 1.0, "a": 0.0 },
+      "Height": 0.22
+    },
+    {
+      "Name": "sand",
+      "Color": { "r": 1.0, "g": 0.92, "b": 0.55, "a": 0.0 },
+      "Height": 0.28
+    },
+    {
+      "Name": "grass",
+      "Color": { "r": 0.28, "g": 0.82, "b": 0.18, "a": 0.0 },
+      "Height": 0.45
+    },
+    {
+      "Name": "higherGrass",
+      "Color": { "r": 0.15, "g": 0.65, "b": 0.10, "a": 0.0 },
+      "Height": 0.58
+    },
+    {
+      "Name": "lowRock",
+      "Color": { "r": 0.48, "g": 0.43, "b": 0.38, "a": 0.0 },
+      "Height": 0.73
+    },
+    {
+      "Name": "highRock",
+      "Color": { "r": 0.30, "g": 0.30, "b": 0.30, "a": 0.0 },
+      "Height": 0.87
+    },
+    {
+      "Name": "snow",
+      "Color": { "r": 1.0, "g": 1.0, "b": 1.0, "a": 0.0 },
+      "Height": 1.0
+    }
+  ]
+}

@@ -4,13 +4,17 @@
 TagManager:
   serializedVersion: 3
   tags:
+  - Floor
+  - MainMenu
+  - SettingsMenu
+  - MeshObject
   - CinemachineTarget
   - Checkpoint
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Terrain
   - Water
   - UI
   - 
