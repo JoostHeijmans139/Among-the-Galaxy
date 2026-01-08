@@ -47,14 +47,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\UiHelper.cs" />
+    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\GameEnvironment.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\MeshGenerator.cs" />
+    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Idle.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\CAbstractViewsHolder.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\TextureGenerator.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\ClassicSRIA.cs" />
+    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Patrol.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Util\CLoadSceneOnClick.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\SimpleClientModels.cs" />
     <Compile Include="Assets\Scripts\CraftingMenuUI.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\CUtil.cs" />
+    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Attack.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\InfiniteTerrainGenerator.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\SimpleClientViewsHolders.cs" />
     <Compile Include="Assets\Scripts\InteractableObject.cs" />
@@ -66,20 +70,22 @@
     <Compile Include="Assets\playerControler.cs" />
     <Compile Include="Assets\Scripts\CraftingRecipe.cs" />
     <Compile Include="Assets\Scripts\CraftingButton.cs" />
+    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\EnemyAI.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BasicRigidBodyPush.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\NoiseHelper.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\ThirdPersonController.cs" />
-    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Golem\HumanoidGiantDemo.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\Noise.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\DemoUI.cs" />
-    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Golem\GolemAi.cs" />
     <Compile Include="Assets\Scripts\Settings\SettingsManager.cs" />
     <Compile Include="Assets\Scripts\CraftingMenuController.cs" />
+    <Compile Include="Assets\Kevin Iglesias\Characters\Humanoid Giant\Demo Scene\Scripts\HumanoidGiantDemo.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\ClassicGridViewExample.cs" />
     <Compile Include="Assets\Scripts\ResourceRowUI.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\DisplayMap.cs" />
+    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\State.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\VerticalClassicListViewExample.cs" />
     <Compile Include="Assets\Scripts\SelectionManager.cs" />
+    <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Pursue.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Util\CExpandCollapseOnClick.cs" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
