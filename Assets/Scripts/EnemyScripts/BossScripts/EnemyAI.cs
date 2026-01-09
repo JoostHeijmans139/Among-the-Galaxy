@@ -48,11 +48,15 @@ public class EnemyAI : MonoBehaviour
     //Checks if player is in attack range
     public void OnTriggerStay(Collider other)
     {
-        if (other.attachedRigidbody)
+        if (other.CompareTag("Player"))
         {
             isInAttackRange = true;
         }
-        else
+    }
+
+    public void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
         {
             isInAttackRange = false;
         }

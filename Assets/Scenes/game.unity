@@ -937,7 +937,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7982966797167880433, guid: 12cc27a1c1cb74f45a97f59a64324747, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 25.24
+      value: -0.93
       objectReference: {fileID: 0}
     - target: {fileID: 7982966797167880433, guid: 12cc27a1c1cb74f45a97f59a64324747, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1496,7 +1496,7 @@ MonoBehaviour:
   GroundedRadius: 0.28
   GroundLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1
   CinemachineCameraTarget: {fileID: 0}
   TopClamp: 70
   BottomClamp: -30
