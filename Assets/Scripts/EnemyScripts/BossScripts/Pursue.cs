@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 
 public class Pursue : State
 {
+    //State constructor
     public Pursue(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
         : base(_npc, _agent, _anim, _player)
     {
@@ -15,6 +16,8 @@ public class Pursue : State
         agent.isStopped = false;
     }
 
+    //Enter pursue state
+    //Set animation and destination
     public override void Enter()
     {
         anim.SetFloat("blend", 1f);
@@ -22,6 +25,11 @@ public class Pursue : State
         agent.SetDestination(npc.transform.position);
     }
 
+    //Update pursue state
+    //Check for player in vision range
+    //If out of vision range, switch to idle state
+    //If in attack range, switch to attack state
+    //Else, pursue player
     public override void Update()
     {
         if (Vector3.Distance(npc.transform.position, player.position) > visDist)
@@ -47,6 +55,7 @@ public class Pursue : State
         }
     }
 
+    //Exit pursue state
     public override void Exit()
     {
         base.Exit();

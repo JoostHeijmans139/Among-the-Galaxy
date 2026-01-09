@@ -6,6 +6,7 @@ using UnityEditor;
 
 public class Idle : State
 {
+    //State constructor
     public Idle(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player) 
         : base(_npc, _agent, _anim, _player)
     {
@@ -14,6 +15,8 @@ public class Idle : State
         agent.isStopped = true;
     }
 
+    //Enter idle state
+    //Set animation and destination
     public override void Enter()
     {
         anim.SetFloat("blend", 0f);
@@ -21,6 +24,10 @@ public class Idle : State
         agent.SetDestination(npc.transform.position);
     }
 
+    //Update idle state
+    //Check for player in vision range
+    //If in vision range, switch to pursue state
+    //Randomly switch to patrol state
     public override void Update()
     {
         if (Vector3.Distance(npc.transform.position, player.position) < visDist)
@@ -43,6 +50,7 @@ public class Idle : State
         }
     }
 
+    //Exit idle state
     public override void Exit()
     {
         base.Exit();

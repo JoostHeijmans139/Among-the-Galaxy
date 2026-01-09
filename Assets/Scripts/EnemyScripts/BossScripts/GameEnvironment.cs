@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public sealed class GameEnvironment
 {
+    //Singleton instance
+    //Handles checkpoints in the game environment
     private static GameEnvironment instance;
     private List<GameObject> checkpoints = new List<GameObject>();
     public List<GameObject> Checkpoints { get { return checkpoints; } }
