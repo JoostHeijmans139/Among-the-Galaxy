@@ -150,6 +150,18 @@ public class PlayerStats : MonoBehaviour
         GainResource("Wood", 1);
         Debug.Log("+1 wood gained, Wood = " + Wood);
     }
+
+    //TODO
+    //Check if button is pressed to attack
+    
+    //public void Attack()
+    //{
+    //    if (isInAttackRange == true)
+    //    {
+    //        EnemyAI.Instance.health -= 10f;
+    //        Debug.Log("Damage dealt to enemy");
+    //    }
+    //}
 }
 
 // Extension method to capitalize first letter

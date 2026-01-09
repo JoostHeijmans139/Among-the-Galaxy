@@ -6,6 +6,8 @@ using UnityEditor;
 
 public class EnemyAI : MonoBehaviour
 {
+    public static EnemyAI Instance { get; private set; }
+
     NavMeshAgent agent;
     Animator anim;
     public Transform player;
@@ -16,6 +18,8 @@ public class EnemyAI : MonoBehaviour
     public int attackRange = 4;
 
     public bool isInAttackRange = false;
+
+    public float health = 50f;
 
     //On start, create new state on the object
     void Start()
