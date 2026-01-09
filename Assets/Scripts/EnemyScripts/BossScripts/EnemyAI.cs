@@ -33,6 +33,7 @@ public class EnemyAI : MonoBehaviour
     void Update()
     {
         currentState = currentState.Process();
+        UpdateHealth();
     }
 
     //Give visuals to the different ranges
@@ -64,6 +65,16 @@ public class EnemyAI : MonoBehaviour
         {
             PlayerStats.Instance.Health -= 10f;
             Debug.Log("Damage dealt to player");
+        }
+    }
+
+    //Destroy enemy on 0 health
+    private void UpdateHealth()
+    {
+        if (health <= 0f)
+        {
+            Destroy(this.gameObject);
+            Debug.Log("Enemy defeated");
         }
     }
 }
