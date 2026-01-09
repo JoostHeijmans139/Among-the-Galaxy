@@ -6,6 +6,7 @@ using UnityEditor;
 
 public class Attack : State
 {
+    //State constructor
     public Attack(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
         : base(_npc, _agent, _anim, _player)
     {
@@ -14,6 +15,8 @@ public class Attack : State
         agent.isStopped = true;
     }
 
+    //Enter attack state
+    //Set animation and destination
     public override void Enter()
     {
         anim.SetBool("attacking", true);
@@ -21,6 +24,10 @@ public class Attack : State
         agent.SetDestination(npc.transform.position);
     }
 
+    //Update attack state
+    //Check for player in attack range
+    //If out of attack range, switch to pursue state
+    //Else, face player
     public override void Update()
     {
         if (Vector3.Distance(npc.transform.position, player.position) > attackDist)
@@ -36,6 +43,7 @@ public class Attack : State
         }
     }
 
+    //Exit attack state
     public override void Exit()
     {
         base.Exit();
