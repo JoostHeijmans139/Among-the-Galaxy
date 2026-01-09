@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using JetBrains.Annotations;
 using TerrainGeneration;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -188,7 +189,7 @@ public class MapGenerator : MonoBehaviour
         meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap,MapChunkSize,MapChunkSize);
         Mesh mesh = meshData.CreateMesh();
         meshCollider.sharedMesh = mesh;
-        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 60.0f, 60.0f);
+        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 5.0f, 60.0f);
         InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
     }
 
@@ -322,10 +323,21 @@ public class MapGenerator : MonoBehaviour
             float worldZ = playerPosition.z + Mathf.Sin(angle) * radius;
 
             Vector2 samplePos = new Vector2(worldX, worldZ);
-            float noiseValue = GetNoiseValueAtWorldPosition(samplePos);
-
-            float biased = Mathf.Clamp01(noiseValue + heightBias);
-            float height = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier+3.0f;
+            float height = 0.0f;
+            Ray ray = new Ray(new Vector3(worldX, 1000f, worldZ), Vector3.down);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                height = hit.point.y;
+                Debug.Log("Raycast hit terrain at position: " + samplePos + " with height: " + height);
+            }
+            else
+            {
+                Debug.Log("Raycast did not hit terrain at position: " + samplePos);
+                continue;
+            }
+            
+            
 
             Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
 
