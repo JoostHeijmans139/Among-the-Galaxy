@@ -160,6 +160,7 @@ public class MapGenerator : MonoBehaviour
         public GameObject treePrefab; // The tree prefab to spawn
         public int numberOfTrees = 100; // How many trees to spawn
         public float minTreeHeight = 0.3f; // Only spawn trees above this normalized height
+        public float treeYOffset = 0.5f; // How much to lower trees into the ground
 
     private static GameObject[] SinglePrefabArray(GameObject prefab)
     {
@@ -555,102 +556,7 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region ObjectGeneration
-        //private void SpawnRocks(float[,] heightMap)
-        //{
-        //    int spawned = 0;
-        //    foreach (Transform child in transform)
-        //    {
-        //        if (child.name.StartsWith("Rock_"))
-        //            Destroy(child.gameObject);
-        //    }
-
-        //    int mapWidth = heightMap.GetLength(0);
-        //    int mapHeight = heightMap.GetLength(1);
-
-        //    for (int i = 0; i < numberOfRocks; i++)
-        //    {
-        //        int x = UnityEngine.Random.Range(0, mapWidth);
-        //        int y = UnityEngine.Random.Range(0, mapHeight);
-
-        //    float worldX = (x - mapWidth / 2f);
-        //    float worldZ = (y - mapHeight / 2f);
-        //    Vector2 samplePos = new Vector2(worldX, worldZ);
-        //    float noiseValue = GetNoiseValueAtWorldPosition(samplePos);
-        //    float biased = Mathf.Clamp01(noiseValue + heightBias);
-        //    float worldY = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier;
-
-        //    if (worldY < minRockHeight)
-        //            continue;
-
-               
-
-        //        GameObject prefab = rockPrefabs[UnityEngine.Random.Range(0, rockPrefabs.Length)];
-
-        //        float yOffset = 0f;
-        //        var prefabRenderer = prefab.GetComponentInChildren<Renderer>();
-        //        if (prefabRenderer != null)
-        //        {
-        //            yOffset = prefabRenderer.bounds.extents.y;
-        //        }
-
-        //    GameObject rock = Instantiate(
-        //        prefab,
-        //        new Vector3(worldX, worldY + yOffset, worldZ),
-        //        Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0),
-        //        transform
-        //    );
-        //    rock.name = $"Rock_{i}";
-        //        spawned++;
-        //    }
-        //    Debug.Log($"[MapGenerator] Spawned {spawned} rocks (minRockHeight={minRockHeight})");
-        //}
-
-    //private void SpawnTrees(float[,] heightMap)
-    //{
-    //    int spawned = 0;
-    //    foreach (Transform child in transform)
-    //    {
-    //        if (child.name.StartsWith("Tree_"))
-    //            Destroy(child.gameObject);
-    //    }
-
-    //    int mapWidth = heightMap.GetLength(0);
-    //    int mapHeight = heightMap.GetLength(1);
-
-    //    for (int i = 0; i < numberOfTrees; i++)
-    //    {
-    //        int x = UnityEngine.Random.Range(0, mapWidth);
-    //        int y = UnityEngine.Random.Range(0, mapHeight);
-
-    //        float worldX = (x - mapWidth / 2f);
-    //        float worldZ = (y - mapHeight / 2f);
-    //        Vector2 samplePos = new Vector2(worldX, worldZ);
-    //        float noiseValue = GetNoiseValueAtWorldPosition(samplePos);
-    //        float biased = Mathf.Clamp01(noiseValue + heightBias);
-    //        float worldY = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier;
-
-    //        if (worldY < minTreeHeight)
-    //            continue;
-
-    //        float yOffset = 0f;
-    //        var prefabRenderer = treePrefab.GetComponentInChildren<Renderer>();
-    //        if (prefabRenderer != null)
-    //        {
-    //            yOffset = prefabRenderer.bounds.extents.y;
-    //        }
-
-    //        GameObject tree = Instantiate(
-    //            treePrefab,
-    //            new Vector3(worldX, worldY + yOffset, worldZ),
-    //            Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0),
-    //            transform
-    //        );
-    //        tree.name = $"Tree_{i}";
-    //        spawned++;
-    //    }
-    //    Debug.Log($"[MapGenerator] Spawned {spawned} trees (minTreeHeight={minTreeHeight})");
-    //}
-    private void SpawnObjects(
+        private void SpawnObjects(
         float[,] heightMap,
         GameObject[] prefabs,
         int numberToSpawn,
@@ -687,15 +593,23 @@ public class MapGenerator : MonoBehaviour
             var prefabRenderer = prefab.GetComponentInChildren<Renderer>();
             if (prefabRenderer != null)
             {
-                yOffset = prefabRenderer.bounds.extents.y;
+                yOffset = prefabRenderer.bounds.center.y - prefabRenderer.bounds.min.y;
+            }
+
+            // Lower trees into the ground
+            float finalY = worldY + yOffset;
+            if (namePrefix == "Tree")
+            {
+                finalY -= treeYOffset;
             }
 
             GameObject obj = Instantiate(
                 prefab,
-                new Vector3(worldX, worldY + yOffset, worldZ),
+                new Vector3(worldX, finalY, worldZ),
                 Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0),
                 transform
             );
+
             obj.name = $"{namePrefix}_{i}";
             spawned++;
         }
