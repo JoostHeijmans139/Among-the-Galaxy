@@ -330,13 +330,17 @@ public class MapGenerator : MonoBehaviour
             {
                 height = hit.point.y;
                 Debug.Log("Raycast hit terrain at position: " + samplePos + " with height: " + height);
+                // if (RayHitWater(hit))
+                // {
+                //     attempt--;
+                //     continue;
+                // }
             }
             else
             {
                 Debug.Log("Raycast did not hit terrain at position: " + samplePos);
                 continue;
             }
-            
             
 
             Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
@@ -375,6 +379,20 @@ public class MapGenerator : MonoBehaviour
             $"(min player distance: {enemySpawnerMinDistanceFromPlayer}).");
     }
 
+    public bool RayHitWater(RaycastHit hit)
+    {
+        Vector2 hitCoord = new Vector2(hit.point.x, hit.point.z);
+        float samplePoint = GetNoiseValueAtWorldPosition(hitCoord);
+        if(samplePoint < 0.3f)
+        {
+            Debug.Log("Sampled point is in water at position: " + hit.point.x+" "+hit.point.z + " with noise value: " + samplePoint);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     #endregion
     #region GenerateGlobalNoiseMap
     public void GenerateGlobalNoiseMap(int seed, float scale, int octaves, float persistence, float lacunarity, Vector2 offsets)
