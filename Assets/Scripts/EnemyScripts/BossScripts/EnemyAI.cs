@@ -6,7 +6,6 @@ using UnityEditor;
 
 public class EnemyAI : MonoBehaviour
 {
-    public static EnemyAI Instance { get; private set; }
 
     NavMeshAgent agent;
     Animator anim;
@@ -16,15 +15,11 @@ public class EnemyAI : MonoBehaviour
     //Adding range
     public int sightRange = 20;
     public int attackRange = 4;
-
     public bool isInAttackRange = false;
 
     public float health = 50f;
 
-    private void Awake()
-    {
-        Instance = this;
-    }
+    public int materialDropAmount = 5;
 
     //On start, create new state on the object
     void Start()
@@ -38,7 +33,6 @@ public class EnemyAI : MonoBehaviour
     void Update()
     {
         currentState = currentState.Process();
-        UpdateHealth();
     }
 
     //Give visuals to the different ranges
@@ -67,7 +61,6 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    //Deal damage
     public void Damage()
     {
         if (isInAttackRange == true)
@@ -77,12 +70,22 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
+    //Take damage
+    public void TakeDamage(float amount)
+    {
+        health -= amount;
+        UpdateHealth();
+    }
+
     //Destroy enemy on 0 health
     private void UpdateHealth()
     {
         if (health <= 0f)
         {
-            Destroy(this.gameObject);
+            PlayerStats.Instance.GainResource("Stone", materialDropAmount);
+            Debug.Log($"Player has {PlayerStats.Instance.Stone} stone");
+
+            Destroy(gameObject);
             Debug.Log("Enemy defeated");
         }
     }

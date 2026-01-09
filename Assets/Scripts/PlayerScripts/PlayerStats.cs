@@ -9,6 +9,8 @@ public class PlayerStats : MonoBehaviour
     //Singleton instance
     public static PlayerStats Instance { get; private set; }
 
+    public PlayerAttackRange attackRange;
+
     private void Awake()
     {
         if (Instance == null)
@@ -25,8 +27,8 @@ public class PlayerStats : MonoBehaviour
     // Starting health of player
     public float Health = 100f;
 
-    public float attackRange = 2f;
-    public bool isInPlayerRange = false;
+    private EnemyAI enemyInRange;
+
     // Crafting resources
     public int Wood { get; set; } = 0;
     public int Stone { get; set; } = 0;
@@ -114,7 +116,7 @@ public class PlayerStats : MonoBehaviour
                 return 0;
         }
     }
-    
+
     // Check if player has enough resources for recipe
     public bool HasResources(CraftingRecipe recipe)
     {
@@ -153,29 +155,11 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("+1 wood gained, Wood = " + Wood);
     }
 
-    public void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Enemy"))
-        {
-            isInPlayerRange = true;
-        }
-    }
-
-    public void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Enemy"))
-        {
-            isInPlayerRange = false;
-        }
-    }
-
-    //Check if button is pressed to attack
     public void Attack()
     {
-        if (Input.GetMouseButtonDown(0) && isInPlayerRange == true)
+        if (Input.GetMouseButtonDown(0) && attackRange.enemyInRange != null)
         {
-            EnemyAI.Instance.health -= 10f;
-            Debug.Log("Damage dealt to enemy");
+            attackRange.enemyInRange.TakeDamage(10f);
         }
     }
 

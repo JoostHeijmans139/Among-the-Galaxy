@@ -100,6 +100,7 @@
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\State.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\VerticalClassicListViewExample.cs" />
     <Compile Include="Assets\Scripts\SelectionManager.cs" />
+    <Compile Include="Assets\Scripts\PlayerScripts\PlayerAttackRange.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Pursue.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Util\CExpandCollapseOnClick.cs" />
   </ItemGroup>
