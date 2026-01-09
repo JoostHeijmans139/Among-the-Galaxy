@@ -21,6 +21,11 @@ public class EnemyAI : MonoBehaviour
 
     public float health = 50f;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     //On start, create new state on the object
     void Start()
     {

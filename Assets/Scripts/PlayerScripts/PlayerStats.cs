@@ -25,6 +25,8 @@ public class PlayerStats : MonoBehaviour
     // Starting health of player
     public float Health = 100f;
 
+    public float attackRange = 2f;
+    public bool isInPlayerRange = false;
     // Crafting resources
     public int Wood { get; set; } = 0;
     public int Stone { get; set; } = 0;
@@ -151,14 +153,35 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("+1 wood gained, Wood = " + Wood);
     }
 
+    public void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            isInPlayerRange = true;
+        }
+    }
+
+    public void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Enemy"))
+        {
+            isInPlayerRange = false;
+        }
+    }
+
     //Check if button is pressed to attack
     public void Attack()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && isInPlayerRange == true)
         {
             EnemyAI.Instance.health -= 10f;
             Debug.Log("Damage dealt to enemy");
         }
+    }
+
+    private void Update()
+    {
+        Attack();
     }
 }
 
