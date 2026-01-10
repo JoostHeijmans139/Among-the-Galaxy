@@ -26,7 +26,7 @@ namespace StarterAssets
         public void OnAttack(InputValue value)
         {
             attack = value.isPressed;
-			Debug.Log("Look im attacking!");
+			//Debug.Log("Look im attacking!");
 
         }
 
