@@ -9,6 +9,8 @@ public class PlayerStats : MonoBehaviour
     //Singleton instance
     public static PlayerStats Instance { get; private set; }
 
+    public PlayerAttackRange attackRange;
+
     private void Awake()
     {
         if (Instance == null)
@@ -24,6 +26,8 @@ public class PlayerStats : MonoBehaviour
 
     // Starting health of player
     public float Health = 100f;
+
+    private EnemyAI enemyInRange;
 
     // Crafting resources
     public int Wood { get; set; } = 0;
@@ -112,7 +116,7 @@ public class PlayerStats : MonoBehaviour
                 return 0;
         }
     }
-    
+
     // Check if player has enough resources for recipe
     public bool HasResources(CraftingRecipe recipe)
     {
@@ -151,17 +155,18 @@ public class PlayerStats : MonoBehaviour
         Debug.Log("+1 wood gained, Wood = " + Wood);
     }
 
-    //TODO
-    //Check if button is pressed to attack
-    
-    //public void Attack()
-    //{
-    //    if (isInAttackRange == true)
-    //    {
-    //        EnemyAI.Instance.health -= 10f;
-    //        Debug.Log("Damage dealt to enemy");
-    //    }
-    //}
+    public void Attack()
+    {
+        if (Input.GetMouseButtonDown(0) && attackRange.enemyInRange != null)
+        {
+            attackRange.enemyInRange.TakeDamage(10f);
+        }
+    }
+
+    private void Update()
+    {
+        Attack();
+    }
 }
 
 // Extension method to capitalize first letter

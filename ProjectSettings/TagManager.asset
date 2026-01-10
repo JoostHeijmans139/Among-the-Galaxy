@@ -8,6 +8,9 @@ TagManager:
   - MainMenu
   - SettingsMenu
   - MeshObject
+  - CinemachineTarget
+  - Checkpoint
+  - Enemy
   layers:
   - Default
   - TransparentFX
