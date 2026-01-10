@@ -126,5 +126,18 @@ MonoBehaviour:
   ObjectHealth: 3
   shakeDuration: 0.2
   shakeMagnitude: 0.1
+  hitDrops:
+  - itemName: Stone
+    dropChance: 0.5
+    amount: 2
+  - itemName: Metal
+    dropChance: 0.2
+    amount: 5
+  - itemName: Gold
+    dropChance: 0.2
+    amount: 4
+  - itemName: Slime
+    dropChance: 0.1
+    amount: 5
   hitGiveAmount: 2
   destroyGiveAmount: 5

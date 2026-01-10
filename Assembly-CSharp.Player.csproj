@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\CraftingMenuUI.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\SimpleClientModels.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\CUtil.cs" />
+    <Compile Include="Assets\Scripts\FirstPersonCamera.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Attack.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\InfiniteTerrainGenerator.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\SimpleClientViewsHolders.cs" />
@@ -88,7 +89,6 @@
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\EnemyAI.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BasicRigidBodyPush.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\NoiseHelper.cs" />
-    <Compile Include="Assets\Scripts\PlayerScripts\ThirdPersonController.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\Noise.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\DemoUI.cs" />
     <Compile Include="Assets\Scripts\Settings\SettingsManager.cs" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using JetBrains.Annotations;
 using TerrainGeneration;
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -13,161 +14,153 @@ public class MapGenerator : MonoBehaviour
 {
     #region MapGenerationVariables
 
-        /// <summary>
-        /// Modes for how the map will be drawn/displayed.
-        /// </summary>
-        public enum DrawMode
-        {
-            DrawNoiseMap, // Display the raw noise values as a grayscale image
-            DrawColorMap, // Display the noise map colored by terrain types
-            DrawMesh, // Display the map as a 3D mesh with textures
-        }
-
-        /// <summary>
-        /// Determines whether noise normalization is done per chunk (Local) or globally across the entire terrain (Global).
-        /// </summary>
-        public Noise.NormalizedMode normalizedMode;
-
-        [Header("Map Settings")]
-        public DrawMode drawMode; // Current mode for displaying the map (NoiseMap, ColorMap, or Mesh)
-
-        public const int MapChunkSize = 241; // Size of each map chunk in vertices (241x241)
-
-        [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation in editor preview
-
-        [Header("Noise Settings")]
-        public int seed; // Seed value for procedural noise generation
-
-        [Range(2, 100)] public float noiseScale; // Controls the zoom level of the noise pattern
-
-        [Range(1, 20)] public int octaves; // Number of noise layers combined together
-
-        /// <summary>
-        /// Controls how much each octave contributes to the overall shape. Higher values = rougher terrain.
-        /// </summary>
-        [Range(0, 1)] public float persistence;
-
-        /// <summary>
-        /// Controls how quickly the frequency increases for each octave. Higher values = more detailed features.
-        /// </summary>
-        [Range(1, int.MaxValue)] public float lacunarity;
-
-        /// <summary>
-        /// Vertical offset added to all terrain heights. Positive values raise terrain, negative values lower it.
-        /// </summary>
-        public float heightBias;
-
-        /// <summary>
-        /// Scale factor for converting world coordinates to noise map coordinates. Affects how terrain samples from the global noise map.
-        /// </summary>
-        public float worldToNoiseScaleBias;
-
-        /// <summary>
-        /// Animation curve to remap height values non-linearly. Allows custom height distribution (e.g., flatter valleys, steeper mountains).
-        /// </summary>
-        public AnimationCurve heightCurve;
-
-        /// <summary>
-        /// Multiplier applied to final height values. Controls the overall vertical scale of the terrain.
-        /// </summary>
-        public float heightMultiplier;
-
-        /// <summary>
-        /// Offset applied to noise sampling position. Used to shift the entire terrain pattern in world space.
-        /// </summary>
-        public Vector2 offsets;
-
-        [Header("Other Settings")] 
-        
-        public bool autoUpdate;/// If true, the map automatically regenerates when inspector values change (editor only).
-
-        /// <summary>
-        /// If true, enables infinite terrain generation mode. If false, generates a single static terrain chunk.
-        /// </summary>
-        public bool generateInfiniteTerrain = false;
-
-        /// <summary>
-        /// Array defining terrain type layers (water, sand, grass, etc.) by height threshold and color.
-        /// </summary>
-        public TerrainType[] TerrainTypes;
-
-        /// <summary>
-        /// Renderer component for the main terrain mesh. Used to apply textures and materials.
-        /// </summary>
-        public MeshRenderer meshRenderer;
-
-        /// <summary>
-        /// Collider component for the terrain mesh. Enables physics interactions with the terrain.
-        /// </summary>
-        public MeshCollider meshCollider;
-
-        /// <summary>
-        /// Pre-generated global noise map used for infinite terrain generation. Size defined by _globalNoiseMapSize.
-        /// </summary>
-        private float[,] _globalNoiseMap;
-
-        /// <summary>
-        /// Size of the global noise map (2048x2048). Larger values provide more unique terrain before patterns repeat.
-        /// </summary>
-        private const int _globalNoiseMapSize = 2048;
-
-        [Header("Enemie spawners")] 
-        public MeshRenderer mapMesh;/// Reference to the terrain mesh renderer. Used for bounds checking when spawning enemy checkpoints.
-
-        /// <summary>
-        /// Parent GameObject to organize spawned enemy checkpoint objects in the hierarchy.
-        /// </summary>
-        public GameObject enemySpawnerParent;
-
-        /// <summary>
-        /// Prefab instantiated for each enemy checkpoint spawn location.
-        /// </summary>
-        public GameObject enemySpawnerPrefab;
-
-        /// <summary>
-        /// Minimum distance (in world units) that must separate each enemy spawner from others.
-        /// </summary>
-        public int enemySpawnerMinDistance = 20;
-
-        /// <summary>
-        /// Minimum distance (in world units) from the player where enemy spawners can spawn. Defines the inner radius of the spawn ring.
-        /// </summary>
-        public float enemySpawnerMinDistanceFromPlayer = 20f;
-
-        /// <summary>
-        /// Seed for enemy spawner random number generation. Ensures consistent spawner placement with the same seed.
-        /// </summary>
-        public int enemySpawnerSeed = 42;
-
-        /// <summary>
-        /// Maximum distance (in world units) from the player where enemy spawners can spawn. Defines the outer radius of the spawn ring.
-        /// </summary>
-        public int playerRadius;
-
-        /// <summary>
-        /// Target number of enemy checkpoint spawners to generate around the player.
-        /// </summary>
-        public int enemySpawnerCount = 10;
-
-        /// <summary>
-        ///  Object generation
-        /// </summary>
-        [Header("Object Generation")]
-        public GameObject[] rockPrefabs; // List of different rock prefabs
-        public int numberOfRocks = 100;  // How many rocks to spawn
-        public float minRockHeight = 0.3f; // Only spawn rocks above this normalized height
-
-        public GameObject treePrefab; // The tree prefab to spawn
-        public int numberOfTrees = 100; // How many trees to spawn
-        public float minTreeHeight = 0.3f; // Only spawn trees above this normalized height
-        public float treeYOffset = 0.5f; // How much to lower trees into the ground
-
-    private static GameObject[] SinglePrefabArray(GameObject prefab)
+    /// <summary>
+    /// Modes for how the map will be drawn/displayed.
+    /// </summary>
+    public enum DrawMode
     {
-        return new[] { prefab };
+        DrawNoiseMap, // Display the raw noise values as a grayscale image
+        DrawColorMap, // Display the noise map colored by terrain types
+        DrawMesh, // Display the map as a 3D mesh with textures
     }
 
+    /// <summary>
+    /// Determines whether noise normalization is done per chunk (Local) or globally across the entire terrain (Global).
+    /// </summary>
+    public Noise.NormalizedMode normalizedMode;
 
+    [Header("Map Settings")]
+    public DrawMode drawMode; // Current mode for displaying the map (NoiseMap, ColorMap, or Mesh)
+
+    public const int MapChunkSize = 241; // Size of each map chunk in vertices (241x241)
+
+    [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation in editor preview
+
+    [Header("Noise Settings")]
+    public int seed; // Seed value for procedural noise generation
+
+    [Range(2, 100)] public float noiseScale; // Controls the zoom level of the noise pattern
+
+    [Range(1, 20)] public int octaves; // Number of noise layers combined together
+
+    /// <summary>
+    /// Controls how much each octave contributes to the overall shape. Higher values = rougher terrain.
+    /// </summary>
+    [Range(0, 1)] public float persistence;
+
+    /// <summary>
+    /// Controls how quickly the frequency increases for each octave. Higher values = more detailed features.
+    /// </summary>
+    [Range(1, int.MaxValue)] public float lacunarity;
+
+    /// <summary>
+    /// Vertical offset added to all terrain heights. Positive values raise terrain, negative values lower it.
+    /// </summary>
+    public float heightBias;
+
+    /// <summary>
+    /// Scale factor for converting world coordinates to noise map coordinates. Affects how terrain samples from the global noise map.
+    /// </summary>
+    public float worldToNoiseScaleBias;
+
+    /// <summary>
+    /// Animation curve to remap height values non-linearly. Allows custom height distribution (e.g., flatter valleys, steeper mountains).
+    /// </summary>
+    public AnimationCurve heightCurve;
+
+    /// <summary>
+    /// Multiplier applied to final height values. Controls the overall vertical scale of the terrain.
+    /// </summary>
+    public float heightMultiplier;
+
+    /// <summary>
+    /// Offset applied to noise sampling position. Used to shift the entire terrain pattern in world space.
+    /// </summary>
+    public Vector2 offsets;
+
+    [Header("Other Settings")]
+
+    public bool autoUpdate;/// If true, the map automatically regenerates when inspector values change (editor only).
+
+                           /// <summary>
+                           /// If true, enables infinite terrain generation mode. If false, generates a single static terrain chunk.
+                           /// </summary>
+    public bool generateInfiniteTerrain = false;
+
+    /// <summary>
+    /// Array defining terrain type layers (water, sand, grass, etc.) by height threshold and color.
+    /// </summary>
+    public TerrainType[] TerrainTypes;
+
+    /// <summary>
+    /// Renderer component for the main terrain mesh. Used to apply textures and materials.
+    /// </summary>
+    public MeshRenderer meshRenderer;
+
+    /// <summary>
+    /// Collider component for the terrain mesh. Enables physics interactions with the terrain.
+    /// </summary>
+    public MeshCollider meshCollider;
+
+    /// <summary>
+    /// Pre-generated global noise map used for infinite terrain generation. Size defined by _globalNoiseMapSize.
+    /// </summary>
+    private float[,] _globalNoiseMap;
+
+    /// <summary>
+    /// Size of the global noise map (2048x2048). Larger values provide more unique terrain before patterns repeat.
+    /// </summary>
+    private const int _globalNoiseMapSize = 2048;
+
+    [Header("Enemie spawners")]
+    public MeshRenderer mapMesh;/// Reference to the terrain mesh renderer. Used for bounds checking when spawning enemy checkpoints.
+
+                                /// <summary>
+                                /// Parent GameObject to organize spawned enemy checkpoint objects in the hierarchy.
+                                /// </summary>
+    public GameObject enemySpawnerParent;
+
+    /// <summary>
+    /// Prefab instantiated for each enemy checkpoint spawn location.
+    /// </summary>
+    public GameObject enemySpawnerPrefab;
+
+    /// <summary>
+    /// Minimum distance (in world units) that must separate each enemy spawner from others.
+    /// </summary>
+    public int enemySpawnerMinDistance = 20;
+
+    /// <summary>
+    /// Minimum distance (in world units) from the player where enemy spawners can spawn. Defines the inner radius of the spawn ring.
+    /// </summary>
+    public float enemySpawnerMinDistanceFromPlayer = 20f;
+
+    /// <summary>
+    /// Seed for enemy spawner random number generation. Ensures consistent spawner placement with the same seed.
+    /// </summary>
+    public int enemySpawnerSeed = 42;
+
+    /// <summary>
+    /// Maximum distance (in world units) from the player where enemy spawners can spawn. Defines the outer radius of the spawn ring.
+    /// </summary>
+    public int playerRadius;
+
+    /// <summary>
+    /// Target number of enemy checkpoint spawners to generate around the player.
+    /// </summary>
+    public int enemySpawnerCount = 10;
+
+    [Header("Object Generation")]
+    public GameObject[] rockPrefabs; // List of different rock prefabs
+    public int numberOfRocks = 100;  // How many rocks to spawn
+    public float minRockHeight = 0.3f; // Only spawn rocks above this normalized height
+    public float minRockDistance = 5f; // Minimum distance between rocks
+
+    public GameObject treePrefab; // The tree prefab to spawn
+    public int numberOfTrees = 100; // How many trees to spawn
+    public float minTreeHeight = 0.3f; // Only spawn trees above this normalized height
+    public float minTreeDistance = 8f; // Minimum distance between trees
+    public float treeYOffset = 0.5f; // How much to lower trees into the ground
     #endregion
 
     #region ThreadingVariables
@@ -192,7 +185,7 @@ public class MapGenerator : MonoBehaviour
             }
             GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
         }
-        if(!generateInfiniteTerrain)
+        if (!generateInfiniteTerrain)
         {
             GameObject meshObject = GameObject.FindGameObjectWithTag("MeshObject");
             if (meshObject != null && !meshObject.activeSelf)
@@ -201,22 +194,20 @@ public class MapGenerator : MonoBehaviour
             }
         }
         Debug.Log("Level of Detail from SettingsManager: " + levelOfDetailEditorPreview);
-        
+
         drawMode = DrawMode.DrawMesh;
         MapData data = GenerateMapData(Vector2.zero);
         MeshData meshData = MeshGenerator.GenerateTerrainMesh(data.HeightMap, heightMultiplier, heightCurve, levelOfDetailEditorPreview);
-        meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap,MapChunkSize,MapChunkSize);
+        meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap, MapChunkSize, MapChunkSize);
         Mesh mesh = meshData.CreateMesh();
         meshCollider.sharedMesh = mesh;
-        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 60.0f, 60.0f);
+        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 5.0f, 60.0f);
         InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
-        SpawnEnemieCheckPointsNearPlayer();
 
         // Spawn objects
         SpawnObjects(data.HeightMap, rockPrefabs, numberOfRocks, minRockHeight, "Rock");
 
         SpawnObjects(data.HeightMap, SinglePrefabArray(treePrefab), numberOfTrees, minTreeHeight, "Tree");
-
     }
 
     #endregion
@@ -349,10 +340,25 @@ public class MapGenerator : MonoBehaviour
             float worldZ = playerPosition.z + Mathf.Sin(angle) * radius;
 
             Vector2 samplePos = new Vector2(worldX, worldZ);
-            float noiseValue = GetNoiseValueAtWorldPosition(samplePos);
+            float height = 0.0f;
+            Ray ray = new Ray(new Vector3(worldX, 1000f, worldZ), Vector3.down);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                height = hit.point.y;
+                Debug.Log("Raycast hit terrain at position: " + samplePos + " with height: " + height);
+                // if (RayHitWater(hit))
+                // {
+                //     attempt--;
+                //     continue;
+                // }
+            }
+            else
+            {
+                Debug.Log("Raycast did not hit terrain at position: " + samplePos);
+                continue;
+            }
 
-            float biased = Mathf.Clamp01(noiseValue + heightBias);
-            float height = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier+3.0f;
 
             Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
 
@@ -390,6 +396,20 @@ public class MapGenerator : MonoBehaviour
             $"(min player distance: {enemySpawnerMinDistanceFromPlayer}).");
     }
 
+    public bool RayHitWater(RaycastHit hit)
+    {
+        Vector2 hitCoord = new Vector2(hit.point.x, hit.point.z);
+        float samplePoint = GetNoiseValueAtWorldPosition(hitCoord);
+        if (samplePoint < 0.3f)
+        {
+            Debug.Log("Sampled point is in water at position: " + hit.point.x + " " + hit.point.z + " with noise value: " + samplePoint);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     #endregion
     #region GenerateGlobalNoiseMap
     public void GenerateGlobalNoiseMap(int seed, float scale, int octaves, float persistence, float lacunarity, Vector2 offsets)
@@ -467,7 +487,7 @@ public class MapGenerator : MonoBehaviour
     {
         ThreadStart threadStart = delegate
         {
-            MapDataThread(position,callback);
+            MapDataThread(position, callback);
         };
         new Thread(threadStart).Start();
     }
@@ -475,8 +495,8 @@ public class MapGenerator : MonoBehaviour
     private void MapDataThread(Vector2 position, Action<MapData> callback)
     {
         MapData mapData;
-        float [,] noiseMap = null;
-        if(normalizedMode == Noise.NormalizedMode.Global)
+        float[,] noiseMap = null;
+        if (normalizedMode == Noise.NormalizedMode.Global)
         {
             if (_globalNoiseMap == null)
             {
@@ -487,9 +507,9 @@ public class MapGenerator : MonoBehaviour
             mapData = new MapData();
             noiseMap = NoiseHelper.SampleNoiseMap(
             _globalNoiseMap,
-            position,MapChunkSize,worldToNoiseScaleBias);
+            position, MapChunkSize, worldToNoiseScaleBias);
             noiseMap = ApplyHeightBias(noiseMap);
-            Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes); 
+            Color[] colorMap = GenerateColorMap(noiseMap, TerrainTypes);
             mapData.HeightMap = noiseMap;
             mapData.ColorMap = colorMap;
         }
@@ -512,7 +532,7 @@ public class MapGenerator : MonoBehaviour
     {
         ThreadStart threadStart = delegate
         {
-            MeshDataThread(mapdata,lod, callback);
+            MeshDataThread(mapdata, lod, callback);
         };
         new Thread(threadStart).Start();
     }
@@ -528,11 +548,11 @@ public class MapGenerator : MonoBehaviour
 
     void Update()
     {
-        lock(_mapDataThreadInfoQueue)
+        lock (_mapDataThreadInfoQueue)
         {
             Dequeue<MapData>(_mapDataThreadInfoQueue);
         }
-        lock(_meshDataThreadInfoQueue)
+        lock (_meshDataThreadInfoQueue)
         {
             Dequeue<MeshData>(_meshDataThreadInfoQueue);
         }
@@ -550,7 +570,7 @@ public class MapGenerator : MonoBehaviour
             MapThreadInfo<T> threadInfo = queue.Dequeue();
             threadInfo.Callback(threadInfo.Parameter);
         }
-        
+
     }
 
     #endregion
@@ -574,12 +594,12 @@ public class MapGenerator : MonoBehaviour
     #endregion
 
     #region ObjectGeneration
-        private void SpawnObjects(
-        float[,] heightMap,
-        GameObject[] prefabs,
-        int numberToSpawn,
-        float minHeight,
-        string namePrefix)
+    private void SpawnObjects(
+    float[,] heightMap,
+    GameObject[] prefabs,
+    int numberToSpawn,
+    float minHeight,
+    string namePrefix)
     {
         int spawned = 0;
         foreach (Transform child in transform)
@@ -591,6 +611,10 @@ public class MapGenerator : MonoBehaviour
         int mapWidth = heightMap.GetLength(0);
         int mapHeight = heightMap.GetLength(1);
 
+        // Get minimum distance for this object type
+        float minDistance = namePrefix == "Rock" ? minRockDistance : minTreeDistance;
+        List<Vector3> spawnedPositions = new List<Vector3>();
+
         for (int i = 0; i < numberToSpawn; i++)
         {
             int x = UnityEngine.Random.Range(0, mapWidth);
@@ -598,40 +622,88 @@ public class MapGenerator : MonoBehaviour
 
             float worldX = (x - mapWidth / 2f);
             float worldZ = (y - mapHeight / 2f);
+
+            // Get normalized height value for minHeight check
             Vector2 samplePos = new Vector2(worldX, worldZ);
             float noiseValue = GetNoiseValueAtWorldPosition(samplePos);
-            float biased = Mathf.Clamp01(noiseValue + heightBias);
-            float worldY = (heightCurve != null ? heightCurve.Evaluate(biased) : biased) * heightMultiplier;
+            float normalizedHeight = Mathf.Clamp01(noiseValue + heightBias);
 
-            if (worldY < minHeight)
-                continue;
-
-            GameObject prefab = prefabs[UnityEngine.Random.Range(0, prefabs.Length)];
-            float yOffset = 0f;
-            var prefabRenderer = prefab.GetComponentInChildren<Renderer>();
-            if (prefabRenderer != null)
+            // Check against normalized height threshold
+            if (normalizedHeight < minHeight)
             {
-                yOffset = prefabRenderer.bounds.center.y - prefabRenderer.bounds.min.y;
+                i--;
+                continue;
             }
 
-            // Lower trees into the ground
-            float finalY = worldY + yOffset;
+            // Use raycast to get accurate world height
+            Ray ray = new Ray(new Vector3(worldX, 1000f, worldZ), Vector3.down);
+            RaycastHit hit;
+            float worldY;
+
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                worldY = hit.point.y;
+
+                // Skip if raycast hits water
+                if (RayHitWater(hit))
+                {
+                    i--;
+                    continue;
+                }
+            }
+            else
+            {
+                // Fallback to noise-based height if raycast fails
+                worldY = (heightCurve != null ? heightCurve.Evaluate(normalizedHeight) : normalizedHeight) * heightMultiplier;
+            }
+
+            GameObject prefab = prefabs[UnityEngine.Random.Range(0, prefabs.Length)];
+            
+            // Apply tree offset if needed (lowers trees slightly into ground for better look)
+            float finalY = worldY;
             if (namePrefix == "Tree")
             {
                 finalY -= treeYOffset;
             }
 
+            Vector3 spawnPosition = new Vector3(worldX, finalY, worldZ);
+
+            // Check minimum distance from other spawned objects
+            bool tooClose = false;
+            float minDistSq = minDistance * minDistance;
+            foreach (Vector3 existingPos in spawnedPositions)
+            {
+                if ((existingPos - spawnPosition).sqrMagnitude < minDistSq)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (tooClose)
+            {
+                i--;
+                continue;
+            }
+
+            // Spawn the object
             GameObject obj = Instantiate(
                 prefab,
-                new Vector3(worldX, finalY, worldZ),
+                spawnPosition,
                 Quaternion.Euler(0, UnityEngine.Random.Range(0, 360), 0),
                 transform
             );
 
             obj.name = $"{namePrefix}_{i}";
+            spawnedPositions.Add(spawnPosition);
             spawned++;
         }
         Debug.Log($"[MapGenerator] Spawned {spawned} {namePrefix.ToLower()}s (minHeight={minHeight})");
+    }
+
+    private GameObject[] SinglePrefabArray(GameObject prefab)
+    {
+        return new GameObject[] { prefab };
     }
 
     #endregion
@@ -693,7 +765,7 @@ public class MapGenerator : MonoBehaviour
         public float inWeight;
         public float outWeight;
         public WeightedMode weightedMode;
-        
+
         public SerializableKeyframe() { }
 
         public SerializableKeyframe(Keyframe keyframe)
@@ -765,6 +837,6 @@ public class MapGenerator : MonoBehaviour
     }
 
     #endregion
-    
+
 }
 
