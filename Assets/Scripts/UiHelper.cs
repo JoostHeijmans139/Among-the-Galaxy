@@ -15,6 +15,12 @@ public class UiHelper: MonoBehaviour
         SceneManager.LoadScene("WorldCreation");
     }
 
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+    
+    
     public void LoadSettingsMenu()
     {
         foreach (GameObject menuItem in MenuParents)

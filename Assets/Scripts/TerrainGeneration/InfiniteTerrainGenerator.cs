@@ -62,6 +62,8 @@ namespace Assets.Scripts.TerrainGeneration
         }
         if (_mapGenerator.generateInfiniteTerrain)
         {
+            _terrainChunkDictionary.Clear();
+            _terrainChunksLastFrame.Clear();
             ViewDistance = LevelOfDetailLevels[LevelOfDetailLevels.Length - 1].VisibleDistanceThreshold;
             _chunkSize = MapGenerator.MapChunkSize - 1;
             _chunksVisibleInViewDistance = Mathf.RoundToInt(ViewDistance / _chunkSize);

@@ -5,8 +5,8 @@ public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseMenuUI;
     private bool isPaused;
-    AudioSource _backGroundAudioSource;
-    Slider _volumeSlider;
+    public AudioSource backGroundAudioSource;
+    public Slider volumeSlider;
     
     void Update()
     {
@@ -18,10 +18,12 @@ public class PauseMenu : MonoBehaviour
             {
                 isPaused = true;
                 pauseMenuUI.SetActive(true);
-                _volumeSlider.value = _backGroundAudioSource.volume;
+                volumeSlider.value = backGroundAudioSource.volume;
+                Time.timeScale = 0;
             }
             else
             {
+                Time.timeScale = 1;
                 isPaused = false;
                 pauseMenuUI.SetActive(false);
             }
