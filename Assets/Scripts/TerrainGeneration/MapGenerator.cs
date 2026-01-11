@@ -202,6 +202,7 @@ public class MapGenerator : MonoBehaviour
         Mesh mesh = meshData.CreateMesh();
         meshCollider.sharedMesh = mesh;
         InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 5.0f, 60.0f);
+
         InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
 
         // Spawn objects
@@ -209,6 +210,7 @@ public class MapGenerator : MonoBehaviour
 
         SpawnObjects(data.HeightMap, SinglePrefabArray(treePrefab), numberOfTrees, minTreeHeight, "Tree");
     }
+        
 
     #endregion
 
@@ -310,6 +312,13 @@ public class MapGenerator : MonoBehaviour
 
         Vector3 playerPosition = playerGO.transform.position;
 
+        // Debug map bounds
+        if (mapMesh != null)
+        {
+            Debug.Log($"Map bounds: Center={mapMesh.bounds.center}, Size={mapMesh.bounds.size}, Min={mapMesh.bounds.min}, Max={mapMesh.bounds.max}");
+        }
+        Debug.Log($"Player position: {playerPosition}, Spawn radius: {playerRadius}");
+
         // Safety check
         if (enemySpawnerMinDistanceFromPlayer >= playerRadius)
         {
@@ -322,6 +331,9 @@ public class MapGenerator : MonoBehaviour
         List<Vector3> spawnedPositions = new List<Vector3>(enemySpawnerCount);
 
         int maxTries = enemySpawnerCount * 12;
+        int raycastFailures = 0;
+        int boundsFailures = 0;
+        int distanceFailures = 0;
 
         for (int attempt = 0; attempt < maxTries; attempt++)
         {
@@ -346,27 +358,25 @@ public class MapGenerator : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity))
             {
                 height = hit.point.y;
-                Debug.Log("Raycast hit terrain at position: " + samplePos + " with height: " + height);
-                // if (RayHitWater(hit))
-                // {
-                //     attempt--;
-                //     continue;
-                // }
             }
             else
             {
-                Debug.Log("Raycast did not hit terrain at position: " + samplePos);
+                raycastFailures++;
                 continue;
             }
 
 
             Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
 
-            // Map bounds check
-            if (mapMesh != null &&
-                !mapMesh.bounds.Contains(new Vector3(worldX, playerPosition.y, worldZ)))
+            // Map bounds check (skip if infinite terrain is enabled or mapMesh is null)
+            if (!generateInfiniteTerrain && mapMesh != null)
             {
-                continue;
+                Vector3 checkPosition = new Vector3(worldX, spawnPosition.y, worldZ);
+                if (!mapMesh.bounds.Contains(checkPosition))
+                {
+                    boundsFailures++;
+                    continue;
+                }
             }
 
             // Minimum distance between spawners
@@ -383,7 +393,10 @@ public class MapGenerator : MonoBehaviour
             }
 
             if (!valid)
+            {
+                distanceFailures++;
                 continue;
+            }
 
             spawnedPositions.Add(spawnPosition);
 
@@ -392,8 +405,8 @@ public class MapGenerator : MonoBehaviour
         }
 
         Debug.Log(
-            $"Spawned {spawnedPositions.Count}/{enemySpawnerCount} enemy checkpoints " +
-            $"(min player distance: {enemySpawnerMinDistanceFromPlayer}).");
+            $"Spawned {spawnedPositions.Count}/{enemySpawnerCount} enemy checkpoints. " +
+            $"Failures: Raycast={raycastFailures}, Bounds={boundsFailures}, Distance={distanceFailures}");
     }
 
     public bool RayHitWater(RaycastHit hit)
