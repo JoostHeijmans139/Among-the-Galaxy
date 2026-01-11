@@ -1,6 +1,6 @@
 // csharp
 using System.IO;
-using Assets.Scripts.TerrainGeneration;
+using TerrainGeneration;
 using UnityEditor;
 using UnityEngine;
 

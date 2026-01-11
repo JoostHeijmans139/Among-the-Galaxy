@@ -52,6 +52,7 @@
     <Compile Include="Assets\Scripts\TerrainGeneration\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Idle.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\CAbstractViewsHolder.cs" />
+    <Compile Include="Assets\Scripts\TerrainGeneration\AsyncNavMeshBuildScheduler.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\TextureGenerator.cs" />
     <Compile Include="Assets\PauseMenu.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\ClassicSRIA.cs" />

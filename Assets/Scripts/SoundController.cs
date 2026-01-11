@@ -1,3 +1,4 @@
+using Settings;
 using UnityEngine;
 
 public class SoundController : MonoBehaviour
@@ -8,6 +9,8 @@ public class SoundController : MonoBehaviour
     {
         _backGroundAudioSource = GetComponent<AudioSource>();
         _backGroundAudioSource.playOnAwake = true;
+        SettingsManager.LoadSettings();
+        _backGroundAudioSource.volume = SettingsManager.CurrentSettings.masterVolume;
     }
     public void SetVolume(float volume)
     {

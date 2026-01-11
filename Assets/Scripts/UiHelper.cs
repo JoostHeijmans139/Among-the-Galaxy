@@ -9,10 +9,17 @@ using UnityEngine.UIElements;
 
 public class UiHelper: MonoBehaviour
 {
+    public AudioSource _MenuAudioSource;
     public List<GameObject> MenuParents;
     public void GenerateMap()
     {
+        _MenuAudioSource.Stop();
         SceneManager.LoadScene("WorldCreation");
+    }
+
+    public void Start()
+    {
+        PlayMenuSound();
     }
 
     public void RestartGame()
@@ -20,7 +27,10 @@ public class UiHelper: MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     
-    
+    private void PlayMenuSound()
+    {
+        _MenuAudioSource.Play();
+    }
     public void LoadSettingsMenu()
     {
         foreach (GameObject menuItem in MenuParents)

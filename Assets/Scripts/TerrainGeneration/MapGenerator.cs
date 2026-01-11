@@ -149,6 +149,12 @@ public class MapGenerator : MonoBehaviour
         /// Target number of enemy checkpoint spawners to generate around the player.
         /// </summary>
         public int enemySpawnerCount = 10;
+        [Header("Enemy patrol settings")] 
+        public float enemyPatrolRadius = 10f;/// Radius around the spawn point that
+        public GameObject CheckpointPrefab;/// Prefab for enemy patrol checkpoints
+        public int numberOfCheckpoints = 3;/// Number of checkpoints to spawn
+        public GameObject enemyPatrolParent;/// Parent object for organizing enemy patrol checkpoints
+                                           
     #endregion
 
     #region ThreadingVariables
@@ -190,7 +196,9 @@ public class MapGenerator : MonoBehaviour
         Mesh mesh = meshData.CreateMesh();
         meshCollider.sharedMesh = mesh;
         InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 5.0f, 60.0f);
+        InvokeRepeating(nameof(SpawnEnemyPatrolPoints),5.0f,40.0f);
         InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
+        InvokeRepeating(nameof(RemoveEnemyPatrolPoints),25.0f,40.0f);
     }
 
     #endregion
@@ -277,6 +285,69 @@ public class MapGenerator : MonoBehaviour
 
         Debug.Log("All enemy checkpoints have been removed.");
     }
+    
+    public void RemoveEnemyPatrolPoints()
+    {
+        if (enemyPatrolParent == null)
+        {
+            Debug.LogWarning("Enemy patrol parent is not assigned.");
+            return;
+        }
+
+        int childCount = enemyPatrolParent.transform.childCount;
+        for (int i = childCount - 1; i >= 0; i--)
+        {
+            Transform child = enemyPatrolParent.transform.GetChild(i);
+            Destroy(child.gameObject);
+        }
+
+        Debug.Log("All enemy patrol checkpoints have been removed.");
+    }
+    public void SpawnEnemyPatrolPoints()
+    {
+        if (_globalNoiseMap == null)
+        {
+            GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
+        }
+        GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO == null)
+        {
+            Debug.LogWarning("Player not found. Cannot spawn enemy patrol points.");
+            return;
+        }
+        Vector3 playerPosition = playerGO.transform.position;
+        System.Random rng = new System.Random(enemySpawnerSeed);
+        for (int i = 0; i < numberOfCheckpoints; i++)
+        {
+            float angle = (float)(rng.NextDouble() * Mathf.PI * 2f);
+            float radius = (float)(rng.NextDouble() * enemyPatrolRadius);
+
+            float worldX = playerPosition.x + Mathf.Cos(angle) * radius;
+            float worldZ = playerPosition.z + Mathf.Sin(angle) * radius;
+
+            Vector2 samplePos = new Vector2(worldX, worldZ);
+            float height = 0.0f;
+            Ray ray = new Ray(new Vector3(worldX, 1000f, worldZ), Vector3.down);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                height = hit.point.y;
+                if (RayHitWater(hit))
+                {
+                    i--;
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+            Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
+            
+            Instantiate(CheckpointPrefab, spawnPosition, Quaternion.identity, enemyPatrolParent.transform);
+        }
+    }
     public void SpawnEnemieCheckPointsNearPlayer()
     {
         if (_globalNoiseMap == null)
@@ -330,11 +401,11 @@ public class MapGenerator : MonoBehaviour
             {
                 height = hit.point.y;
                 Debug.Log("Raycast hit terrain at position: " + samplePos + " with height: " + height);
-                // if (RayHitWater(hit))
-                // {
-                //     attempt--;
-                //     continue;
-                // }
+                if (RayHitWater(hit))
+                {
+                    attempt--;
+                    continue;
+                }
             }
             else
             {

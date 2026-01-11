@@ -20,7 +20,7 @@ namespace Settings
             Debug.Log($"Settings saved to {SettingsPath}");
         }
 
-        private static void LoadSettings()
+        public static void LoadSettings()
         {
             if (System.IO.File.Exists(SettingsPath))
             {
@@ -39,7 +39,8 @@ namespace Settings
         {
             CurrentSettings = new SettingsData
             {
-                generateInfiteTerrain = false
+                generateInfiteTerrain = false,
+                masterVolume = 1.0f
             };
             SaveSettings();
             LoadSettings();
@@ -49,5 +50,6 @@ namespace Settings
     public class SettingsData
     {
         public Boolean generateInfiteTerrain = true;
+        public float masterVolume = 1.0f;
     }
 }
