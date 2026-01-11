@@ -170,8 +170,7 @@ namespace Assets.Scripts.TerrainGeneration
             
             // Add NavMeshSurface component for AI navigation
             _navMeshSurface = _meshObject.AddComponent<NavMeshSurface>();
-            _navMeshSurface.collectObjects = CollectObjects.All;
-            _navMeshSurface.layerMask = ~0; // Include all layers
+            _navMeshSurface.collectObjects = CollectObjects.Children;
             
             SetVisible(false);
             _lodMeshes = new LODMesh[_levelsOfDetail.Length];

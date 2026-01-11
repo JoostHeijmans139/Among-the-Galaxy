@@ -23,6 +23,13 @@ public class Patrol : State
     //Set animation and destination
     public override void Enter()
     {
+        // Safety check: ensure checkpoints exist
+        if (GameEnvironment.Singleton == null || GameEnvironment.Singleton.Checkpoints == null || GameEnvironment.Singleton.Checkpoints.Count == 0)
+        {
+            Debug.LogWarning("[Patrol] No checkpoints available. Cannot enter patrol state.");
+            return;
+        }
+        
         currentIndex = 0;
         anim.SetFloat("blend", 0.5f);
         base.Enter();
@@ -37,6 +44,18 @@ public class Patrol : State
     {
         if (player == null) return;
         
+        // Safety check: ensure checkpoints still exist
+        if (GameEnvironment.Singleton == null || GameEnvironment.Singleton.Checkpoints == null || GameEnvironment.Singleton.Checkpoints.Count == 0)
+        {
+            return;
+        }
+        
+        // Ensure currentIndex is valid
+        if (currentIndex < 0 || currentIndex >= GameEnvironment.Singleton.Checkpoints.Count)
+        {
+            currentIndex = 0;
+        }
+        
         if (Vector3.Distance(npc.transform.position, player.position) > visDist)
         {
             if (agent.remainingDistance < 1)
@@ -46,7 +65,11 @@ public class Patrol : State
                 else
                     currentIndex++;
 
-                agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+                // Verify new index is valid before setting destination
+                if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count)
+                {
+                    agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+                }
             }   
         }
         else

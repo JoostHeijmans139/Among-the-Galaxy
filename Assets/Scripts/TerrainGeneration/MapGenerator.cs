@@ -314,6 +314,10 @@ public class MapGenerator : MonoBehaviour
         for (int i = childCount - 1; i >= 0; i--)
         {
             Transform child = enemySpawnerParent.transform.GetChild(i);
+            
+            // Remove from GameEnvironment checkpoints list before destroying
+            GameEnvironment.Singleton.Checkpoints.Remove(child.gameObject);
+            
             Destroy(child.gameObject);
         }
 
@@ -458,7 +462,14 @@ public class MapGenerator : MonoBehaviour
             }
 
             Transform parent = enemySpawnerParent != null ? enemySpawnerParent.transform : null;
-            Instantiate(enemySpawnerPrefab, finalSpawnPosition, Quaternion.identity, parent);
+            GameObject spawnedCheckpoint = Instantiate(enemySpawnerPrefab, finalSpawnPosition, Quaternion.identity, parent);
+            
+            // Tag as checkpoint and add to GameEnvironment
+            if (!spawnedCheckpoint.CompareTag("Checkpoint"))
+            {
+                spawnedCheckpoint.tag = "Checkpoint";
+            }
+            GameEnvironment.Singleton.Checkpoints.Add(spawnedCheckpoint);
         }
 
         Debug.Log(
