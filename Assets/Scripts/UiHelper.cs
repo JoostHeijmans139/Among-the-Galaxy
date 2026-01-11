@@ -23,6 +23,13 @@ public class UiHelper: MonoBehaviour
             PlayerStats.Instance.ResetStats();
         }
         
+        // Unpause the game in case it was paused
+        Time.timeScale = 1;
+        
+        // Reset cursor state to ensure player can move
+        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+        UnityEngine.Cursor.visible = false;
+        
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     
