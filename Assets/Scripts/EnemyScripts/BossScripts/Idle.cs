@@ -11,8 +11,11 @@ public class Idle : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.IDLE;
-        agent.speed = 0;
-        agent.isStopped = true;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.speed = 0;
+            agent.isStopped = true;
+        }
     }
 
     //Enter idle state
@@ -30,6 +33,8 @@ public class Idle : State
     //Randomly switch to patrol state
     public override void Update()
     {
+        if (player == null) return;
+        
         if (Vector3.Distance(npc.transform.position, player.position) < visDist)
         {
             nextState = new Pursue(npc, agent, anim, player);

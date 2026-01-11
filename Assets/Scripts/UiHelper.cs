@@ -24,6 +24,19 @@ public class UiHelper: MonoBehaviour
 
     public void RestartGame()
     {
+        // Reset player stats before restarting
+        if (PlayerStats.Instance != null)
+        {
+            PlayerStats.Instance.ResetStats();
+        }
+        
+        // Unpause the game in case it was paused
+        Time.timeScale = 1;
+        
+        // Reset cursor state to ensure player can move
+        UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+        UnityEngine.Cursor.visible = false;
+        
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     

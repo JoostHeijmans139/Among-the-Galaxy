@@ -147,6 +147,18 @@ public class PlayerStats : MonoBehaviour
         Inventory.Add(recipe.itemName);
     }
 
+    // Reset all player stats to default values (for game restart)
+    public void ResetStats()
+    {
+        Health = 100f;
+        Wood = 0;
+        Stone = 0;
+        Metal = 0;
+        Gold = 0;
+        Slime = 0;
+        Inventory.Clear();
+    }
+
     //Debug
     [ContextMenu("Debug Give Wood (1)")]
     private void DebugGiveWood()

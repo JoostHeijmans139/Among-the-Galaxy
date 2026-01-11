@@ -11,8 +11,11 @@ public class Attack : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.ATTACK;
-        agent.speed = 0;
-        agent.isStopped = true;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.speed = 0;
+            agent.isStopped = true;
+        }
     }
 
     //Enter attack state
@@ -30,6 +33,8 @@ public class Attack : State
     //Else, face player
     public override void Update()
     {
+        if (player == null) return;
+        
         if (Vector3.Distance(npc.transform.position, player.position) > attackDist)
         {
             anim.SetBool("attacking", false);

@@ -62,17 +62,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\UiHelper.cs" />
+    <Compile Include="Assets\Scripts\SoundController.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\GameEnvironment.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Idle.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\CAbstractViewsHolder.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\TextureGenerator.cs" />
+    <Compile Include="Assets\PauseMenu.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\ClassicSRIA.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Patrol.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Util\CLoadSceneOnClick.cs" />
     <Compile Include="Assets\Scripts\CraftingMenuUI.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\SimpleClientModels.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\CUtil.cs" />
+    <Compile Include="Assets\Scripts\FirstPersonCamera.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Attack.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\InfiniteTerrainGenerator.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\SimpleClientViewsHolders.cs" />
@@ -100,6 +103,7 @@
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\State.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\VerticalClassicListViewExample.cs" />
     <Compile Include="Assets\Scripts\SelectionManager.cs" />
+    <Compile Include="Assets\Scripts\PlayerScripts\PlayerAttackRange.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Pursue.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Util\CExpandCollapseOnClick.cs" />
   </ItemGroup>

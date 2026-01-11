@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
+using StarterAssets;
 
 public class playerControler : MonoBehaviour
 {
@@ -10,11 +11,6 @@ public class playerControler : MonoBehaviour
     [SerializeField] private float jumpHeight = 2f;
     [SerializeField] private float gravity = -9.81f;
     
-    [Header("Camera Settings")]
-    [SerializeField] private Transform cameraTransform;
-    [SerializeField] private float mouseSensitivity = 2f;
-    [SerializeField] private float maxLookAngle = 80f;
-    
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundDistance = 0.4f;
@@ -22,15 +18,12 @@ public class playerControler : MonoBehaviour
     
     // Component references
     private CharacterController controller;
+    private StarterAssetsInputs input;
     
     // Movement variables
     private Vector3 velocity;
     private bool isGrounded;
     private float currentSpeed;
-    
-    // Camera rotation variables
-    private float rotationX = 0f;
-    private float rotationY = 0f;
     
     /// <summary>
     /// Initialize component references and setup
@@ -38,16 +31,16 @@ public class playerControler : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
-            
+        input = GetComponent<StarterAssetsInputs>();
+        
+        if (input == null)
+        {
+            Debug.LogError("playerControler: StarterAssetsInputs component not found! Please add it to the Player.");
+        }
+        
         // Lock and hide cursor for FPS control
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        
-        // If no camera assigned, try to find main camera
-        if (cameraTransform == null)
-        {
-            cameraTransform = Camera.main?.transform;
-        }
     }
     
     /// <summary>
@@ -55,11 +48,9 @@ public class playerControler : MonoBehaviour
     /// </summary>
     void Update()
     {
-        cameraTransform.position = this.transform.position;
         HandleGroundCheck();
         HandleMovement();
         HandleJump();
-        HandleMouseLook();
         ApplyGravity();
     }
     
@@ -94,16 +85,16 @@ public class playerControler : MonoBehaviour
     /// </summary>
     private void HandleMovement()
     {
-        // Get input
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        if (input == null) return;
+        
+        // Get input from StarterAssetsInputs
+        Vector2 moveInput = input.move;
         
         // Determine current speed (sprint or walk)
-        bool isSprinting = Input.GetKey(KeyCode.LeftShift);
-        currentSpeed = isSprinting ? sprintSpeed : walkSpeed;
+        currentSpeed = input.sprint ? sprintSpeed : walkSpeed;
         
         // Calculate movement direction relative to player rotation
-        Vector3 move = transform.right * horizontal + transform.forward * vertical;
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         
         // Apply movement
         controller.Move(move * currentSpeed * Time.deltaTime);
@@ -114,42 +105,16 @@ public class playerControler : MonoBehaviour
     /// </summary>
     private void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (input != null && input.jump)
         {
-
-            // Calculate jump velocity using physics formula: v = sqrt(h * -2 * g)
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            if (isGrounded)
+            {
+                // Calculate jump velocity using physics formula: v = sqrt(h * -2 * g)
+                velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
+            // Always reset jump input to prevent queuing
+            input.jump = false;
         }
-    }
-    
-    /// <summary>
-    /// Handle mouse look for first-person camera control
-    /// </summary>
-    /// <summary>
-    /// Handle mouse look for first-person camera control
-    /// </summary>
-    private void HandleMouseLook()
-    {
-        if (cameraTransform == null) return;
-        
-        // Get mouse input
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
-        
-        // Accumulate horizontal rotation
-        rotationY += mouseX;
-        
-        // Accumulate vertical rotation with clamping
-        rotationX -= mouseY;
-        rotationX = Mathf.Clamp(rotationX, -maxLookAngle, maxLookAngle);
-        
-        // Apply rotations using eulerAngles to force the rotation
-        Vector3 playerRot = transform.eulerAngles;
-        playerRot.y = rotationY;
-        transform.eulerAngles = playerRot;
-        
-        // Apply camera rotation
-        cameraTransform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
     }
     
     /// <summary>
