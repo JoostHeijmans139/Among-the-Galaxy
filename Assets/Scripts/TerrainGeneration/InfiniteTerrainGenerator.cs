@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using Assets.Scripts.TerrainGeneration;
 using TerrainGeneration;
+using Unity.AI.Navigation;
 
 namespace Assets.Scripts.TerrainGeneration
 {
@@ -142,11 +143,14 @@ namespace Assets.Scripts.TerrainGeneration
         MeshFilter _meshFilter;
         MapGenerator.MapData _mapData;
         MeshCollider _meshCollider;
+        NavMeshSurface _navMeshSurface;
         LODInfo[] _levelsOfDetail;
         LODMesh[] _lodMeshes;
         bool mapDataReceived;
         int previousLODIndex = -1;
         private readonly int _colliderLODIndex = 0;  // Which LOD to use for collider (0 = highest detail);
+        private bool _navMeshBaked = false;
+        
         public TerrainChunk(Vector2 coord,int chunkSize,LODInfo[] detailLevels,GameObject parent,Material meshMaterial)
         {
             _levelsOfDetail = detailLevels;
@@ -163,6 +167,12 @@ namespace Assets.Scripts.TerrainGeneration
             _meshObject.name = $"Terrain Chunk {coord.x},{coord.y}";
             _meshCollider = _meshObject.AddComponent<MeshCollider>();
             _meshCollider.sharedMaterial = terrainPhysicsMaterial;
+            
+            // Add NavMeshSurface component for AI navigation
+            _navMeshSurface = _meshObject.AddComponent<NavMeshSurface>();
+            _navMeshSurface.collectObjects = CollectObjects.All;
+            _navMeshSurface.layerMask = ~0; // Include all layers
+            
             SetVisible(false);
             _lodMeshes = new LODMesh[_levelsOfDetail.Length];
             for (int i = 0; i < _levelsOfDetail.Length; i++)
@@ -233,11 +243,26 @@ namespace Assets.Scripts.TerrainGeneration
             {
                 _meshCollider.sharedMesh = null; // Clear first to force update
                 _meshCollider.sharedMesh = colliderMesh.Mesh;
+                
+                // Bake NavMesh after collider is set (only once)
+                if (!_navMeshBaked && _meshCollider.sharedMesh != null && _meshObject.activeSelf)
+                {
+                    _navMeshBaked = true;
+                    // Small delay to ensure collider physics are updated
+                    _mapGenerator.StartCoroutine(BakeNavMeshDelayed());
+                }
             }
             else if (!colliderMesh.HaseReqestedMesh)
             {
                 colliderMesh.RequestMesh(_mapData);
             }
+        }
+        
+        private System.Collections.IEnumerator BakeNavMeshDelayed()
+        {
+            yield return new WaitForEndOfFrame();
+            _navMeshSurface.BuildNavMesh();
+            Debug.Log($"[InfiniteTerrainGenerator] NavMesh baked for chunk at {position} with {_navMeshSurface.navMeshData.sourceBounds} bounds");
         }
         public void SetVisible(bool visible)
         {

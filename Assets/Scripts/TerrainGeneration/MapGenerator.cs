@@ -5,6 +5,8 @@ using JetBrains.Annotations;
 using TerrainGeneration;
 using Unity.VisualScripting;
 using UnityEngine;
+using Unity.AI.Navigation;
+using UnityEngine.AI;
 
 /// <summary>
 /// Generates a procedural map using Perlin noise and displays it using different modes.
@@ -112,6 +114,12 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     private const int _globalNoiseMapSize = 2048;
 
+    [Header("NavMesh Settings")]
+    /// <summary>
+    /// NavMeshSurface component for runtime NavMesh baking after terrain generation.
+    /// </summary>
+    public NavMeshSurface navMeshSurface;
+
     [Header("Enemie spawners")]
     public MeshRenderer mapMesh;/// Reference to the terrain mesh renderer. Used for bounds checking when spawning enemy checkpoints.
 
@@ -176,6 +184,10 @@ public class MapGenerator : MonoBehaviour
     {
         // Load the generateInfiniteTerrain setting from SettingsManager
         generateInfiniteTerrain = Settings.SettingsManager.CurrentSettings.generateInfiteTerrain;
+        
+        // Generate global noise map for both modes (needed for spawning systems)
+        GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
+        
         if (generateInfiniteTerrain)
         {
             GameObject meshObject = GameObject.FindGameObjectWithTag("MeshObject");
@@ -183,7 +195,6 @@ public class MapGenerator : MonoBehaviour
             {
                 meshObject.SetActive(false);
             }
-            GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
         }
         if (!generateInfiniteTerrain)
         {
@@ -197,17 +208,29 @@ public class MapGenerator : MonoBehaviour
 
         drawMode = DrawMode.DrawMesh;
         MapData data = GenerateMapData(Vector2.zero);
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(data.HeightMap, heightMultiplier, heightCurve, levelOfDetailEditorPreview);
-        meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap, MapChunkSize, MapChunkSize);
-        Mesh mesh = meshData.CreateMesh();
-        meshCollider.sharedMesh = mesh;
-        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 5.0f, 60.0f);
+        
+        // Only generate static mesh if not using infinite terrain
+        if (!generateInfiniteTerrain)
+        {
+            MeshData meshData = MeshGenerator.GenerateTerrainMesh(data.HeightMap, heightMultiplier, heightCurve, levelOfDetailEditorPreview);
+            meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap, MapChunkSize, MapChunkSize);
+            Mesh mesh = meshData.CreateMesh();
+            meshCollider.sharedMesh = mesh;
+            
+            // Wait a frame for mesh/collider to be ready, then bake NavMesh and spawn enemies
+            StartCoroutine(BakeNavMeshAndSpawnEnemies());
 
-        InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
+            InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
+        }
+        else
+        {
+            // For infinite terrain, spawn enemies after a short delay (no NavMesh baking needed)
+            Debug.Log("[MapGenerator] Infinite terrain mode - skipping static NavMesh baking.");
+            StartCoroutine(SpawnEnemiesForInfiniteTerrain());
+        }
 
-        // Spawn objects
+        // Spawn objects (works for both infinite and static terrain)
         SpawnObjects(data.HeightMap, rockPrefabs, numberOfRocks, minRockHeight, "Rock");
-
         SpawnObjects(data.HeightMap, SinglePrefabArray(treePrefab), numberOfTrees, minTreeHeight, "Tree");
     }
         
@@ -400,8 +423,42 @@ public class MapGenerator : MonoBehaviour
 
             spawnedPositions.Add(spawnPosition);
 
+            // Check if position is over water before trying NavMesh
+            Vector2 waterCheckPos = new Vector2(worldX, worldZ);
+            float noiseValue = GetNoiseValueAtWorldPosition(waterCheckPos);
+            if (noiseValue < 0.3f) // Water threshold
+            {
+                Debug.Log("[MapGenerator] Skipping spawn over water.");
+                continue;
+            }
+
+            // Verify position is on NavMesh before spawning (only for static terrain)
+            Vector3 finalSpawnPosition = spawnPosition;
+            
+            if (!generateInfiniteTerrain)
+            {
+                // Static terrain mode: verify NavMesh exists
+                NavMeshHit navHit;
+                
+                if (NavMesh.SamplePosition(spawnPosition, out navHit, 50f, NavMesh.AllAreas))
+                {
+                    finalSpawnPosition = navHit.position;
+                    Debug.Log($"[MapGenerator] Found NavMesh at {finalSpawnPosition}");
+                }
+                else
+                {
+                    Debug.LogWarning($"[MapGenerator] Could not find NavMesh near spawn position {spawnPosition}. Skipping this spawn.");
+                    continue;
+                }
+            }
+            else
+            {
+                // Infinite terrain mode: skip NavMesh check (chunks handle their own NavMesh)
+                Debug.Log($"[MapGenerator] Spawning at {finalSpawnPosition} (infinite terrain, no NavMesh check)");
+            }
+
             Transform parent = enemySpawnerParent != null ? enemySpawnerParent.transform : null;
-            Instantiate(enemySpawnerPrefab, spawnPosition, Quaternion.identity, parent);
+            Instantiate(enemySpawnerPrefab, finalSpawnPosition, Quaternion.identity, parent);
         }
 
         Debug.Log(
@@ -798,6 +855,138 @@ public class MapGenerator : MonoBehaviour
             kf.weightedMode = weightedMode;
             return kf;
         }
+    }
+
+    #endregion
+
+    #region NavMeshBaking
+
+    /// <summary>
+    /// Coroutine for infinite terrain mode - spawns enemies without NavMesh baking.
+    /// </summary>
+    private System.Collections.IEnumerator SpawnEnemiesForInfiniteTerrain()
+    {
+        // Wait a moment for terrain chunks to be generated
+        yield return new WaitForSeconds(2f);
+        
+        Debug.Log("[MapGenerator] Infinite terrain ready. Starting enemy spawning.");
+        
+        // Spawn first batch of enemies immediately
+        SpawnEnemieCheckPointsNearPlayer();
+        
+        // Set up periodic removal and respawning
+        InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
+        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 60.0f, 60.0f);
+    }
+
+    /// <summary>
+    /// Coroutine that bakes NavMesh and waits for it to be ready before spawning enemies.
+    /// </summary>
+    private System.Collections.IEnumerator BakeNavMeshAndSpawnEnemies()
+    {
+        // Wait for mesh and collider to be fully ready
+        yield return new WaitForEndOfFrame();
+        
+        // Verify mesh collider is ready
+        if (meshCollider == null || meshCollider.sharedMesh == null)
+        {
+            Debug.LogError("[MapGenerator] MeshCollider or mesh is null! Cannot bake NavMesh.");
+            yield break;
+        }
+        
+        Debug.Log($"[MapGenerator] MeshCollider ready with {meshCollider.sharedMesh.vertexCount} vertices.");
+        
+        // Bake the NavMesh
+        BakeNavMesh();
+        
+        // Wait for NavMesh to be fully registered
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(1f);
+        
+        // Verify NavMesh is actually available
+        NavMeshTriangulation triangulation = NavMesh.CalculateTriangulation();
+        if (triangulation.vertices.Length == 0)
+        {
+            Debug.LogError("[MapGenerator] NavMesh still has no geometry after baking! Check NavMeshSurface settings:");
+            if (navMeshSurface != null)
+            {
+                Debug.LogError($"  - NavMeshSurface on: {navMeshSurface.gameObject.name}");
+                Debug.LogError($"  - Collect Objects: {navMeshSurface.collectObjects}");
+                Debug.LogError($"  - Agent Type: {navMeshSurface.agentTypeID}");
+            }
+            yield break;
+        }
+        
+        Debug.Log("[MapGenerator] NavMesh confirmed ready. Starting enemy spawning.");
+        
+        // Spawn first batch of enemies immediately
+        SpawnEnemieCheckPointsNearPlayer();
+        
+        // Then repeat every 60 seconds
+        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 60.0f, 60.0f);
+    }
+
+    /// <summary>
+    /// Bakes the NavMesh at runtime after terrain generation.
+    /// </summary>
+    private void BakeNavMesh()
+    {
+        if (navMeshSurface == null)
+        {
+            // Find the Mesh GameObject (the one with MeshCollider and MeshRenderer)
+            GameObject meshObject = meshCollider != null ? meshCollider.gameObject : null;
+            
+            if (meshObject == null && meshRenderer != null)
+            {
+                meshObject = meshRenderer.gameObject;
+            }
+            
+            if (meshObject != null)
+            {
+                navMeshSurface = meshObject.GetComponent<NavMeshSurface>();
+                
+                if (navMeshSurface == null)
+                {
+                    Debug.LogWarning($"[MapGenerator] No NavMeshSurface found on {meshObject.name}. Adding one now.");
+                    navMeshSurface = meshObject.AddComponent<NavMeshSurface>();
+                    // Configure settings for terrain
+                    navMeshSurface.collectObjects = CollectObjects.All;
+                    navMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+                    navMeshSurface.layerMask = ~0; // Include all layers
+                }
+            }
+            else
+            {
+                Debug.LogError("[MapGenerator] Could not find Mesh GameObject! Assign meshCollider or meshRenderer in inspector.");
+                return;
+            }
+        }
+
+        // CRITICAL: Ensure the mesh GameObject is active before baking
+        GameObject meshGO = navMeshSurface.gameObject;
+        bool wasActive = meshGO.activeSelf;
+        if (!wasActive)
+        {
+            Debug.LogWarning($"[MapGenerator] {meshGO.name} was inactive. Activating for NavMesh baking...");
+            meshGO.SetActive(true);
+        }
+
+        Debug.Log($"[MapGenerator] Starting NavMesh bake on {navMeshSurface.gameObject.name}...");
+        Debug.Log($"[MapGenerator] NavMeshSurface settings: CollectObjects={navMeshSurface.collectObjects}, UseGeometry={navMeshSurface.useGeometry}");
+        
+        navMeshSurface.BuildNavMesh();
+        
+        // Verify NavMesh was built
+        NavMeshTriangulation triangulation = NavMesh.CalculateTriangulation();
+        Debug.Log($"[MapGenerator] NavMesh baked! Vertices: {triangulation.vertices.Length}, Triangles: {triangulation.indices.Length / 3}");
+        
+        if (triangulation.vertices.Length == 0)
+        {
+            Debug.LogError("[MapGenerator] NavMesh has no geometry! Make sure the Mesh object has a MeshCollider.");
+        }
+        
+        // Keep mesh active - enemies need to see it for raycasting and navigation
+        // Don't disable it again even if it was disabled before
     }
 
     #endregion

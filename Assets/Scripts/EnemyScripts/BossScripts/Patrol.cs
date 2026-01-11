@@ -12,8 +12,11 @@ public class Patrol : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PATROL;
-        agent.speed = 2;
-        agent.isStopped = false;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.speed = 2;
+            agent.isStopped = false;
+        }
     }
 
     //Enter patrol state
@@ -32,6 +35,8 @@ public class Patrol : State
     //Else, move to next checkpoint
     public override void Update()
     {
+        if (player == null) return;
+        
         if (Vector3.Distance(npc.transform.position, player.position) > visDist)
         {
             if (agent.remainingDistance < 1)

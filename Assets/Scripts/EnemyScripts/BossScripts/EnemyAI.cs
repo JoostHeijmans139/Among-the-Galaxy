@@ -26,13 +26,48 @@ public class EnemyAI : MonoBehaviour
     {
         agent = this.GetComponent<NavMeshAgent>();
         anim = this.GetComponent<Animator>();
+        
+        // Auto-find player if not assigned
+        if (player == null)
+        {
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                player = playerObj.transform;
+            }
+            else
+            {
+                Debug.LogError($"[EnemyAI] Player not found for enemy {gameObject.name}. Make sure the player has the 'Player' tag.");
+            }
+        }
+        
+        // Validate NavMeshAgent is on NavMesh
+        if (agent != null && !agent.isOnNavMesh)
+        {
+            Debug.LogWarning($"[EnemyAI] {gameObject.name} is not on a NavMesh yet. Attempting to warp to NavMesh...");
+            // Try to warp to nearest NavMesh position
+            UnityEngine.AI.NavMeshHit navHit;
+            if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out navHit, 10f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                agent.Warp(navHit.position);
+                Debug.Log($"[EnemyAI] {gameObject.name} warped to NavMesh at {navHit.position}");
+            }
+            else
+            {
+                Debug.LogError($"[EnemyAI] {gameObject.name} could not find nearby NavMesh within 10 units!");
+            }
+        }
+        
         currentState = new Idle(this.gameObject, agent, anim, player);
     }
 
     //Handle state
     void Update()
     {
-        currentState = currentState.Process();
+        if (currentState != null)
+        {
+            currentState = currentState.Process();
+        }
     }
 
     //Give visuals to the different ranges

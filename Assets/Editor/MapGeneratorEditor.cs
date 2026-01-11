@@ -23,12 +23,10 @@ public class MapGeneratorEditor : Editor
         DrawDefaultInspector();
         if (EditorGUI.EndChangeCheck())
         {
-            serializedObject.ApplyModifiedProperties();
             if (mapGenerator.autoUpdate)
             {
                 mapGenerator.DrawMapInEditor();
             }
-            return;
         }
 
         #region Loading Terrain Types from JSON

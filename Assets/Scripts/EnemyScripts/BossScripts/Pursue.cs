@@ -12,8 +12,11 @@ public class Pursue : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PURSUE;
-        agent.speed = 5;
-        agent.isStopped = false;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.speed = 5;
+            agent.isStopped = false;
+        }
     }
 
     //Enter pursue state
@@ -32,6 +35,8 @@ public class Pursue : State
     //Else, pursue player
     public override void Update()
     {
+        if (player == null) return;
+        
         if (Vector3.Distance(npc.transform.position, player.position) > visDist)
         {
             nextState = new Idle(npc, agent, anim, player);
