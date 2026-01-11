@@ -86,8 +86,13 @@ public class SelectionManager : MonoBehaviour
     /// </summary>
     void Update()
     {
+        // Reconnect to camera if reference is lost (e.g., after scene reload)
         if (playerCamera == null)
-            return;
+        {
+            playerCamera = Camera.main;
+            if (playerCamera == null)
+                return;
+        }
 
         // Perform raycast from camera center
         Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);

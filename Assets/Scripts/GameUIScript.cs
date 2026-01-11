@@ -13,9 +13,24 @@ public class UIScript : MonoBehaviour
     public TextMeshProUGUI goldTextbox;
     public TextMeshProUGUI slimeTextbox;
     public PlayerStats playerStats;
+
+    private void Start()
+    {
+        // Reconnect to PlayerStats singleton if reference is lost
+        if (playerStats == null)
+        {
+            playerStats = PlayerStats.Instance;
+        }
+    }
     
     void Update()
     {
+        // Reconnect to PlayerStats singleton if reference is lost during runtime
+        if (playerStats == null && PlayerStats.Instance != null)
+        {
+            playerStats = PlayerStats.Instance;
+        }
+
         // Show Health if these elements arent filled
         if (playerStats == null || healthTextbox == null || woodTextbox == null || stoneTextbox == null || metalTextbox == null || goldTextbox == null || slimeTextbox == null)
         {

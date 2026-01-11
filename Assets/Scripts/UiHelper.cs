@@ -17,6 +17,12 @@ public class UiHelper: MonoBehaviour
 
     public void RestartGame()
     {
+        // Reset player stats before restarting
+        if (PlayerStats.Instance != null)
+        {
+            PlayerStats.Instance.ResetStats();
+        }
+        
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     
