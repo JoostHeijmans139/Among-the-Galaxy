@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Gold Axe
   itemIcon: {fileID: 21300000, guid: 719c2201c2f5f6c4aafffaeb5abdf5f9, type: 3}
+  weaponType: 4
   costs:
   - resourceName: Gold
     amount: 10
+  requiredWeapon: 3
