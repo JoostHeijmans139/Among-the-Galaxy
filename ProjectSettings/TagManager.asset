@@ -11,6 +11,8 @@ TagManager:
   - CinemachineTarget
   - Checkpoint
   - Enemy
+  - GameOverScreen
+  - TimeSurvivedText
   layers:
   - Default
   - TransparentFX

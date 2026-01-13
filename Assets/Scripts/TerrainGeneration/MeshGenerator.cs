@@ -17,52 +17,48 @@ namespace TerrainGeneration
     /// <param name="levelOfDetail">Level of detail for mesh simplification (0 = highest detail).</param>
     /// <returns>MeshData containing vertices, triangles, and UVs for the terrain mesh.</returns>
     /// <returns>MeshData containing vertices, triangles, and UVs representing the terrain mesh.</returns>
-    public static MeshData GenerateTerrainMesh(float[,] heighMap,float heightMultiplier,AnimationCurve heightCurve, int levelOfDetail)
+    public static MeshData GenerateTerrainMesh(float[,] heighMap, float heightMultiplier, AnimationCurve heightCurve, int levelOfDetail)
     {
-        AnimationCurve Heightcurve = new  AnimationCurve(heightCurve.keys);
-        int width = heighMap.GetLength(0);  // Number of vertices along X-axis
-        int height = heighMap.GetLength(1); // Number of vertices along Z-axis
+        AnimationCurve Heightcurve = new AnimationCurve(heightCurve.keys);
+        int width = heighMap.GetLength(0);
+        int height = heighMap.GetLength(1);
 
-        // Calculate the top-left corner position to center the mesh around origin
         float topLeftX = (width - 1) / -2f;
         float topLeftZ = (height - 1) / 2f;
-        
+
         int meshSimplificationIncrement = levelOfDetail == 0 ? 1 : levelOfDetail * 2;
         int verticesPerLine = (width - 1) / meshSimplificationIncrement + 1;
-        
-        // Create a new MeshData object to hold mesh info
+    
         MeshData meshData = new MeshData(verticesPerLine, verticesPerLine);
 
-        int vertexIndex = 0; // Tracks the current vertex index while iterating
+        int vertexIndex = 0;
+        int yIndex = 0;  // Track simplified Y position
 
-        // Loop through each vertex coordinate in the height map grid
-        for (int y = 0; y < height; y+=meshSimplificationIncrement)
+        for (int y = 0; y < height; y += meshSimplificationIncrement)
         {
-            for (int x = 0; x < width; x+=meshSimplificationIncrement)
+            int xIndex = 0;  // Track simplified X position
+        
+            for (int x = 0; x < width; x += meshSimplificationIncrement)
             {
-                // Assign the vertex position:
-                // X = topLeftX offset + x position
-                // Y = height value from height map
-                // Z = topLeftZ offset - y position (negative because Unity's Z axis is forward)
                 float heightValue = Mathf.Clamp01(Heightcurve.Evaluate(heighMap[x, y]));
-                meshData.Vertices[vertexIndex] = new Vector3(topLeftX + x,heightValue*heightMultiplier , topLeftZ - y);
-
-                // Calculate UV coordinates for texturing (range 0 to 1)
+                meshData.Vertices[vertexIndex] = new Vector3(topLeftX + x, heightValue * heightMultiplier, topLeftZ - y);
                 meshData.Uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
 
-                // Generate triangles for all vertices except those on the far right and bottom edges
-                if (x < width - 1 && y < height - 1)
+                // Only create triangles if NOT on the last row or column of simplified mesh
+                if (xIndex < verticesPerLine - 1 && yIndex < verticesPerLine - 1)
                 {
-                    // Each square consists of two triangles; add their indices in clockwise order
                     meshData.AddTriangle(vertexIndex, vertexIndex + verticesPerLine + 1, vertexIndex + verticesPerLine);
                     meshData.AddTriangle(vertexIndex + verticesPerLine + 1, vertexIndex, vertexIndex + 1);
                 }
 
-                vertexIndex++; // Move to next vertex index
+                vertexIndex++;
+                xIndex++;
             }
+            yIndex++;
         }
-        SmoothMeshEdges(meshData, verticesPerLine); // Smooth the edges of the mesh
-        return meshData; // Return the constructed mesh data
+    
+        SmoothMeshEdges(meshData, verticesPerLine);
+        return meshData;
     }
     // Add to GenerateTerrainMesh before returning meshData:
     private static void SmoothMeshEdges(MeshData meshData, int verticesPerLine, float smoothingFactor = 0.5f)

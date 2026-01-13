@@ -1,6 +1,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using PlayerScripts;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -22,6 +23,7 @@ public class PlayerStats : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        
     }
 
     // Starting health of player
@@ -35,6 +37,8 @@ public class PlayerStats : MonoBehaviour
     public int Metal { get; set; } = 0;
     public int Gold { get; set; } = 0;
     public int Slime { get; set; } = 0;
+    
+    public static int TimeSurvived { get; set; } = 0;
 
     // Player inventory
     public List<string> Inventory = new List<string>();
@@ -169,6 +173,11 @@ public class PlayerStats : MonoBehaviour
 
     public void Attack()
     {
+        if (attackRange == null)
+        {
+            Debug.LogError("AttackRange reference is missing!");
+            return;
+        }
         if (Input.GetMouseButtonDown(0) && attackRange.enemyInRange != null)
         {
             attackRange.enemyInRange.TakeDamage(10f);

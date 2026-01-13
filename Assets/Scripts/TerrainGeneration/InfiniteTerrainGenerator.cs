@@ -138,7 +138,11 @@ namespace TerrainGeneration
                 }
             }
 
-            AsyncNavMeshBuildScheduler.RequestNavMeshBuild();
+            if (_terrainChunksLastFrame.Count > 0)
+            {
+                AsyncNavMeshBuildScheduler.RequestNavMeshBuild();
+            }
+            
         }
         
 
@@ -156,6 +160,7 @@ namespace TerrainGeneration
             MeshFilter _meshFilter;
             MapGenerator.MapData _mapData;
             MeshCollider _meshCollider;
+            NavMeshSurface _navMeshSurface;
             LODInfo[] _levelsOfDetail;
             LODMesh[] _lodMeshes;
             bool mapDataReceived;

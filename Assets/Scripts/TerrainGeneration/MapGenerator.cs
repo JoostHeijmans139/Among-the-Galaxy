@@ -32,7 +32,7 @@ public class MapGenerator : MonoBehaviour
         [Header("Map Settings")]
         public DrawMode drawMode; // Current mode for displaying the map (NoiseMap, ColorMap, or Mesh)
 
-        public const int MapChunkSize = 241; // Size of each map chunk in vertices (241x241)
+        public const int MapChunkSize = 141; // Size of each map chunk in vertices (241x241)
 
         [Range(0, 6)] public int levelOfDetailEditorPreview; // Level of detail for mesh generation in editor preview
 
@@ -195,8 +195,8 @@ public class MapGenerator : MonoBehaviour
         meshRenderer.material.mainTexture = TextureGenerator.TextureFromColourMap(data.ColorMap,MapChunkSize,MapChunkSize);
         Mesh mesh = meshData.CreateMesh();
         meshCollider.sharedMesh = mesh;
-        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 5.0f, 60.0f);
-        InvokeRepeating(nameof(SpawnEnemyPatrolPoints),5.0f,40.0f);
+        InvokeRepeating(nameof(SpawnEnemieCheckPointsNearPlayer), 10.0f, 60.0f);
+        InvokeRepeating(nameof(SpawnEnemyPatrolPoints),10.0f,40.0f);
         InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
         InvokeRepeating(nameof(RemoveEnemyPatrolPoints),25.0f,40.0f);
     }
@@ -354,6 +354,12 @@ public class MapGenerator : MonoBehaviour
         {
             GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
         }
+        Debug.Log($"[Spawn] Attempting spawn. NavMesh baked: {AsyncNavMeshBuildScheduler.isNavMeshBaked}");
+        if (!AsyncNavMeshBuildScheduler.isNavMeshBaked)
+        {
+            Debug.LogWarning("NavMesh is not baked yet. Cannot spawn enememies");
+            return;
+        }
 
         GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
         if (playerGO == null)
@@ -442,7 +448,10 @@ public class MapGenerator : MonoBehaviour
             spawnedPositions.Add(spawnPosition);
 
             Transform parent = enemySpawnerParent != null ? enemySpawnerParent.transform : null;
+            
             Instantiate(enemySpawnerPrefab, spawnPosition, Quaternion.identity, parent);
+            
+
         }
 
         Debug.Log(

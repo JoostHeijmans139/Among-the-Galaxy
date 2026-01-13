@@ -19,9 +19,27 @@ public class UiHelper: MonoBehaviour
 
     public void Start()
     {
+        if(_MenuAudioSource == null)
+        {
+            gameObject.AddComponent<AudioSource>();
+            _MenuAudioSource = GetComponent<AudioSource>();
+        }
+        if(SceneManager.GetActiveScene() == SceneManager.GetSceneByName("WorldCreation"))
+        {
+            _MenuAudioSource.enabled = false;
+        }
         PlayMenuSound();
     }
+    
+    public static void SetTimeSurvived(float time, TMPro.TMP_Text text)
+    {
+        int minutes = Mathf.FloorToInt(time / 60F);
+        int seconds = Mathf.FloorToInt(time - minutes * 60);
+        string niceTime = string.Format("{0:0}:{1:00}", minutes, seconds);
+        text.text = niceTime;
 
+    }
+    
     public void RestartGame()
     {
         // Reset player stats before restarting

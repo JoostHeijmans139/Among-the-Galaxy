@@ -69,10 +69,10 @@ public class playerControler : MonoBehaviour
             isGrounded = controller.isGrounded;
         }
 
-        if (isGrounded)
-        {
-            Debug.Log("GROUNDED");
-        }
+        // if (isGrounded)
+        // {
+        //     Debug.Log("GROUNDED");
+        // }
 
         if (isGrounded && velocity.y < 0)
         {
