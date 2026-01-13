@@ -7,7 +7,13 @@ public class CraftingRecipe : ScriptableObject
     public string itemName;
     public Sprite itemIcon;
 
+    // Type of weapon
+    public PlayerStats.weapon weaponType;
+
     public List<ResourceCost> costs;
+
+    // Weapon being upgraded
+    public PlayerStats.weapon requiredWeapon = PlayerStats.weapon.None;
 }
 
 [System.Serializable]
