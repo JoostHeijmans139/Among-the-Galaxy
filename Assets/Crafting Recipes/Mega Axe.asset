@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0e0c3b3388fa184dbd1595ee9a224c5, type: 3}
   m_Name: Mega Axe
   m_EditorClassIdentifier: 
-  itemName: Ultra Axe
+  itemName: Mega Axe
   itemIcon: {fileID: 21300000, guid: 719c2201c2f5f6c4aafffaeb5abdf5f9, type: 3}
+  weaponType: 5
   costs:
   - resourceName: Wood
     amount: 10
@@ -25,3 +26,4 @@ MonoBehaviour:
     amount: 10
   - resourceName: Slime
     amount: 10
+  requiredWeapon: 4

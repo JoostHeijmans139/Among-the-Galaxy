@@ -40,8 +40,19 @@ public class PlayerStats : MonoBehaviour
     
     public static int TimeSurvived { get; set; } = 0;
 
-    // Player inventory
-    public List<string> Inventory = new List<string>();
+    // List of possible weapons
+    public enum weapon
+    {
+        None,
+        WoodAxe,
+        StoneAxe,
+        MetalAxe,
+        GoldAxe,
+        MegaAxe,
+    }
+
+    // Equipped weapon
+    public weapon equippedWeapon { get; set; } = weapon.None;
 
     // Player gaining resources function
     public void GainResource(string type, int amount)
@@ -124,6 +135,7 @@ public class PlayerStats : MonoBehaviour
     // Check if player has enough resources for recipe
     public bool HasResources(CraftingRecipe recipe)
     {
+        // Material check
         foreach (var cost in recipe.costs)
         {
             if (GetAmount(cost.resourceName) < cost.amount)
@@ -132,7 +144,14 @@ public class PlayerStats : MonoBehaviour
                 return false;
             }
         }
-        // Player has enough
+
+        // Needed weapon check
+        if (equippedWeapon != recipe.requiredWeapon)
+        {
+            return false;
+        }
+
+        // Player has enough and has required weapon
         return true;
     }
 
@@ -145,12 +164,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    // Add crafted item to player's inventory
-    public void GiveItem(CraftingRecipe recipe)
-    {
-        Inventory.Add(recipe.itemName);
-    }
-
     // Reset all player stats to default values (for game restart)
     public void ResetStats()
     {
@@ -160,7 +173,7 @@ public class PlayerStats : MonoBehaviour
         Metal = 0;
         Gold = 0;
         Slime = 0;
-        Inventory.Clear();
+        equippedWeapon = weapon.None;
     }
 
     //Debug
@@ -169,6 +182,17 @@ public class PlayerStats : MonoBehaviour
     {
         GainResource("Wood", 1);
         Debug.Log("+1 wood gained, Wood = " + Wood);
+    }
+
+    [ContextMenu("Debug Give All Resources (10)")]
+    private void DebugGiveAll()
+    {
+        GainResource("Wood", 10);
+        GainResource("Stone", 10);
+        GainResource("Metal", 10);
+        GainResource("Gold", 10);
+        GainResource("Slime", 10);
+        Debug.Log("+10 wood, stone, metal, gold and slime");
     }
 
     public void Attack()
