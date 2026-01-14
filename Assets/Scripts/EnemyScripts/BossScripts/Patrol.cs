@@ -1,8 +1,11 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine.AI;
 using UnityEditor;
+using UnityEngine.SceneManagement;
+
 public class Patrol : State
 {
     int currentIndex = -1;
@@ -33,7 +36,10 @@ public class Patrol : State
         currentIndex = 0;
         anim.SetFloat("blend", 0.5f);
         base.Enter();
-        agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+        if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count && GameEnvironment.Singleton.Checkpoints[currentIndex] != null)
+        {
+            agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+        }
     }
 
     //Update patrol state
@@ -42,7 +48,11 @@ public class Patrol : State
     //Else, move to next checkpoint
     public override void Update()
     {
-        if (player == null) return;
+        if (player == null || !player.gameObject.activeSelf || player.gameObject.IsDestroyed())
+        {
+            // anim.SetTrigger("isIdle");
+            return;
+        }
         
         // Safety check: ensure checkpoints still exist
         if (GameEnvironment.Singleton == null || GameEnvironment.Singleton.Checkpoints == null || GameEnvironment.Singleton.Checkpoints.Count == 0)
@@ -68,7 +78,16 @@ public class Patrol : State
                 // Verify new index is valid before setting destination
                 if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count)
                 {
-                    agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+                    if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count && GameEnvironment.Singleton.Checkpoints[currentIndex] != null)
+                    {
+                        agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
+
+                    }
+                    else
+                    {
+                        PlayerStats.Instance.Health = 0f;
+                        return;
+                    }
                 }
             }   
         }

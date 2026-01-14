@@ -12,11 +12,7 @@ public class EnemyAI : MonoBehaviour
     Animator anim;
     public Transform player;
     State currentState;
-
-    private static GameObject _gameOverscreen;
-    private static TMPro.TMP_Text _timeText;
-    public Canvas _gameOverscreenNonStatic;
-    public TMPro.TMP_Text _timeTextNonStatic;
+    
     //Adding range
     public int sightRange = 20;
     public int attackRange = 4;
@@ -33,21 +29,7 @@ public class EnemyAI : MonoBehaviour
     {
         agent = this.GetComponent<NavMeshAgent>();
         anim = this.GetComponent<Animator>();
-        // if(_gameOverscreenNonStatic != null && _timeTextNonStatic != null)
-        // {
-        //     _gameOverscreen = _gameOverscreenNonStatic;
-        //     _timeText = _timeTextNonStatic;
-        // }
-        // else
-        // {
-        //     Debug.Log("Game over screen or time text not assigned in inspector.");
-        // }
-        _gameOverscreen = GameObject.FindGameObjectWithTag("GameOverScreen");
-        if (_gameOverscreen != null)
-        {
-            _gameOverscreen.SetActive(false);
-        }
-        // _timeText = GameObject.FindGameObjectWithTag("TimeSurvivedText").GetComponent<TMPro.TMP_Text>();
+        
         // Auto-find player if not assigned
         if (player == null)
         {
@@ -123,6 +105,20 @@ public class EnemyAI : MonoBehaviour
         if (isInAttackRange == true)
         {
             PlayerStats.Instance.Health -= 10f;
+            if (PlayerStats.Instance.Health <= 0f)
+            {
+                if (UiHelper._gameOverscreen == null)
+                {
+                    Debug.LogWarning("UiHelper GameOverScreen reference is missing!");
+                    return;
+                }
+                UiHelper._gameOverscreen.SetActive(true);
+                
+                player.gameObject.SetActive(true);
+                Time.timeScale = 0;
+                UiHelper.SetTimeSurvived(timeSurived, UiHelper._timeText);
+                Cursor.lockState = CursorLockMode.None;
+            }
             Debug.Log("Damage dealt to player");
         }
     }
@@ -131,13 +127,6 @@ public class EnemyAI : MonoBehaviour
     public void TakeDamage(float amount)
     {
         health -= amount;
-        if (health >= 0f)
-        {
-            _gameOverscreen.SetActive(true);
-            Time.timeScale = 0;
-            UiHelper.SetTimeSurvived(timeSurived, _timeText);
-            Cursor.lockState = CursorLockMode.None;
-        }
         UpdateHealth();
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Settings;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
@@ -11,6 +12,9 @@ public class UiHelper: MonoBehaviour
 {
     public AudioSource _MenuAudioSource;
     public List<GameObject> MenuParents;
+    public static GameObject _gameOverscreen;
+    public static TMPro.TMP_Text _timeText;
+    public static GameObject _resourceDisplayPanel;
     public void GenerateMap()
     {
         _MenuAudioSource.Stop();
@@ -27,17 +31,42 @@ public class UiHelper: MonoBehaviour
         if(SceneManager.GetActiveScene() == SceneManager.GetSceneByName("WorldCreation"))
         {
             _MenuAudioSource.enabled = false;
+            _gameOverscreen = GameObject.FindGameObjectWithTag("GameOverScreen");
+            if (_gameOverscreen != null)
+            {
+                Debug.Log("Successfully found GameOverScreen in scene.");
+                _timeText = GameObject.FindGameObjectWithTag("TimeSurvivedText").GetComponent<TMPro.TMP_Text>();
+                _resourceDisplayPanel = GameObject.FindGameObjectWithTag("ResourceDisplayPanel");
+                if (_resourceDisplayPanel == null)
+                {
+                    Debug.Log("ResourceDisplayPanel not found in scene. Please ensure there is a UI panel with the 'ResourceDisplayPanel' tag.");
+                    return;
+                }
+                if(_timeText == null)
+                {
+                    Debug.LogError("TimeSurvivedText not found in scene. Please ensure there is a TextMeshPro text object with the 'TimeSurvivedText' tag.");
+                    return;
+                }
+                _gameOverscreen.SetActive(false);
+            }
+            else
+            {
+                Debug.Log("GameOverScreen not found in scene. Please ensure there is a UI panel with the 'GameOverScreen' tag.");
+                return;
+            }
         }
         PlayMenuSound();
+        
+
     }
     
     public static void SetTimeSurvived(float time, TMPro.TMP_Text text)
     {
         int minutes = Mathf.FloorToInt(time / 60F);
         int seconds = Mathf.FloorToInt(time - minutes * 60);
-        string niceTime = string.Format("{0:0}:{1:00}", minutes, seconds);
+        string niceTime = string.Format( "You survived"+"{0:0} seconds : and {1:00} minutes", minutes, seconds);
         text.text = niceTime;
-
+        _resourceDisplayPanel.SetActive(false);
     }
     
     public void RestartGame()
