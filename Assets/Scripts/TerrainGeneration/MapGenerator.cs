@@ -154,7 +154,43 @@ public class MapGenerator : MonoBehaviour
         public GameObject CheckpointPrefab;/// Prefab for enemy patrol checkpoints
         public int numberOfCheckpoints = 3;/// Number of checkpoints to spawn
         public GameObject enemyPatrolParent;/// Parent object for organizing enemy patrol checkpoints
-                                           
+
+        [Header("Object spawner")]
+        /// <summary>
+        /// Tree object to spawn
+        /// </summary>
+        public GameObject treeObject;
+
+        /// <summary>
+        /// Amount of trees to spawn
+        /// </summary>
+        public int treeCount = 100;
+
+        /// <summary>
+        /// List of rock objects to spawn
+        /// </summary>
+        public List<GameObject> rockObjects;
+
+        /// <summary>
+        /// Amount of rocks to spawn
+        /// </summary>
+        public int rockCount = 100;
+
+        /// <summary>
+        /// Minimum distance (in world units) that must separate each object from others.
+        /// </summary>
+        public int objectMinDistance = 20;
+
+        /// <summary>
+        /// Minimum distance (in world units) from the player where objects can spawn. Defines the inner radius of the spawn ring.
+        /// </summary>
+        public float objectMinDistanceFromPlayer = 20f;
+
+        /// <summary>
+        /// Seed for object random number generation. Ensures consistent object placement with the same seed.
+        /// </summary>
+        public int objectSeed = 42;
+
     #endregion
 
     #region ThreadingVariables
@@ -199,6 +235,9 @@ public class MapGenerator : MonoBehaviour
         InvokeRepeating(nameof(SpawnEnemyPatrolPoints),10.0f,40.0f);
         InvokeRepeating(nameof(RemoveEnemieCheckPoints), 300.0f, 120.0f);
         InvokeRepeating(nameof(RemoveEnemyPatrolPoints),25.0f,40.0f);
+        
+        //Object spawning - delayed to allow mesh collider to initialize
+        Invoke(nameof(SpawnInitialObjects), 0.1f);
     }
 
     #endregion
@@ -472,6 +511,83 @@ public class MapGenerator : MonoBehaviour
         {
             return false;
         }
+    }
+
+    private void SpawnInitialObjects()
+    {
+        //Trees:
+        SpawnObjects(new List<GameObject> { treeObject }, treeCount);
+
+        //Rocks:
+        SpawnObjects(rockObjects, rockCount);
+    }
+
+    // Object spawning functions
+    public void SpawnObjects(List<GameObject> objectPrefabs, int spawnCount, Transform parent = null)
+    {
+        if (objectPrefabs == null || objectPrefabs.Count == 0)
+        {
+            Debug.LogWarning("No object prefabs to spawn");
+            return;
+        }
+        if (_globalNoiseMap == null)
+        {
+            GenerateGlobalNoiseMap(seed, noiseScale, octaves, persistence, lacunarity, offsets);
+        }
+        GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO == null)
+        {
+            Debug.LogWarning("Player not found. Cannot spawn objects.");
+            return;
+        }
+        Vector3 playerPosition = playerGO.transform.position;
+        System.Random rng = new System.Random(objectSeed);
+
+        int spawned = 0;
+        int maxTries = spawnCount * 10;
+        for (int attempt = 0; attempt < maxTries && spawned < spawnCount; attempt++)
+        {
+            float angle = (float)(rng.NextDouble() * Mathf.PI * 2f);
+            float radius = Mathf.Lerp(objectMinDistanceFromPlayer, playerRadius, Mathf.Sqrt((float)rng.NextDouble()));
+
+            float worldX = playerPosition.x + Mathf.Cos(angle) * radius;
+            float worldZ = playerPosition.z + Mathf.Sin(angle) * radius;
+
+            Vector2 samplePos = new Vector2(worldX, worldZ);
+            float height = 0.0f;
+            Ray ray = new Ray(new Vector3(worldX, 1000f, worldZ), Vector3.down);
+            RaycastHit hit;
+
+            if (mapMesh != null && !mapMesh.bounds.Contains(new Vector3(worldX, playerPosition.y, worldZ)))
+            {
+                Debug.Log("Spawn position is outside mesh bounds: " + samplePos);
+                continue;
+            }
+
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+            {
+                height = hit.point.y;
+                if (RayHitWater(hit))
+                {
+                    Debug.Log("Raycast hit the water! Will skip this object");
+                    continue;
+                }
+            }
+            else
+            {
+                Debug.Log("Raycast did not hit terrain at position: " + samplePos);
+                continue;
+            }
+
+            Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
+
+            GameObject prefab = objectPrefabs[rng.Next(objectPrefabs.Count)];
+            Instantiate(prefab, spawnPosition, Quaternion.identity, parent);
+            spawned++;
+        }
+        Debug.Log($"Spawned {spawned}/{spawnCount} objects from list.");
+        // Change objectseed for next objects
+        objectSeed++;
     }
     #endregion
     #region GenerateGlobalNoiseMap
