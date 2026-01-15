@@ -177,6 +177,11 @@ public class MapGenerator : MonoBehaviour
         public int rockCount = 100;
 
         /// <summary>
+        /// Object that contains all of the spawned objects
+        /// </summary>
+        public GameObject objectParent;
+
+        /// <summary>
         /// Minimum distance (in world units) that must separate each object from others.
         /// </summary>
         public int objectMinDistance = 20;
@@ -516,14 +521,14 @@ public class MapGenerator : MonoBehaviour
     private void SpawnInitialObjects()
     {
         //Trees:
-        SpawnObjects(new List<GameObject> { treeObject }, treeCount);
+        SpawnObjects(new List<GameObject> { treeObject }, treeCount, objectParent);
 
         //Rocks:
-        SpawnObjects(rockObjects, rockCount);
+        SpawnObjects(rockObjects, rockCount, objectParent);
     }
 
     // Object spawning functions
-    public void SpawnObjects(List<GameObject> objectPrefabs, int spawnCount, Transform parent = null)
+    public void SpawnObjects(List<GameObject> objectPrefabs, int spawnCount, GameObject parent = null)
     {
         if (objectPrefabs == null || objectPrefabs.Count == 0)
         {
@@ -582,7 +587,8 @@ public class MapGenerator : MonoBehaviour
             Vector3 spawnPosition = new Vector3(worldX, height + 0.1f, worldZ);
 
             GameObject prefab = objectPrefabs[rng.Next(objectPrefabs.Count)];
-            Instantiate(prefab, spawnPosition, Quaternion.identity, parent);
+            Transform parentTransform = parent != null ? parent.transform : null;
+            Instantiate(prefab, spawnPosition, Quaternion.identity, parentTransform);
             spawned++;
         }
         Debug.Log($"Spawned {spawned}/{spawnCount} objects from list.");
