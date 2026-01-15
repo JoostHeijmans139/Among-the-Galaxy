@@ -64,7 +64,7 @@ public class UiHelper: MonoBehaviour
     {
         int minutes = Mathf.FloorToInt(time / 60F);
         int seconds = Mathf.FloorToInt(time - minutes * 60);
-        string niceTime = string.Format( "You survived"+"{0:0} seconds : and {1:00} minutes", minutes, seconds);
+        string niceTime = string.Format( "You survived "+"{0:0} seconds : and {1:00} minutes",seconds,minutes);
         text.text = niceTime;
         _resourceDisplayPanel.SetActive(false);
     }
