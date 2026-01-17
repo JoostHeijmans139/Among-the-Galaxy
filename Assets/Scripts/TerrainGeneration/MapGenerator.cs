@@ -242,7 +242,7 @@ public class MapGenerator : MonoBehaviour
         InvokeRepeating(nameof(RemoveEnemyPatrolPoints),25.0f,40.0f);
         
         //Object spawning - delayed to allow mesh collider to initialize
-        Invoke(nameof(SpawnInitialObjects), 0.1f);
+        Invoke(nameof(SpawnInitialObjects), 0.5f);
     }
 
     #endregion
