@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEditor;
 using JetBrains.Annotations;
+using Unity.VisualScripting;
 
 public class Pursue : State
 {
@@ -12,7 +13,7 @@ public class Pursue : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PURSUE;
-        if (agent != null && agent.isOnNavMesh)
+        if (!agent.IsUnityNull() && agent.isOnNavMesh)
         {
             agent.speed = 5;
             agent.isStopped = false;

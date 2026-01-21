@@ -15,7 +15,7 @@ public class Patrol : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PATROL;
-        if (agent != null && agent.isOnNavMesh)
+        if (!agent.IsUnityNull() && agent.isOnNavMesh)
         {
             agent.speed = 2;
             agent.isStopped = false;
@@ -36,7 +36,7 @@ public class Patrol : State
         currentIndex = 0;
         anim.SetFloat("blend", 0.5f);
         base.Enter();
-        if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count && GameEnvironment.Singleton.Checkpoints[currentIndex] != null)
+        if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count && !GameEnvironment.Singleton.Checkpoints[currentIndex].IsUnityNull())
         {
             agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
         }
@@ -78,7 +78,7 @@ public class Patrol : State
                 // Verify new index is valid before setting destination
                 if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count)
                 {
-                    if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count && GameEnvironment.Singleton.Checkpoints[currentIndex] != null)
+                    if (currentIndex < GameEnvironment.Singleton.Checkpoints.Count && !GameEnvironment.Singleton.Checkpoints[currentIndex].IsUnityNull())
                     {
                         agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
 

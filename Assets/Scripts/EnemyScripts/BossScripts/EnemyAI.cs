@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TerrainGeneration;
 using UnityEngine.AI;
 using UnityEditor;
+using Unity.VisualScripting;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -34,7 +35,7 @@ public class EnemyAI : MonoBehaviour
         if (player == null)
         {
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-            if (playerObj != null)
+            if (!playerObj.IsUnityNull())
             {
                 player = playerObj.transform;
             }
@@ -45,7 +46,7 @@ public class EnemyAI : MonoBehaviour
         }
         Debug.Log(AsyncNavMeshBuildScheduler.isNavMeshBaked);
         // Validate NavMeshAgent is on NavMesh
-        if (agent != null && !agent.isOnNavMesh && AsyncNavMeshBuildScheduler.isNavMeshBaked)
+        if (!agent.IsUnityNull() && !agent.isOnNavMesh && AsyncNavMeshBuildScheduler.isNavMeshBaked)
         {
             Debug.LogWarning($"[EnemyAI] {gameObject.name} is not on a NavMesh yet. Attempting to warp to NavMesh...");
             // Try to warp to nearest NavMesh position
@@ -67,7 +68,7 @@ public class EnemyAI : MonoBehaviour
     //Handle state
     void Update()
     {
-        if (currentState != null)
+        if (!currentState.IsUnityNull())
         {
             currentState = currentState.Process();
         }

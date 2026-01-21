@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEditor;
+using Unity.VisualScripting;
 
 public class Idle : State
 {
@@ -11,7 +12,7 @@ public class Idle : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.IDLE;
-        if (agent != null && agent.isOnNavMesh)
+        if (!agent.IsUnityNull() && agent.isOnNavMesh)
         {
             agent.speed = 0;
             agent.isStopped = true;
