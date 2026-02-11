@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using TerrainGeneration;
+using Unity.VisualScripting;
 using UnityEngine.AI;
 using UnityEditor;
 
@@ -62,6 +63,11 @@ public class EnemyAI : MonoBehaviour
         }
         
         currentState = new Idle(this.gameObject, agent, anim, player);
+        if (currentState != null)
+        {
+            currentState.visDist = sightRange;
+            currentState.attackDist = attackRange;
+        }
     }
 
     //Handle state
@@ -70,6 +76,18 @@ public class EnemyAI : MonoBehaviour
         if (currentState != null)
         {
             currentState = currentState.Process();
+        }
+        // Sync ranges before processing
+        currentState.visDist = sightRange;
+        currentState.attackDist = attackRange;
+            
+        currentState = currentState.Process();
+            
+        // Sync ranges for new state if it changed
+        if (currentState != null)
+        {
+            currentState.visDist = sightRange;
+            currentState.attackDist = attackRange;
         }
         timeSurived += Time.deltaTime;
     }
@@ -97,6 +115,15 @@ public class EnemyAI : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isInAttackRange = false;
+        }
+    }
+
+    public static void IsOnNavMesh(NavMeshAgent agent,int speed,bool isStopped)
+    {
+        if (!agent.IsUnityNull() && agent.isOnNavMesh)
+        {
+            agent.speed = speed;
+            agent.isStopped = isStopped;
         }
     }
 

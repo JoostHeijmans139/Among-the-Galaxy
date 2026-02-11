@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEditor;
 using JetBrains.Annotations;
+using Unity.VisualScripting;
 
 public class Pursue : State
 {
@@ -12,10 +13,24 @@ public class Pursue : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PURSUE;
-        if (agent != null && agent.isOnNavMesh)
+        name = STATE.PURSUE;
+        if (!agent.IsUnityNull())
         {
-            agent.speed = 5;
-            agent.isStopped = false;
+            if (agent.isOnNavMesh)
+            {
+                SetupNavMeshAgent(3.5f, false);
+            }
+            else
+            {
+                if (!npc.IsUnityNull())
+                {
+                    MonoBehaviour mb = npc.GetComponent<MonoBehaviour>();
+                    if (!mb.IsUnityNull())
+                    {
+                        mb.StartCoroutine(WaitForNavMesh(() => SetupNavMeshAgent(5f, false)));
+                    }
+                }
+            }
         }
     }
 
@@ -25,7 +40,6 @@ public class Pursue : State
     {
         anim.SetFloat("blend", 1f);
         base.Enter();
-        agent.SetDestination(npc.transform.position);
     }
 
     //Update pursue state
@@ -36,6 +50,8 @@ public class Pursue : State
     public override void Update()
     {
         if (player == null) return;
+        
+        agent.SetDestination(player.position);
         
         if (Vector3.Distance(npc.transform.position, player.position) > visDist)
         {

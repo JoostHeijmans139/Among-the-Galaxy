@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine.AI;
 using UnityEditor;
 
@@ -11,10 +12,23 @@ public class Attack : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.ATTACK;
-        if (agent != null && agent.isOnNavMesh)
+        if (!agent.IsUnityNull())
         {
-            agent.speed = 0;
-            agent.isStopped = true;
+            if (agent.isOnNavMesh)
+            {
+                SetupNavMeshAgent(1f, true);
+            }
+            else
+            {
+                if (!npc.IsUnityNull())
+                {
+                    MonoBehaviour mb = npc.GetComponent<MonoBehaviour>();
+                    if (!mb.IsUnityNull())
+                    {
+                        mb.StartCoroutine(WaitForNavMesh(() => SetupNavMeshAgent(1f, true)));
+                    }
+                }
+            }
         }
     }
 
@@ -24,7 +38,7 @@ public class Attack : State
     {
         anim.SetBool("attacking", true);
         base.Enter();
-        agent.SetDestination(npc.transform.position);
+        agent.SetDestination(player.position);
     }
 
     //Update attack state
@@ -44,7 +58,7 @@ public class Attack : State
         else
         {
             npc.transform.LookAt(new Vector3(player.position.x, npc.transform.position.y, player.position.z));
-            agent.SetDestination(npc.transform.position);
+            agent.SetDestination(player.position);
         }
     }
 

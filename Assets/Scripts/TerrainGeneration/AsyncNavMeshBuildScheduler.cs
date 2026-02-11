@@ -31,26 +31,18 @@ namespace TerrainGeneration
 
             if (_instance == null)
             {
-                // Create instance if it doesn't exist
-                if (_instance == null)
-                {
-                    GameObject schedulerObject = new GameObject("AsyncNavMeshBuildScheduler");
-                    _instance = schedulerObject.AddComponent<AsyncNavMeshBuildScheduler>();
-                    DontDestroyOnLoad(schedulerObject);
-                }
+                GameObject schedulerObject = new GameObject("AsyncNavMeshBuildScheduler");
+                _instance = schedulerObject.AddComponent<AsyncNavMeshBuildScheduler>();
+                DontDestroyOnLoad(schedulerObject);
             }
-            // Setup NavMeshSurface
+
+            // Setup NavMeshSurface - remove the duplicate creation
+            _sharedNavMeshSurface = terrainParent.GetComponent<NavMeshSurface>();
             if (_sharedNavMeshSurface == null)
             {
-                _sharedNavMeshSurface = terrainParent.GetComponent<NavMeshSurface>();
-                if (_sharedNavMeshSurface == null)
-                {
-                    _sharedNavMeshSurface = terrainParent.AddComponent<NavMeshSurface>();
-                }
-                _sharedNavMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-                _sharedNavMeshSurface.collectObjects = CollectObjects.Children;
+                _sharedNavMeshSurface = terrainParent.AddComponent<NavMeshSurface>();
             }
-            _sharedNavMeshSurface = terrainParent.AddComponent<NavMeshSurface>();
+    
             _sharedNavMeshSurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
             _sharedNavMeshSurface.collectObjects = CollectObjects.Children;
 

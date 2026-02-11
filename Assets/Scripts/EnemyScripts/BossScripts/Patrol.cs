@@ -10,15 +10,30 @@ public class Patrol : State
 {
     int currentIndex = -1;
 
+    private int CountLogged = 0;
     //State constructor
     public Patrol(GameObject _npc, NavMeshAgent _agent, Animator _anim, Transform _player)
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.PATROL;
-        if (agent != null && agent.isOnNavMesh)
+        if (!agent.IsUnityNull())
         {
-            agent.speed = 2;
-            agent.isStopped = false;
+            if (agent.isOnNavMesh)
+            {
+                SetupNavMeshAgent(2f, true);
+            }
+            else
+            {
+                // Start coroutine to wait for NavMesh
+                if (!npc.IsUnityNull())
+                {
+                    MonoBehaviour mb = npc.GetComponent<MonoBehaviour>();
+                    if (!mb.IsUnityNull())
+                    {
+                        mb.StartCoroutine(WaitForNavMesh(() => SetupNavMeshAgent(2f, true)));
+                    }
+                }
+            }
         }
     }
 
@@ -29,7 +44,11 @@ public class Patrol : State
         // Safety check: ensure checkpoints exist
         if (GameEnvironment.Singleton == null || GameEnvironment.Singleton.Checkpoints == null || GameEnvironment.Singleton.Checkpoints.Count == 0)
         {
-            Debug.LogWarning("[Patrol] No checkpoints available. Cannot enter patrol state.");
+            if(CountLogged < 1)
+            {
+                CountLogged++;
+                Debug.LogWarning("[Patrol] No checkpoints found in GameEnvironment. Ensure checkpoints are set up correctly.");
+            }
             return;
         }
         
@@ -41,7 +60,7 @@ public class Patrol : State
             agent.SetDestination(GameEnvironment.Singleton.Checkpoints[currentIndex].transform.position);
         }
     }
-
+    
     //Update patrol state
     //Check for player in vision range
     //If in vision range, switch to pursue state

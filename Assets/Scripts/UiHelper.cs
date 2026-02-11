@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 using UnityEngine.UIElements;
+using Cursor = UnityEngine.Cursor;
 
 public class UiHelper: MonoBehaviour
 {
@@ -66,6 +67,7 @@ public class UiHelper: MonoBehaviour
         int seconds = Mathf.FloorToInt(time - minutes * 60);
         string niceTime = string.Format( "You survived "+"{0:0} seconds : and {1:00} minutes",seconds,minutes);
         text.text = niceTime;
+        Cursor.lockState = CursorLockMode.None;
         _resourceDisplayPanel.SetActive(false);
     }
     

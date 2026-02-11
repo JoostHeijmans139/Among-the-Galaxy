@@ -34,7 +34,7 @@ namespace TerrainGeneration
         public Transform viewer;
 
         /// <summary> The viewer’s current position projected onto the XZ-plane. </summary>
-        public static Vector2 ViewerPosition;
+        private static Vector2 ViewerPosition;
 
         private Vector2 _viewerPositionOld;
 
@@ -52,6 +52,7 @@ namespace TerrainGeneration
 
         private static MapGenerator _mapGenerator;
 
+        public static Bounds? CurrentMeshBounds;
         #endregion
 
         #region start and update methods
@@ -144,20 +145,44 @@ namespace TerrainGeneration
             }
             
         }
+        public Vector2Int GetViewerChunkCoord()
+        {
+            int cx = Mathf.RoundToInt(ViewerPosition.x / _chunkSize);
+            int cy = Mathf.RoundToInt(ViewerPosition.y / _chunkSize);
+            return new Vector2Int(cx, cy);
+        }
+
+        public TerrainChunk GetCurrentTerrainChunk(bool createIfMissing = false)
+        {
+            Vector2Int coordInt = GetViewerChunkCoord();
+            Vector2 coord = new Vector2(coordInt.x, coordInt.y);
+
+            if (_terrainChunkDictionary.TryGetValue(coord, out TerrainChunk chunk))
+                return chunk;
+
+            if (createIfMissing)
+            {
+                TerrainChunk newChunk = new TerrainChunk(coord, _chunkSize, LevelOfDetailLevels, parent, meshMaterial);
+                _terrainChunkDictionary.Add(coord, newChunk);
+                return newChunk;
+            }
+
+            return null;
+        }
         
 
         #endregion
 
         #region TerrainChunkClass
 
-        private class TerrainChunk
+        public class TerrainChunk
         {
             private const float CHUNK_OVERLAP = 1f;
             readonly GameObject _meshObject;
             Vector2 position;
             Bounds _bounds;
             MeshRenderer _meshRenderer;
-            MeshFilter _meshFilter;
+            public MeshFilter _meshFilter;
             MapGenerator.MapData _mapData;
             MeshCollider _meshCollider;
             NavMeshSurface _navMeshSurface;
@@ -289,6 +314,11 @@ namespace TerrainGeneration
             {
                 Mesh = meshData.CreateMesh();
                 HaseMesh = true;
+                // Update CurrentMeshBounds when mesh is actually created
+                if (CurrentMeshBounds.IsUnityNull())
+                {
+                    CurrentMeshBounds = Mesh.bounds;
+                }
                 updateCallback();
             }
             public void RequestMesh(MapGenerator.MapData mapData)

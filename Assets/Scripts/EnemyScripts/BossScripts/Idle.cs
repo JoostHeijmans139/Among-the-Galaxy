@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine.AI;
 using UnityEditor;
 
@@ -11,10 +12,23 @@ public class Idle : State
         : base(_npc, _agent, _anim, _player)
     {
         name = STATE.IDLE;
-        if (agent != null && agent.isOnNavMesh)
+        if (!agent.IsUnityNull())
         {
-            agent.speed = 0;
-            agent.isStopped = true;
+            if (agent.isOnNavMesh)
+            {
+                SetupNavMeshAgent(0, true);
+            }
+            else
+            {
+                if (!npc.IsUnityNull())
+                {
+                    MonoBehaviour mb = npc.GetComponent<MonoBehaviour>();
+                    if (!mb.IsUnityNull())
+                    {
+                        mb.StartCoroutine(WaitForNavMesh(() => SetupNavMeshAgent(0, true)));
+                    }
+                }
+            }
         }
     }
 
