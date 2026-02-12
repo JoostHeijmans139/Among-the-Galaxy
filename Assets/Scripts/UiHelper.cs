@@ -29,7 +29,8 @@ public class UiHelper: MonoBehaviour
             gameObject.AddComponent<AudioSource>();
             _MenuAudioSource = GetComponent<AudioSource>();
         }
-        if(SceneManager.GetActiveScene() == SceneManager.GetSceneByName("WorldCreation"))
+        bool isGameScene = SceneManager.GetActiveScene().name == "WorldCreation";
+        if(isGameScene)
         {
             _MenuAudioSource.enabled = false;
             _gameOverscreen = GameObject.FindGameObjectWithTag("GameOverScreen");
@@ -56,9 +57,10 @@ public class UiHelper: MonoBehaviour
                 return;
             }
         }
-        PlayMenuSound();
-        
-
+        else
+        {
+            PlayMenuSound();
+        }
     }
     
     public static void SetTimeSurvived(float time, TMPro.TMP_Text text)
