@@ -29,15 +29,19 @@ public class CraftingMenuUI : MonoBehaviour
 
     public void SelectRecipe(CraftingRecipe recipe)
     {
+        Debug.Log($"[CraftingMenuUI] SelectRecipe called with: {recipe.itemName}");
         currentRecipe = recipe;
+        Debug.Log($"[CraftingMenuUI] currentRecipe set to: {currentRecipe.itemName}");
 
         itemNameText.text = recipe.itemName;
+        Debug.Log($"[CraftingMenuUI] itemNameText set to: {recipe.itemName}");
 
         itemIcon.sprite = recipe.itemIcon;
         itemIcon.enabled = true;
 
         PopulateResourceList(recipe);
         UpdateConfirmButton();
+        Debug.Log($"[CraftingMenuUI] Finished SelectRecipe for: {recipe.itemName}");
     }
 
     private void PopulateResourceList(CraftingRecipe recipe)

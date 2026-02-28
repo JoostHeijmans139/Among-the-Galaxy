@@ -8,6 +8,7 @@ public class CraftingMenuController : MonoBehaviour
 
     [SerializeField] private GameObject craftingUI;
     [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private CraftingMenuNavigationController navigationController;
 
     private bool isOpen;
 
@@ -26,6 +27,12 @@ public class CraftingMenuController : MonoBehaviour
             playerInput.SwitchCurrentActionMap("UI");
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            
+            // Enable controller navigation by selecting first button
+            if (navigationController != null)
+            {
+                navigationController.SelectFirstButton();
+            }
         }
         else
         {

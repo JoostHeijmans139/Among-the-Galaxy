@@ -14,6 +14,7 @@ public class UiHelper: MonoBehaviour
     public AudioSource _MenuAudioSource;
     public List<GameObject> MenuParents;
     public static GameObject _gameOverscreen;
+    public static GameOverNavigationController _gameOverNavigationController;
     public static TMPro.TMP_Text _timeText;
     public static GameObject _resourceDisplayPanel;
     public void GenerateMap()
@@ -37,6 +38,14 @@ public class UiHelper: MonoBehaviour
             if (_gameOverscreen != null)
             {
                 Debug.Log("Successfully found GameOverScreen in scene.");
+                
+                // Get the navigation controller component
+                _gameOverNavigationController = _gameOverscreen.GetComponent<GameOverNavigationController>();
+                if (_gameOverNavigationController == null)
+                {
+                    Debug.LogWarning("GameOverNavigationController not found on GameOverScreen. Controller navigation will not be available.");
+                }
+                
                 _timeText = GameObject.FindGameObjectWithTag("TimeSurvivedText").GetComponent<TMPro.TMP_Text>();
                 _resourceDisplayPanel = GameObject.FindGameObjectWithTag("ResourceDisplayPanel");
                 if (_resourceDisplayPanel == null)

@@ -61,12 +61,14 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.24f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\CraftingMenuNavigationController.cs" />
     <Compile Include="Assets\Scripts\UiHelper.cs" />
     <Compile Include="Assets\Scripts\SoundController.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\GameEnvironment.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\EnemyScripts\BossScripts\Idle.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\CAbstractViewsHolder.cs" />
+    <Compile Include="Assets\Scripts\TerrainGeneration\AsyncNavMeshBuildScheduler.cs" />
     <Compile Include="Assets\Scripts\TerrainGeneration\TextureGenerator.cs" />
     <Compile Include="Assets\PauseMenu.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\ClassicSRIA.cs" />
@@ -95,6 +97,7 @@
     <Compile Include="Assets\Scripts\TerrainGeneration\Noise.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\Common\DemoUI.cs" />
     <Compile Include="Assets\Scripts\Settings\SettingsManager.cs" />
+    <Compile Include="Assets\Scripts\GameOverNavigationController.cs" />
     <Compile Include="Assets\Scripts\CraftingMenuController.cs" />
     <Compile Include="Assets\Kevin Iglesias\Characters\Humanoid Giant\Demo Scene\Scripts\HumanoidGiantDemo.cs" />
     <Compile Include="Assets\ClassicSRIA\Scripts\Examples\ClassicGridViewExample.cs" />

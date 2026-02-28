@@ -26,8 +26,7 @@ namespace StarterAssets
         public void OnAttack(InputValue value)
         {
             attack = value.isPressed;
-			//Debug.Log("Look im attacking!");
-
+			Debug.Log($"OnAttack called! isPressed: {value.isPressed}, attack: {attack}");
         }
 
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED

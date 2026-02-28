@@ -143,9 +143,19 @@ public class EnemyAI : MonoBehaviour
                 UiHelper._gameOverscreen.SetActive(true);
                 
                 player.gameObject.SetActive(true);
-                Time.timeScale = 0;
                 UiHelper.SetTimeSurvived(timeSurived, UiHelper._timeText);
                 Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                
+                // Pause AFTER setting up UI so coroutines can complete
+                Time.timeScale = 0;
+                
+                // Enable controller navigation by selecting first button
+                // Call directly since OnEnable coroutine won't work with Time.timeScale = 0
+                if (UiHelper._gameOverNavigationController != null)
+                {
+                    UiHelper._gameOverNavigationController.SelectFirstButton();
+                }
             }
             Debug.Log("Damage dealt to player");
         }

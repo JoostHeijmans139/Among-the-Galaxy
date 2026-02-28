@@ -124,12 +124,14 @@ public class SelectionManager : MonoBehaviour
                 // Handle interaction input
                 if (playerInputs != null && playerInputs.attack)
                 {
+                    Debug.Log("Attack triggered via playerInputs.attack!");
                     interactable.OnPunchOrShoot();
-                    playerInputs.attack = false;
+                    // Don't reset here - let both SelectionManager and PlayerStats read the input
                 }
                 // Fallback if StarterAssetsInputs not available
                 else if (Input.GetMouseButtonDown(0)) 
                 {
+                    Debug.Log("Attack triggered via mouse click fallback!");
                     interactable.OnPunchOrShoot();
                 }
             }

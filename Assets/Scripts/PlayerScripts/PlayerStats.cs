@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using PlayerScripts;
 using Unity.VisualScripting;
 using UnityEngine;
+using StarterAssets;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class PlayerStats : MonoBehaviour
     public static PlayerStats Instance { get; private set; }
 
     public PlayerAttackRange attackRange;
+    private StarterAssetsInputs playerInputs;
 
     private void Awake()
     {
@@ -24,6 +26,12 @@ public class PlayerStats : MonoBehaviour
             Destroy(gameObject);
         }
         
+        // Get player input reference
+        playerInputs = GetComponent<StarterAssetsInputs>();
+        if (playerInputs == null)
+        {
+            Debug.LogWarning("PlayerStats: StarterAssetsInputs not found on Player!");
+        }
     }
 
     // Starting health of player
@@ -202,7 +210,23 @@ public class PlayerStats : MonoBehaviour
             Debug.LogError("AttackRange reference is missing!");
             return;
         }
-        if (Input.GetMouseButtonDown(0) && attackRange.enemyInRange != null)
+        
+        // Check for attack input from new Input System
+        bool attackPressed = false;
+        if (playerInputs != null && playerInputs.attack)
+        {
+            attackPressed = true;
+            // Don't reset here - let SelectionManager handle the reset at end of frame
+            Debug.Log("Enemy attack triggered via controller/new input system!");
+        }
+        // Fallback to old input system
+        else if (Input.GetMouseButtonDown(0))
+        {
+            attackPressed = true;
+            Debug.Log("Enemy attack triggered via mouse click!");
+        }
+        
+        if (attackPressed && attackRange.enemyInRange != null)
         {
             attackRange.enemyInRange.TakeDamage(10f);
         }
