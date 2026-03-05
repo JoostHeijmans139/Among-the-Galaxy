@@ -123,6 +123,17 @@ public class CraftingMenuNavigationController : MonoBehaviour
         if (!gameObject.activeInHierarchy || eventSystem == null)
             return;
 
+        // Manual detection for closing crafting menu (since PlayerInput is deactivated)
+        // Q key on keyboard or Y button (buttonNorth) on gamepad
+        bool closeMenuPressed = Input.GetKeyDown(KeyCode.Q) || 
+                                Input.GetKeyDown(KeyCode.JoystickButton3); // Y/Triangle button
+        
+        if (closeMenuPressed)
+        {
+            CraftingMenuController.Instance.ToggleCrafting();
+            return; // Exit early to prevent other input processing
+        }
+
         GameObject currentSelected = eventSystem.currentSelectedGameObject;
         
         // Track selection FIRST before any input processing
